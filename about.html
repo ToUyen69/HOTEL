@@ -1,0 +1,799 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Về Chúng Tôi — KSAN Hotel</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ── Page Hero ── */
+    .page-hero {
+      position: relative;
+      min-height: 380px;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+    .page-hero-bg {
+      position: absolute;
+      inset: 0;
+      background: url('Public/2.jpg') center/cover no-repeat;
+      filter: brightness(.55);
+      transition: transform 8s ease;
+    }
+    .page-hero:hover .page-hero-bg { transform: scale(1.04); }
+    .page-hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(18,53,36,.45) 0%, rgba(18,53,36,.25) 60%, rgba(0,0,0,.55) 100%);
+    }
+    .page-hero-content {
+      position: relative;
+      z-index: 1;
+      color: #fff;
+      padding: 80px 20px 60px;
+      width: 100%;
+    }
+    .page-hero-content h1 {
+      color: #fff;
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      text-shadow: 0 2px 16px rgba(0,0,0,.35);
+      margin-bottom: 14px;
+    }
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .85rem;
+      opacity: .88;
+    }
+    .breadcrumb a { color: rgba(255,255,255,.8); }
+    .breadcrumb a:hover { color: #fff; }
+    .breadcrumb span { color: rgba(255,255,255,.6); }
+
+    /* ── Story Section ── */
+    .story-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+    .story-img-wrap {
+      position: relative;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+    .story-img-wrap img {
+      width: 100%;
+      height: 480px;
+      object-fit: cover;
+      display: block;
+      transition: transform .6s ease;
+    }
+    .story-img-wrap:hover img { transform: scale(1.04); }
+    .story-img-badge {
+      position: absolute;
+      bottom: 24px;
+      left: 24px;
+      background: var(--primary);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: var(--radius);
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      font-weight: 600;
+      box-shadow: 0 4px 20px rgba(62,123,39,.4);
+    }
+    .story-img-badge strong {
+      display: block;
+      font-size: 1.5rem;
+      line-height: 1;
+      margin-bottom: 2px;
+    }
+    .story-content { padding: 10px 0; }
+    .story-label {
+      display: inline-block;
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 14px;
+    }
+    .story-content h2 { margin-bottom: 20px; }
+    .story-content p {
+      color: var(--text-light);
+      line-height: 1.85;
+      margin-bottom: 16px;
+      font-size: .97rem;
+    }
+    .story-highlight {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: var(--primary-pale);
+      border-left: 4px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      margin-top: 24px;
+    }
+    .story-highlight-icon {
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .story-highlight-icon img { width: 20px; filter: invert(1); }
+    .story-highlight p {
+      color: var(--secondary);
+      font-weight: 600;
+      margin: 0;
+      font-size: .93rem;
+      line-height: 1.6;
+    }
+
+    /* ── Values Cards ── */
+    .value-card {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      padding: 36px 28px;
+      box-shadow: var(--shadow-sm);
+      border: 1.5px solid var(--border);
+      text-align: center;
+      transition: all var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .value-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      transform: scaleX(0);
+      transition: transform var(--transition);
+      transform-origin: left;
+    }
+    .value-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); border-color: var(--primary-light); }
+    .value-card:hover::before { transform: scaleX(1); }
+    .value-icon {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: var(--primary-pale);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      transition: all var(--transition);
+    }
+    .value-card:hover .value-icon { background: var(--primary); }
+    .value-icon img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      transition: filter var(--transition);
+    }
+    .value-card:hover .value-icon img { filter: invert(1); }
+    .value-card h3 { margin-bottom: 12px; font-size: 1.15rem; }
+    .value-card p { color: var(--text-light); font-size: .91rem; line-height: 1.75; }
+
+    /* ── Stats Section ── */
+    .stats-section {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+      padding: 80px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .stats-section::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 300px; height: 300px;
+      background: rgba(255,255,255,.04);
+      border-radius: 50%;
+    }
+    .stats-section::after {
+      content: '';
+      position: absolute;
+      bottom: -80px; left: -40px;
+      width: 250px; height: 250px;
+      background: rgba(255,255,255,.04);
+      border-radius: 50%;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      position: relative;
+      z-index: 1;
+    }
+    .stat-box {
+      text-align: center;
+      padding: 36px 20px;
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: var(--radius-lg);
+      background: rgba(255,255,255,.06);
+      backdrop-filter: blur(4px);
+      transition: all var(--transition);
+    }
+    .stat-box:hover {
+      background: rgba(255,255,255,.12);
+      transform: translateY(-4px);
+      border-color: rgba(255,255,255,.3);
+    }
+    .stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.2rem, 4vw, 3.2rem);
+      font-weight: 700;
+      color: #fff;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .stat-num span { color: var(--accent); }
+    .stat-label {
+      font-size: .82rem;
+      color: rgba(255,255,255,.7);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-weight: 600;
+    }
+    .stat-icon {
+      width: 48px; height: 48px;
+      background: rgba(255,255,255,.12);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    }
+    .stat-icon img { width: 22px; filter: invert(1); opacity: .85; }
+
+    /* ── Team Section ── */
+    .team-card {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      border: 1.5px solid var(--border);
+      text-align: center;
+      transition: all var(--transition);
+    }
+    .team-card:hover { box-shadow: var(--shadow-md); transform: translateY(-4px); border-color: var(--primary-light); }
+    .team-avatar {
+      width: 100%;
+      height: 180px;
+      background: linear-gradient(135deg, var(--primary-pale) 0%, #d4e8c2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .team-avatar::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 60%, rgba(18,53,36,.08));
+    }
+    .team-avatar-initials {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(62,123,39,.35);
+      position: relative;
+      z-index: 1;
+      transition: transform var(--transition);
+    }
+    .team-card:hover .team-avatar-initials { transform: scale(1.07); }
+    .team-body { padding: 20px 18px 24px; }
+    .team-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--secondary);
+      margin-bottom: 4px;
+    }
+    .team-role {
+      font-size: .8rem;
+      color: var(--primary);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+    .team-desc {
+      font-size: .85rem;
+      color: var(--text-light);
+      line-height: 1.65;
+    }
+
+    /* ── Gallery ── */
+    .gallery-about {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, 220px);
+      gap: 12px;
+    }
+    .gallery-about-item {
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+    }
+    .gallery-about-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform .4s ease;
+    }
+    .gallery-about-item:hover img { transform: scale(1.07); }
+    .gallery-about-item::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(18,53,36,0);
+      transition: background .3s ease;
+    }
+    .gallery-about-item:hover::after { background: rgba(18,53,36,.18); }
+
+    /* ── CTA Banner ── */
+    .cta-banner {
+      background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+      padding: 70px 0;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-banner::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 200px; height: 200px;
+      background: rgba(255,255,255,.05);
+      border-radius: 50%;
+    }
+    .cta-banner h2 { color: #fff; margin-bottom: 14px; }
+    .cta-banner p { color: rgba(255,255,255,.8); max-width: 520px; margin: 0 auto 32px; font-size: 1rem; line-height: 1.7; }
+    .cta-btn-group { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn-white {
+      background: #fff;
+      color: var(--primary);
+      border-color: #fff;
+      font-weight: 700;
+    }
+    .btn-white:hover { background: var(--primary-pale); border-color: var(--primary-pale); color: var(--primary-dark); }
+    .btn-outline-white {
+      background: transparent;
+      color: #fff;
+      border: 2px solid rgba(255,255,255,.6);
+    }
+    .btn-outline-white:hover { background: rgba(255,255,255,.15); border-color: #fff; color: #fff; }
+
+    /* ── Footer ── */
+    .footer { background: var(--primary-dark); color: #fff; }
+    .footer-map { height: 260px; }
+    .footer-top { padding: 56px 0 40px; }
+    .footer h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: .95rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 18px;
+      letter-spacing: .4px;
+    }
+    .footer-links { list-style: none; }
+    .footer-links li { margin-bottom: 9px; }
+    .footer-links a {
+      color: rgba(255,255,255,.65);
+      font-size: .84rem;
+      transition: color var(--transition);
+    }
+    .footer-links a:hover { color: var(--accent); }
+    .social-links { display: flex; gap: 10px; }
+    .social-link {
+      width: 36px; height: 36px;
+      background: rgba(255,255,255,.1);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all var(--transition);
+    }
+    .social-link:hover { background: var(--primary); }
+    .footer-contact-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      margin-bottom: 11px; font-size: .84rem;
+      color: rgba(255,255,255,.7);
+    }
+    .footer-contact-icon { flex-shrink: 0; margin-top: 2px; }
+    .footer-newsletter { display: flex; gap: 8px; }
+    .footer-newsletter input {
+      flex: 1; padding: 10px 14px;
+      border: 1.5px solid rgba(255,255,255,.2);
+      border-radius: 8px;
+      background: rgba(255,255,255,.08);
+      color: #fff;
+      font-size: .83rem;
+      outline: none;
+    }
+    .footer-newsletter input::placeholder { color: rgba(255,255,255,.4); }
+    .footer-newsletter input:focus { border-color: var(--accent); }
+    .footer-newsletter button {
+      padding: 10px 16px;
+      background: var(--primary);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: .82rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background var(--transition);
+    }
+    .footer-newsletter button:hover { background: var(--accent); }
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,.1);
+      padding: 18px 0;
+      font-size: .8rem;
+      color: rgba(255,255,255,.45);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .story-grid { grid-template-columns: 1fr; gap: 36px; }
+      .story-img-wrap img { height: 300px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .gallery-about { grid-template-rows: repeat(3, 180px); }
+    }
+    @media (max-width: 600px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .gallery-about { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 160px); }
+      .footer-top .container > div { grid-template-columns: 1fr !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════ HEADER ════════════════ -->
+<header class="header">
+  <div class="container">
+    <div class="header-inner">
+      <a href="index.html" class="logo">
+        <img src="Public/logo KS.png" alt="KSAN Logo">
+      </a>
+      <nav class="nav" id="main-nav">
+        <a href="index.html">Trang chủ</a>
+        <a href="rooms.html">Phòng</a>
+        <a href="services.html">Dịch vụ</a>
+        <a href="about.html" class="active">Về chúng tôi</a>
+        <a href="travel-guide.html">Cẩm nang</a>
+        <a href="my-booking.html">Đặt phòng của tôi</a>
+      </nav>
+      <div class="header-actions" id="header-actions"></div>
+      <button class="mobile-toggle" id="mobile-toggle">☰</button>
+    </div>
+  </div>
+</header>
+
+<!-- ════════════════ PAGE HERO ════════════════ -->
+<section class="page-hero">
+  <div class="page-hero-bg"></div>
+  <div class="page-hero-overlay"></div>
+  <div class="container page-hero-content">
+    <h1>Về KSAN Hotel</h1>
+    <div class="breadcrumb">
+      <a href="index.html">Trang chủ</a>
+      <span>›</span>
+      <span>Về chúng tôi</span>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ SECTION 1 — CÂU CHUYỆN ════════════════ -->
+<section class="section" style="background: var(--bg);">
+  <div class="container">
+    <div class="story-grid">
+      <!-- Hình ảnh -->
+      <div class="story-img-wrap">
+        <img src="Public/ghe_ngoi.jpg" alt="Không gian KSAN Hotel">
+        <div class="story-img-badge">
+          <strong>10+</strong>
+          Năm thành lập
+        </div>
+      </div>
+
+      <!-- Nội dung -->
+      <div class="story-content">
+        <span class="story-label">Câu chuyện của chúng tôi</span>
+        <h2>Hành trình từ ước mơ đến khách sạn thông minh hàng đầu TP.HCM</h2>
+        <p>
+          KSAN Hotel được thành lập năm 2015 bởi một nhóm những người trẻ đam mê du lịch và công nghệ, với mong muốn tạo ra một không gian nghỉ dưỡng đích thực tại trung tâm Thành phố Hồ Chí Minh — nơi mà sự ấm áp của lòng hiếu khách Việt Nam hòa quyện cùng tiện ích thông minh hiện đại.
+        </p>
+        <p>
+          Khởi đầu chỉ với 6 phòng khiêm tốn trên đường Nguyễn Huệ, chúng tôi đã không ngừng lắng nghe khách hàng, cải thiện dịch vụ và đầu tư vào hệ thống quản lý thông minh. Qua từng năm, KSAN phát triển lên 14 phòng với đầy đủ tiện nghi cao cấp, hệ thống đặt phòng trực tuyến tích hợp AI và dịch vụ chăm sóc khách hàng 24/7.
+        </p>
+        <p>
+          Triết lý của chúng tôi đơn giản nhưng sâu sắc: mỗi vị khách xứng đáng được chào đón như những người thân quý — được phục vụ theo nhu cầu riêng, được trải nghiệm không gian nghỉ ngơi cá nhân hóa, và được cảm nhận sự khác biệt của một khách sạn thực sự coi trọng từng khoảnh khắc của họ.
+        </p>
+        <div class="story-highlight">
+          <div class="story-highlight-icon">
+            <img src="Public/icon/success.png" alt="">
+          </div>
+          <p>Tầm nhìn 2030: Trở thành mô hình Smart Hotel tiên phong tại TP.HCM — ứng dụng IoT, AI và dữ liệu để cá nhân hóa từng trải nghiệm lưu trú.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ SECTION 2 — SỨ MỆNH & GIÁ TRỊ ════════════════ -->
+<section class="section" style="background: #fff;">
+  <div class="container">
+    <div class="section-header">
+      <h2>Sứ mệnh & Giá trị cốt lõi</h2>
+      <div class="divider-gold"></div>
+      <p>Ba trụ cột định hướng mọi hoạt động và dịch vụ của KSAN Hotel trong suốt hành trình phát triển.</p>
+    </div>
+    <div class="grid-3">
+
+      <div class="value-card">
+        <div class="value-icon">
+          <img src="Public/icon/success.png" alt="Trải nghiệm cá nhân hóa">
+        </div>
+        <h3>Trải nghiệm cá nhân hóa</h3>
+        <p>Mỗi vị khách là một câu chuyện riêng biệt. Chúng tôi lắng nghe, ghi nhớ và chuẩn bị sẵn những tiện nghi phù hợp nhất trước khi quý khách đặt chân đến.</p>
+      </div>
+
+      <div class="value-card">
+        <div class="value-icon">
+          <img src="Public/icon/24-hours-support.png" alt="Công nghệ thông minh">
+        </div>
+        <h3>Công nghệ thông minh</h3>
+        <p>Hệ thống quản lý IoT, ứng dụng đặt phòng tích hợp AI và kiểm soát phòng tự động giúp quý khách tận hưởng sự tiện lợi tối đa chỉ với một chạm.</p>
+      </div>
+
+      <div class="value-card">
+        <div class="value-icon">
+          <img src="Public/icon/Policy.png" alt="Bền vững & Trách nhiệm">
+        </div>
+        <h3>Bền vững & Trách nhiệm</h3>
+        <p>KSAN cam kết giảm thiểu tác động môi trường qua việc sử dụng năng lượng tái tạo, sản phẩm hữu cơ và chương trình tái chế trong toàn bộ hoạt động.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ SECTION 3 — CON SỐ ẤN TƯỢNG ════════════════ -->
+<section class="stats-section">
+  <div class="container">
+    <div class="section-header" style="margin-bottom:48px;">
+      <h2 style="color:#fff;">Con số nói lên tất cả</h2>
+      <div class="divider-gold"></div>
+      <p style="color:rgba(255,255,255,.7);">Mỗi con số là một dấu mốc, một lời hứa và niềm tin mà quý khách đã trao cho chúng tôi.</p>
+    </div>
+    <div class="stats-grid">
+
+      <div class="stat-box">
+        <div class="stat-icon">
+          <img src="Public/icon/calendar.png" alt="">
+        </div>
+        <div class="stat-num">10<span>+</span></div>
+        <div class="stat-label">Năm hoạt động</div>
+      </div>
+
+      <div class="stat-box">
+        <div class="stat-icon">
+          <img src="Public/icon/bed.png" alt="">
+        </div>
+        <div class="stat-num">14</div>
+        <div class="stat-label">Phòng cao cấp</div>
+      </div>
+
+      <div class="stat-box">
+        <div class="stat-icon">
+          <img src="Public/icon/gold.png" alt="">
+        </div>
+        <div class="stat-num">4.9<span>★</span></div>
+        <div class="stat-label">Đánh giá trung bình</div>
+      </div>
+
+      <div class="stat-box">
+        <div class="stat-icon">
+          <img src="Public/icon/user.png" alt="">
+        </div>
+        <div class="stat-num">5000<span>+</span></div>
+        <div class="stat-label">Lượt khách hài lòng</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ SECTION 4 — ĐỘI NGŨ ════════════════ -->
+<section class="section" style="background: var(--bg);">
+  <div class="container">
+    <div class="section-header">
+      <h2>Đội ngũ tận tâm</h2>
+      <div class="divider-gold"></div>
+      <p>Những con người đứng sau mỗi nụ cười, mỗi bữa ăn ngon và mỗi kỳ nghỉ đáng nhớ của quý khách.</p>
+    </div>
+    <div class="grid-4">
+
+      <div class="team-card">
+        <div class="team-avatar">
+          <div class="team-avatar-initials">MK</div>
+        </div>
+        <div class="team-body">
+          <div class="team-name">Nguyễn Minh Khoa</div>
+          <div class="team-role">General Manager</div>
+          <p class="team-desc">10 năm kinh nghiệm trong ngành khách sạn, tốt nghiệp MBA Đại học RMIT. Người định hướng chiến lược Smart Hotel cho KSAN.</p>
+        </div>
+      </div>
+
+      <div class="team-card">
+        <div class="team-avatar" style="background: linear-gradient(135deg, #e8f4e8 0%, #c5d9b0 100%);">
+          <div class="team-avatar-initials" style="background: var(--accent);">TL</div>
+        </div>
+        <div class="team-body">
+          <div class="team-name">Trần Thị Lan</div>
+          <div class="team-role">Front Office Manager</div>
+          <p class="team-desc">Chuyên gia tiếp đón với 7 năm kinh nghiệm tại các khách sạn 5 sao. Luôn đảm bảo mỗi vị khách cảm thấy như về nhà.</p>
+        </div>
+      </div>
+
+      <div class="team-card">
+        <div class="team-avatar" style="background: linear-gradient(135deg, #fdf6ec 0%, #efe3c2 100%);">
+          <div class="team-avatar-initials" style="background: #8B6914;">VH</div>
+        </div>
+        <div class="team-body">
+          <div class="team-name">Phạm Văn Hùng</div>
+          <div class="team-role">Executive Chef</div>
+          <p class="team-desc">Đầu bếp trưởng với 12 năm rèn luyện tại Pháp và Singapore. Mang phong cách ẩm thực fusion Á-Âu độc đáo đến từng bữa sáng.</p>
+        </div>
+      </div>
+
+      <div class="team-card">
+        <div class="team-avatar" style="background: linear-gradient(135deg, #f5e8f0 0%, #d9b0c5 100%);">
+          <div class="team-avatar-initials" style="background: #8E3060;">TT</div>
+        </div>
+        <div class="team-body">
+          <div class="team-name">Lê Thị Thu</div>
+          <div class="team-role">Spa Manager</div>
+          <p class="team-desc">Chứng chỉ quốc tế về liệu pháp spa từ CIDESCO Thụy Sĩ. Người tạo nên không gian thư giãn chữa lành độc đáo tại KSAN Spa.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ SECTION 5 — GALLERY ════════════════ -->
+<section class="section" style="background: #fff; padding-bottom: 80px;">
+  <div class="container">
+    <div class="section-header">
+      <h2>Không gian KSAN</h2>
+      <div class="divider-gold"></div>
+      <p>Mỗi góc nhìn là một khung cảnh đáng nhớ — nơi thiết kế tinh tế gặp gỡ thiên nhiên xanh mát.</p>
+    </div>
+    <div class="gallery-about">
+      <div class="gallery-about-item">
+        <img src="Public/1.jpg" alt="Sảnh KSAN Hotel">
+      </div>
+      <div class="gallery-about-item">
+        <img src="Public/2.jpg" alt="Không gian ngoại thất">
+      </div>
+      <div class="gallery-about-item">
+        <img src="Public/3.jpg" alt="Phòng nghỉ KSAN">
+      </div>
+      <div class="gallery-about-item">
+        <img src="Public/4.jpg" alt="Khu vực ăn sáng">
+      </div>
+      <div class="gallery-about-item">
+        <img src="Public/5.jpg" alt="Hồ bơi & Sân vườn">
+      </div>
+      <div class="gallery-about-item">
+        <img src="Public/6.jpg" alt="Dịch vụ spa">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ CTA BANNER ════════════════ -->
+<section class="cta-banner">
+  <div class="container" style="position:relative;z-index:1;">
+    <h2>Hãy để KSAN là điểm đến tiếp theo của bạn</h2>
+    <p>Đặt phòng ngay hôm nay và khám phá trải nghiệm lưu trú thông minh, ấm áp và đáng nhớ tại trung tâm Thành phố Hồ Chí Minh.</p>
+    <div class="cta-btn-group">
+      <a href="rooms.html" class="btn btn-white btn-lg">Xem các loại phòng</a>
+      <a href="booking.html" class="btn btn-outline-white btn-lg">Đặt phòng ngay</a>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ FOOTER ════════════════ -->
+<footer class="footer" id="contact">
+  <div class="footer-map">
+    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.4577565082064!2d106.6957803!3d10.7769453!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f40a3b49e59%3A0xa1bd14e483a602db!2zTmd1eeG7hW4gSHXhu4MgV2Fsa2luZyBTdHJlZXQ!5e0!3m2!1svi!2svn!4v1700000000000" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+  </div>
+  <div class="footer-top">
+    <div class="container">
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1.3fr;gap:36px">
+        <div>
+          <img src="Public/logo KS.png" style="height:52px;margin-bottom:14px">
+          <p style="font-size:.84rem;line-height:1.9;color:rgba(255,255,255,.7);margin-bottom:16px">Khách sạn thông minh KSAN — nơi công nghệ và sự ấm áp hòa quyện tạo nên kỳ nghỉ đáng nhớ.</p>
+          <div class="social-links">
+            <a href="#" class="social-link"><img src="Public/icon/facebook.png" style="width:15px;filter:invert(1)"></a>
+            <a href="#" class="social-link"><img src="Public/icon/instagram.png" style="width:15px;filter:invert(1)"></a>
+            <a href="#" class="social-link"><img src="Public/icon/youtube.png" style="width:15px;filter:invert(1)"></a>
+          </div>
+        </div>
+        <div>
+          <h4>Khám phá</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Trang chủ</a></li>
+            <li><a href="rooms.html">Các loại phòng</a></li>
+            <li><a href="services.html">Dịch vụ & Tiện ích</a></li>
+            <li><a href="about.html">Về chúng tôi</a></li>
+            <li><a href="travel-guide.html">Cẩm nang du lịch</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Hỗ trợ</h4>
+          <ul class="footer-links">
+            <li><a href="my-booking.html">Đặt phòng của tôi</a></li>
+            <li><a href="feedback.html">Gửi phản hồi</a></li>
+            <li><a href="account.html">Tài khoản & Điểm thưởng</a></li>
+            <li><a href="#">Chính sách hủy phòng</a></li>
+            <li><a href="#">Câu hỏi thường gặp</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Liên hệ</h4>
+          <div class="footer-contact-item"><span class="footer-contact-icon"><img src="Public/icon/placeholder.png" style="height:14px;filter:invert(1);opacity:.75"></span><span>123 Nguyễn Huệ, Q.1, TP.HCM</span></div>
+          <div class="footer-contact-item"><span class="footer-contact-icon"><img src="Public/icon/call.png" style="height:14px;filter:invert(1);opacity:.75"></span><span>(028) 1234 5678</span></div>
+          <div class="footer-contact-item"><span class="footer-contact-icon"><img src="Public/icon/info.png" style="height:14px;filter:invert(1);opacity:.75"></span><span>info@ksan.vn</span></div>
+          <div class="footer-contact-item"><span class="footer-contact-icon"><img src="Public/icon/24-hours-support.png" style="height:14px;filter:invert(1);opacity:.75"></span><span>Lễ tân phục vụ 24/7</span></div>
+          <div style="margin-top:16px">
+            <h4 style="margin-bottom:8px">Đăng ký nhận tin</h4>
+            <p style="font-size:.78rem;color:rgba(255,255,255,.6);margin-bottom:10px">Nhận ưu đãi và tin tức mới nhất.</p>
+            <div class="footer-newsletter">
+              <input type="email" placeholder="Email của bạn...">
+              <button onclick="showToast('Đã đăng ký!','success')">Đăng ký</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+      <span>© 2025 KSAN Hotel. Hệ thống quản lý khách sạn thông minh.</span>
+      <div style="display:flex;gap:16px;font-size:.78rem">
+        <a href="#" style="color:rgba(255,255,255,.5)">Chính sách bảo mật</a>
+        <a href="#" style="color:rgba(255,255,255,.5)">Điều khoản sử dụng</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div id="toast-container"></div>
+
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script src="js/footer.js"></script>
+</body>
+</html>
+

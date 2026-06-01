@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KSAN Admin — Đăng nhập</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <style>
+    body { display:flex; align-items:center; justify-content:center; min-height:100vh;
+      background: linear-gradient(135deg, #1B4332 0%, #346739 60%, #79AE6F 100%); }
+    .login-wrap { width:400px; max-width:calc(100vw - 32px); }
+    .login-card { background:#fff; border-radius:16px; padding:40px; box-shadow:0 20px 60px rgba(0,0,0,.25); }
+    .login-logo { text-align:center; margin-bottom:32px; }
+    .login-logo img { height:72px; margin:0 auto 12px; }
+    .login-logo h2 { color:#346739; font-family:Georgia,serif; font-size:1.5rem; margin-bottom:3px; }
+    .login-logo p  { color:#888; font-size:.78rem; letter-spacing:1px; text-transform:uppercase; }
+    .demo-hint {
+      background:#F2EDC2; border:1px solid #9FCB98; border-radius:8px;
+      padding:12px 16px; font-size:.8rem; color:#346739; margin-bottom:18px;
+    }
+    .demo-hint strong { display:block; margin-bottom:4px; }
+  </style>
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="../Public/logo KS.png" alt="KSAN">
+      <h2>KSAN Admin Panel</h2>
+      <p>Hệ thống quản lý khách sạn thông minh</p>
+    </div>
+
+    <div id="login-alert"></div>
+
+    <div class="demo-hint">
+      <strong><img src="../Public/icon/info.png" style="height:13px;vertical-align:middle;margin-right:4px"> Tài khoản demo:</strong>
+      Mật khẩu: <strong>admin123</strong> (hoặc <strong>123456</strong>)
+    </div>
+
+    <div class="form-group">
+      <label>Mật khẩu đăng nhập</label>
+      <input type="password" class="form-control" id="login-pw"
+        placeholder="Nhập mật khẩu..." style="font-size:1rem;padding:12px 14px">
+    </div>
+
+    <button class="btn btn-primary btn-full" id="login-btn" style="font-size:.95rem;padding:13px">
+      <img src="../Public/icon/check.png"> Đăng nhập vào hệ thống
+    </button>
+
+    <div style="text-align:center;margin-top:20px">
+      <a href="../index.html" style="font-size:.8rem;color:#79AE6F;display:inline-flex;align-items:center;gap:4px">
+        <img src="../Public/icon/home.png" style="height:13px"> Quay lại trang khách hàng
+      </a>
+    </div>
+  </div>
+</div>
+
+<script src="js/admin.js"></script>
+<script>
+document.getElementById('login-btn').addEventListener('click', () => {
+  const pw  = document.getElementById('login-pw').value;
+  const res = AdminAuth.login(pw);
+  if (!res.ok) {
+    document.getElementById('login-alert').innerHTML =
+      `<div class="alert alert-danger" style="margin-bottom:14px">${res.msg}</div>`;
+    return;
+  }
+  location.href = 'dashboard.html';
+});
+document.getElementById('login-pw').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('login-btn').click();
+});
+</script>
+</body>
+</html>

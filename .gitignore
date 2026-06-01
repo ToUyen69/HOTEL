@@ -1,0 +1,5 @@
+.claude/
+.gemini/
+.idea/
+.vscode/
+*.log

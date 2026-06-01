@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — KSAN Admin</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <style>
+    /* ── Occupancy bar ── */
+    .occ-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+    .occ-row-label { font-size:.78rem; color:var(--text-sm); width:110px; flex-shrink:0; }
+    .occ-track { flex:1; height:9px; background:var(--border); border-radius:6px; overflow:hidden; }
+    .occ-fill  { height:100%; border-radius:6px; transition:width .5s ease; }
+    .occ-row-val { font-size:.78rem; font-weight:700; width:52px; text-align:right; flex-shrink:0; }
+
+    /* ── Mini room grid ── */
+    .mini-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(48px,1fr)); gap:5px; }
+    .mini-tile {
+      border-radius:6px; padding:7px 3px; text-align:center;
+      font-size:.68rem; font-weight:700; cursor:pointer;
+      border:1.5px solid transparent; transition:transform .15s;
+    }
+    .mini-tile:hover { transform:scale(1.1); }
+    .mini-tile.empty       { background:#e6f4ea; color:var(--dark); border-color:var(--light); }
+    .mini-tile.occupied    { background:#dbeafe; color:#1d4ed8; border-color:#93c5fd; }
+    .mini-tile.dirty       { background:#fef9c3; color:#92400e; border-color:#fde68a; }
+    .mini-tile.maintenance { background:#fee2e2; color:#991b1b; border-color:#fca5a5; }
+
+    /* ── Bar chart ── */
+    .bar-chart { display:flex; align-items:flex-end; gap:8px; height:100px; padding-bottom:20px; position:relative; }
+    .bar-chart::after { content:''; position:absolute; bottom:20px; left:0; right:0;
+      height:1px; background:var(--border); }
+    .bar-col { flex:1; display:flex; flex-direction:column; align-items:center; gap:0; position:relative; }
+    .bar-rect { width:100%; border-radius:4px 4px 0 0; min-height:3px;
+      transition:height .5s ease; cursor:default; position:relative; }
+    .bar-rect:hover::after { content:attr(title); position:absolute; bottom:calc(100% + 4px);
+      left:50%; transform:translateX(-50%); background:var(--dark); color:#fff;
+      font-size:.6rem; padding:2px 6px; border-radius:4px; white-space:nowrap; z-index:10; }
+    .bar-label { font-size:.6rem; color:var(--text-sm); margin-top:4px; position:absolute;
+      bottom:-18px; left:0; right:0; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+    /* ── Timeline ── */
+    .tl-item { display:flex; align-items:flex-start; gap:10px; padding:9px 0;
+      border-bottom:1px solid var(--border); }
+    .tl-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+    .tl-dot.in  { background:var(--dark); }
+    .tl-dot.out { background:#1565c0; }
+
+    /* ── Summary table ── */
+    .sum-row { display:flex; justify-content:space-between; font-size:.82rem;
+      padding:5px 0; border-bottom:1px solid var(--border); }
+    .sum-row:last-child { border:none; }
+    .sum-row.total { font-weight:700; color:var(--dark); font-size:.9rem; }
+
+    /* ── Filter chips ── */
+    .quick-filter { display:flex; gap:6px; flex-wrap:wrap; }
+    .qf-btn { padding:5px 14px; border-radius:20px; border:1.5px solid var(--border);
+      background:#fff; cursor:pointer; font-size:.75rem; font-weight:600; color:var(--text-sm); transition:all .2s; }
+    .qf-btn.active { background:var(--dark); color:#fff; border-color:var(--dark); }
+    .qf-btn:hover  { border-color:var(--dark); color:var(--dark); }
+  </style>
+</head>
+<body>
+<div class="admin-wrapper">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <div class="admin-main">
+    <header class="admin-header">
+      <h1><img src="../Public/icon/view.png" style="height:17px;vertical-align:middle;margin-right:6px">Dashboard</h1>
+      <div class="admin-header-right">
+        <span class="admin-time" id="admin-time"></span>
+        <button class="btn btn-cream btn-sm" onclick="renderAll()">Làm mới</button>
+      </div>
+    </header>
+
+    <main class="admin-content">
+
+      <!-- ── Bộ lọc ── -->
+      <div style="background:#fff;border-radius:var(--radius-lg);padding:14px 18px;
+          margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:var(--shadow)">
+        <div style="font-size:.78rem;font-weight:700;color:var(--text-sm);text-transform:uppercase;letter-spacing:.5px">Khoảng thời gian:</div>
+        <div class="quick-filter">
+          <button class="qf-btn active" data-range="today"   onclick="setRange('today',this)">Hôm nay</button>
+          <button class="qf-btn"        data-range="week"    onclick="setRange('week',this)">7 ngày qua</button>
+          <button class="qf-btn"        data-range="month"   onclick="setRange('month',this)">Tháng này</button>
+          <button class="qf-btn"        data-range="all"     onclick="setRange('all',this)">Tất cả</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap">
+          <input type="date" class="form-control" id="range-from" style="width:140px;padding:6px 10px;font-size:.8rem">
+          <span style="font-size:.78rem;color:var(--text-sm)">đến</span>
+          <input type="date" class="form-control" id="range-to"   style="width:140px;padding:6px 10px;font-size:.8rem">
+          <button class="btn btn-primary btn-sm" onclick="applyCustomRange()">Áp dụng</button>
+        </div>
+      </div>
+
+      <!-- ── KPI ── -->
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px" id="kpi-row"></div>
+
+      <!-- ── Grid chính ── -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+
+        <!-- LEFT -->
+        <div style="display:flex;flex-direction:column;gap:20px">
+
+          <!-- Room status -->
+          <div class="card">
+            <div class="card-header">
+              <h3 style="font-size:.88rem"><img src="../Public/icon/room.png" style="height:14px"> Tình trạng phòng</h3>
+              <a href="rooms.html" style="font-size:.74rem;color:var(--medium)">Quản lý →</a>
+            </div>
+            <div class="card-body" style="padding:16px">
+              <div id="occ-bars" style="margin-bottom:16px"></div>
+              <div id="mini-grid" class="mini-grid"></div>
+            </div>
+          </div>
+
+          <!-- Today's schedule -->
+          <div class="card">
+            <div class="card-header">
+              <h3 style="font-size:.88rem"><img src="../Public/icon/calendar.png" style="height:14px"> Lịch nhận/trả phòng</h3>
+              <span id="schedule-date" style="font-size:.74rem;color:var(--text-sm)"></span>
+            </div>
+            <div class="card-body" style="padding:12px 16px;max-height:260px;overflow-y:auto" id="schedule-list">
+              <div style="color:var(--text-sm);font-size:.83rem;text-align:center;padding:20px">Đang tải...</div>
+            </div>
+          </div>
+
+          <!-- Pending complaints -->
+          <div class="card">
+            <div class="card-header">
+              <h3 style="font-size:.88rem"><img src="../Public/icon/crisis.png" style="height:14px"> Khiếu nại chưa xử lý</h3>
+              <a href="customers.html" style="font-size:.74rem;color:var(--medium)">Xử lý →</a>
+            </div>
+            <div class="card-body" style="padding:12px 16px" id="complaints-list"></div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT -->
+        <div style="display:flex;flex-direction:column;gap:20px">
+
+          <!-- Revenue chart -->
+          <div class="card">
+            <div class="card-header">
+              <h3 style="font-size:.88rem"><img src="../Public/icon/invoice.png" style="height:14px"> Doanh thu theo ngày</h3>
+              <span id="rev-period-label" style="font-size:.74rem;color:var(--text-sm)"></span>
+            </div>
+            <div class="card-body" style="padding:16px">
+              <div class="bar-chart" id="rev-chart" style="margin-bottom:10px"></div>
+              <div id="rev-summary" style="margin-top:8px"></div>
+            </div>
+          </div>
+
+          <!-- Room type breakdown -->
+          <div class="card">
+            <div class="card-header">
+              <h3 style="font-size:.88rem"><img src="../Public/icon/bed.png" style="height:14px"> Phân tích theo loại phòng</h3>
+            </div>
+            <div class="card-body" style="padding:12px 16px" id="type-breakdown"></div>
+          </div>
+
+          <!-- Recent bookings -->
+          <div class="card">
+            <div class="card-header">
+              <h3 style="font-size:.88rem"><img src="../Public/icon/note.png" style="height:14px"> Đặt phòng gần đây</h3>
+              <a href="bookings.html" style="font-size:.74rem;color:var(--medium)">Tất cả →</a>
+            </div>
+            <div class="card-body" style="padding:12px 16px;max-height:260px;overflow-y:auto" id="recent-list"></div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script src="../js/data.js"></script>
+<script src="js/admin.js"></script>
+<script>
+AdminAuth.require();
+renderSidebar('dashboard');
+startClock();
+
+const ROOM_INV = [
+  { number:'101', typeId:'R001', floor:1 }, { number:'102', typeId:'R001', floor:1 },
+  { number:'103', typeId:'R002', floor:1 },
+  { number:'201', typeId:'R001', floor:2 }, { number:'202', typeId:'R002', floor:2 },
+  { number:'203', typeId:'R002', floor:2 }, { number:'204', typeId:'R004', floor:2 },
+  { number:'301', typeId:'R002', floor:3 }, { number:'302', typeId:'R002', floor:3 },
+  { number:'303', typeId:'R004', floor:3 }, { number:'304', typeId:'R004', floor:3 },
+  { number:'401', typeId:'R003', floor:4 }, { number:'402', typeId:'R003', floor:4 },
+  { number:'403', typeId:'R001', floor:4 }, { number:'404', typeId:'R001', floor:4 },
+  { number:'501', typeId:'R001', floor:5 }, { number:'502', typeId:'R002', floor:5 },
+];
+
+/* ── Date range state ── */
+let rangeFrom = '', rangeTo = '';
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+function nDaysAgo(n) { const d=new Date(); d.setDate(d.getDate()-n); return d.toISOString().split('T')[0]; }
+function firstOfMonth() { const d=new Date(); d.setDate(1); return d.toISOString().split('T')[0]; }
+
+function setRange(range, btn) {
+  document.querySelectorAll('.qf-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (range === 'today')  { rangeFrom = todayStr();      rangeTo = todayStr(); }
+  if (range === 'week')   { rangeFrom = nDaysAgo(6);     rangeTo = todayStr(); }
+  if (range === 'month')  { rangeFrom = firstOfMonth();  rangeTo = todayStr(); }
+  if (range === 'all')    { rangeFrom = '';               rangeTo = ''; }
+  document.getElementById('range-from').value = rangeFrom;
+  document.getElementById('range-to').value   = rangeTo;
+  renderAll();
+}
+function applyCustomRange() {
+  rangeFrom = document.getElementById('range-from').value;
+  rangeTo   = document.getElementById('range-to').value;
+  document.querySelectorAll('.qf-btn').forEach(b => b.classList.remove('active'));
+  renderAll();
+}
+
+/* ── Filter bookings by range ── */
+function filterBks(bks) {
+  return bks.filter(b => {
+    if (!rangeFrom && !rangeTo) return true;
+    const d = (b.createdAt || b.checkIn || '').split('T')[0];
+    if (rangeFrom && d < rangeFrom) return false;
+    if (rangeTo   && d > rangeTo)   return false;
+    return true;
+  });
+}
+
+/* ── Get room status ── */
+function getRmStatus(num) {
+  const active = KSAN.getBookings().find(b => b.status==='checked_in' && b.assignedRoomNumber===num);
+  if (active) return 'occupied';
+  const s = JSON.parse(localStorage.getItem('ksan_room_status') || '{}');
+  return s[num] || 'empty';
+}
+
+/* ── KPI ── */
+function renderKPI() {
+  const allBks  = KSAN.getBookings();
+  const bks     = filterBks(allBks);
+  const today   = todayStr();
+  const active  = allBks.filter(b => b.status==='checked_in');
+  const todayIn = allBks.filter(b => b.checkIn===today && b.status==='confirmed');
+  const todayOut= allBks.filter(b => b.checkOut===today && b.status==='checked_in');
+  const occCount= ROOM_INV.filter(r => getRmStatus(r.number)==='occupied').length;
+  const occPct  = Math.round(occCount/ROOM_INV.length*100);
+
+  const revenue = bks.filter(b => b.status!=='cancelled')
+                     .reduce((s,b) => s + (b.deposit||0), 0);
+  const totalAll = allBks.filter(b=>b.status!=='cancelled').reduce((s,b)=>s+b.totalPrice,0);
+
+  document.getElementById('kpi-row').innerHTML = `
+    <div class="stat-card" style="border-left-color:var(--dark)">
+      <div class="stat-label">Tỉ lệ lấp đầy</div>
+      <div class="stat-value">${occPct}%</div>
+      <div style="height:5px;background:var(--border);border-radius:3px;margin:6px 0 4px;overflow:hidden">
+        <div style="height:100%;width:${occPct}%;background:var(--dark);border-radius:3px"></div>
+      </div>
+      <div class="stat-sub">${occCount}/${ROOM_INV.length} phòng</div>
+    </div>
+    <div class="stat-card" style="border-left-color:#1565c0">
+      <div class="stat-label">Đang lưu trú</div>
+      <div class="stat-value" style="color:#1565c0">${active.length}</div>
+      <div class="stat-sub">Khách hiện có mặt</div>
+    </div>
+    <div class="stat-card" style="border-left-color:var(--warn)">
+      <div class="stat-label">Check-in hôm nay</div>
+      <div class="stat-value" style="color:var(--warn)">${todayIn.length}</div>
+      <div class="stat-sub">Chờ nhận phòng</div>
+    </div>
+    <div class="stat-card" style="border-left-color:var(--danger)">
+      <div class="stat-label">Check-out hôm nay</div>
+      <div class="stat-value" style="color:var(--danger)">${todayOut.length}</div>
+      <div class="stat-sub">Cần trả phòng</div>
+    </div>
+    <div class="stat-card" style="border-left-color:var(--medium)">
+      <div class="stat-label">Doanh thu (kỳ chọn)</div>
+      <div class="stat-value" style="font-size:1rem;margin-top:4px">${(revenue/1e6).toFixed(1)}M</div>
+      <div class="stat-sub">Tổng hệ thống: ${(totalAll/1e6).toFixed(1)}M</div>
+    </div>`;
+}
+
+/* ── Room status bars + mini grid ── */
+function renderRoomStatus() {
+  const counts = {empty:0, occupied:0, dirty:0, maintenance:0};
+  ROOM_INV.forEach(r => counts[getRmStatus(r.number)]++);
+  const total = ROOM_INV.length;
+
+  const bars = [
+    { key:'occupied',    label:'Đang sử dụng', color:'#1d4ed8' },
+    { key:'empty',       label:'Trống',         color:'var(--dark)' },
+    { key:'dirty',       label:'Cần dọn',        color:'var(--warn)' },
+    { key:'maintenance', label:'Bảo trì',        color:'var(--danger)' },
+  ];
+  document.getElementById('occ-bars').innerHTML = bars.map(b => {
+    const pct = Math.round(counts[b.key]/total*100);
+    return `<div class="occ-row">
+      <div class="occ-row-label">${b.label}</div>
+      <div class="occ-track"><div class="occ-fill" style="width:${pct}%;background:${b.color}"></div></div>
+      <div class="occ-row-val" style="color:${b.color}">${counts[b.key]}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('mini-grid').innerHTML = ROOM_INV.map(r => {
+    const st = getRmStatus(r.number);
+    const active = KSAN.getBookings().find(b => b.status==='checked_in' && b.assignedRoomNumber===r.number);
+    const tip = active ? `Phòng ${r.number} — ${active.guestName}` : `Phòng ${r.number} — Tầng ${r.floor}`;
+    return `<div class="mini-tile ${st}" title="${tip}" onclick="location.href='rooms.html'">${r.number}</div>`;
+  }).join('');
+}
+
+/* ── Today's schedule ── */
+function renderSchedule() {
+  const today = todayStr();
+  document.getElementById('schedule-date').textContent = new Date().toLocaleDateString('vi-VN', {weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'});
+  const allBks = KSAN.getBookings();
+  const arrivals  = allBks.filter(b => b.checkIn ===today && b.status==='confirmed');
+  const departures= allBks.filter(b => b.checkOut===today && b.status==='checked_in');
+  const all = [
+    ...arrivals  .map(b=>({...b, stype:'in'})),
+    ...departures.map(b=>({...b, stype:'out'})),
+  ].sort((a,b)=>a.guestName.localeCompare(b.guestName));
+
+  const el = document.getElementById('schedule-list');
+  if (!all.length) {
+    el.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text-sm);font-size:.82rem">Không có lịch nhận/trả phòng hôm nay.</div>`;
+    return;
+  }
+  el.innerHTML = all.map(b => {
+    const room = KSAN.ROOMS.find(r=>r.id===b.roomId);
+    return `<div class="tl-item">
+      <div class="tl-dot ${b.stype}"></div>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong style="font-size:.83rem">${b.guestName}</strong>
+          <span class="badge ${b.stype==='in'?'badge-confirmed':'badge-checkin'}">${b.stype==='in'?'Nhận phòng':'Trả phòng'}</span>
+        </div>
+        <div style="font-size:.72rem;color:var(--text-sm);margin-top:1px">
+          ${room?.name} ${b.assignedRoomNumber?'· Phòng '+b.assignedRoomNumber:''} · ${b.guests} khách
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Revenue chart ── */
+function renderRevChart() {
+  const bks = KSAN.getBookings().filter(b=>b.status!=='cancelled');
+  // Xây dựng danh sách ngày
+  let days = [];
+  if (!rangeFrom) {
+    for (let i=6;i>=0;i--) { const d=new Date(); d.setDate(d.getDate()-i); days.push(d.toISOString().split('T')[0]); }
+  } else {
+    const from=new Date(rangeFrom), to=new Date(rangeTo||todayStr());
+    const diff = Math.round((to-from)/864e5);
+    const maxDays = Math.min(diff+1, 30);
+    for (let i=0;i<maxDays;i++) {
+      const d=new Date(from); d.setDate(d.getDate()+i); days.push(d.toISOString().split('T')[0]);
+    }
+  }
+
+  const dayData = days.map(d => ({
+    date: d,
+    label: new Date(d).toLocaleDateString('vi-VN', days.length<=7?{weekday:'short',day:'numeric'}:{day:'numeric',month:'numeric'}),
+    rev: bks.filter(b=>b.createdAt?.startsWith(d)).reduce((s,b)=>s+(b.deposit||0),0)
+  }));
+
+  const maxRev = Math.max(...dayData.map(d=>d.rev), 1);
+  const totalRev = dayData.reduce((s,d)=>s+d.rev, 0);
+  const today = todayStr();
+
+  document.getElementById('rev-period-label').textContent =
+    `${formatDate(days[0])} — ${formatDate(days[days.length-1])}`;
+
+  const chart = document.getElementById('rev-chart');
+  chart.innerHTML = dayData.map(d => {
+    const pxH = Math.max(Math.round(d.rev / maxRev * 76), d.rev>0?3:0);
+    const isToday = d.date === today;
+    return `<div class="bar-col">
+      <div style="font-size:.62rem;color:${d.rev>0?'var(--dark)':'transparent'};margin-bottom:2px;font-weight:600">
+        ${d.rev>0?(d.rev>=1e6?(d.rev/1e6).toFixed(1)+'M':(d.rev/1e3).toFixed(0)+'K'):''}
+      </div>
+      <div class="bar-rect" style="height:${pxH}px;background:${isToday?'var(--dark)':'var(--light)'}"
+        title="${formatDate(d.date)}: ${formatCurrency(d.rev)}"></div>
+      <div class="bar-label">${d.label}</div>
+    </div>`;
+  }).join('');
+
+  // Summary
+  const avgRev = days.length > 0 ? totalRev / days.length : 0;
+  document.getElementById('rev-summary').innerHTML = `
+    <div class="sum-row"><span>Tổng doanh thu kỳ này</span><strong>${formatCurrency(totalRev)}</strong></div>
+    <div class="sum-row"><span>Bình quân / ngày</span><span>${formatCurrency(Math.round(avgRev))}</span></div>
+    <div class="sum-row"><span>Số booking trong kỳ</span><span>${bks.filter(b=>days.includes(b.createdAt?.split('T')[0])).length}</span></div>`;
+}
+
+/* ── Room type breakdown ── */
+function renderTypeBreakdown() {
+  const bks = filterBks(KSAN.getBookings().filter(b=>b.status!=='cancelled'));
+  const el = document.getElementById('type-breakdown');
+  el.innerHTML = KSAN.ROOMS.map(r => {
+    const rBks   = bks.filter(b=>b.roomId===r.id);
+    const rev    = rBks.reduce((s,b)=>s+b.totalPrice,0);
+    const active = KSAN.getBookings().filter(b=>b.status==='checked_in'&&b.roomId===r.id).length;
+    const total  = ROOM_INV.filter(i=>i.typeId===r.id).length;
+    const pct    = total > 0 ? Math.round(active/total*100) : 0;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <img src="../${r.image}" style="width:44px;height:36px;object-fit:cover;border-radius:5px;flex-shrink:0">
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong style="font-size:.82rem">${r.type}</strong>
+          <span style="font-size:.75rem;font-weight:700;color:var(--dark)">${formatCurrency(rev)}</span>
+        </div>
+        <div style="font-size:.7rem;color:var(--text-sm)">${active}/${total} có khách · ${rBks.length} booking</div>
+        <div style="height:4px;background:var(--border);border-radius:3px;margin-top:5px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:var(--medium);border-radius:3px"></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Recent bookings ── */
+function renderRecent() {
+  const recent = KSAN.getBookings().sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,8);
+  const el = document.getElementById('recent-list');
+  if (!recent.length) { el.innerHTML='<div style="text-align:center;padding:20px;color:var(--text-sm);font-size:.83rem">Chưa có đặt phòng.</div>'; return; }
+  el.innerHTML = recent.map(b=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.guestName}</div>
+        <div style="font-size:.7rem;color:var(--text-sm)">${b.id} · ${formatDate(b.checkIn)}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        ${statusBadge(b.status)}
+        <div style="font-size:.72rem;color:var(--dark);font-weight:600;margin-top:2px">${formatCurrency(b.totalPrice)}</div>
+      </div>
+    </div>`).join('');
+}
+
+/* ── Complaints ── */
+function renderComplaints() {
+  const pending = KSAN.getFeedbacks().filter(f=>f.type==='complaint'&&!f.resolved);
+  const el = document.getElementById('complaints-list');
+  if (!pending.length) {
+    el.innerHTML=`<div style="text-align:center;padding:14px;color:#1a5c16;font-size:.82rem">
+      <img src="../Public/icon/success.png" style="height:18px;display:block;margin:0 auto 6px">
+      Không có khiếu nại chưa xử lý.
+    </div>`; return;
+  }
+  el.innerHTML = pending.slice(0,3).map(f=>`
+    <div style="padding:9px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div>
+          <strong style="font-size:.82rem">${f.guestName||'Ẩn danh'}</strong>
+          <div style="font-size:.74rem;color:var(--text-sm);margin-top:2px;line-height:1.5">${(f.comment||'').slice(0,70)}${f.comment?.length>70?'...':''}</div>
+        </div>
+        <a href="customers.html" style="font-size:.72rem;color:var(--danger);white-space:nowrap">Xử lý →</a>
+      </div>
+    </div>`).join('');
+  if (pending.length>3) el.innerHTML += `<div style="text-align:center;padding:6px;font-size:.72rem;color:var(--text-sm)">+ ${pending.length-3} khiếu nại khác</div>`;
+}
+
+function renderAll() {
+  renderKPI();
+  renderRoomStatus();
+  renderSchedule();
+  renderRevChart();
+  renderTypeBreakdown();
+  renderRecent();
+  renderComplaints();
+}
+
+// Init
+rangeFrom = todayStr(); rangeTo = todayStr();
+document.getElementById('range-from').value = rangeFrom;
+document.getElementById('range-to').value   = rangeTo;
+renderAll();
+setInterval(renderAll, 60000);
+</script>
+</body>
+</html>

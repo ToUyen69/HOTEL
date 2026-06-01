@@ -1,0 +1,315 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phòng — KSAN Hotel</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="header">
+  <div class="container">
+    <div class="header-inner">
+      <a href="index.html" class="logo">
+        <img src="Public/logo KS.png" alt="KSAN Logo">
+      </a>
+      <nav class="nav" id="main-nav">
+        <a href="index.html">Trang chủ</a>
+        <a href="rooms.html">Phòng</a>
+        <a href="services.html">Dịch vụ</a>
+        <a href="about.html">Về chúng tôi</a>
+        <a href="travel-guide.html">Cẩm nang</a>
+        <a href="my-booking.html">Đặt phòng của tôi</a>      </nav>
+      <div class="header-actions" id="header-actions"></div>
+      <button class="mobile-toggle" id="mobile-toggle">☰</button>
+    </div>
+  </div>
+</header>
+
+<!-- Page Hero -->
+<section class="page-hero">
+  <div class="container page-hero-content">
+    <h1>Các loại phòng</h1>
+    <div class="breadcrumb">
+      <a href="index.html">Trang chủ</a>
+      <span>›</span>
+      <span>Phòng</span>
+    </div>
+  </div>
+</section>
+
+<!-- Search Filter Bar -->
+<div style="background:#fff;border-bottom:1px solid var(--border);padding:18px 0;position:sticky;top:80px;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.05)">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:12px;align-items:end">
+      <div class="form-group" style="margin:0">
+        <label>Nhận phòng</label>
+        <input type="date" class="form-control" id="f-checkin">
+      </div>
+      <div class="form-group" style="margin:0">
+        <label>Trả phòng</label>
+        <input type="date" class="form-control" id="f-checkout">
+      </div>
+      <div class="form-group" style="margin:0">
+        <label>Số khách</label>
+        <select class="form-control" id="f-guests">
+          <option value="1">1 khách</option>
+          <option value="2" selected>2 khách</option>
+          <option value="3">3 khách</option>
+          <option value="4">4 khách</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin:0">
+        <label>Loại phòng</label>
+        <select class="form-control" id="f-type">
+          <option value="">Tất cả</option>
+          <option value="Standard">Standard</option>
+          <option value="Deluxe">Deluxe</option>
+          <option value="Suite">Suite</option>
+          <option value="Family">Family</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" id="filter-btn" style="margin-top:0">Tìm kiếm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Results -->
+<section class="section">
+  <div class="container">
+    <div id="search-summary" style="margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px"></div>
+    <div id="rooms-list"></div>
+  </div>
+</section>
+
+<!-- Room Detail Modal -->
+<div class="modal-overlay" id="room-modal">
+  <div class="modal" style="max-width:680px">
+    <div class="modal-header">
+      <h3 id="modal-room-name">Chi tiết phòng</h3>
+      <button class="modal-close" onclick="closeModal('room-modal')">×</button>
+    </div>
+    <div class="modal-body" id="modal-room-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('room-modal')">Đóng</button>
+      <button class="btn btn-primary" id="modal-book-btn">Đặt phòng này</button>
+    </div>
+  </div>
+</div>
+
+<footer class="footer"></footer>
+
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script>
+/* parse URL params */
+const params = new URLSearchParams(location.search);
+let currentCheckIn  = params.get('checkin')  || todayStr();
+let currentCheckOut = params.get('checkout') || tomorrowStr();
+let currentGuests   = parseInt(params.get('guests') || 2);
+let currentType     = params.get('type') || '';
+let selectedRoomId  = params.get('room') || null;
+
+/* fill filter bar */
+document.getElementById('f-checkin').value  = currentCheckIn;
+document.getElementById('f-checkout').value = currentCheckOut;
+document.getElementById('f-guests').value   = String(currentGuests);
+document.getElementById('f-type').value     = currentType;
+
+document.getElementById('f-checkin').min  = todayStr();
+document.getElementById('f-checkout').min = tomorrowStr();
+
+document.getElementById('f-checkin').addEventListener('change', function() {
+  const next = addDays(this.value, 1);
+  const out  = document.getElementById('f-checkout');
+  if (out.value <= this.value) out.value = next;
+});
+
+document.getElementById('filter-btn').addEventListener('click', applyFilter);
+
+function applyFilter() {
+  currentCheckIn  = document.getElementById('f-checkin').value;
+  currentCheckOut = document.getElementById('f-checkout').value;
+  currentGuests   = parseInt(document.getElementById('f-guests').value);
+  currentType     = document.getElementById('f-type').value;
+  if (!currentCheckIn || !currentCheckOut) { showToast('Vui lòng chọn ngày.', 'warning'); return; }
+  if (new Date(currentCheckOut) <= new Date(currentCheckIn)) {
+    showToast('Ngày trả phòng phải sau ngày nhận phòng.', 'warning'); return;
+  }
+  renderRooms();
+}
+
+/* Tính số phòng còn trống trong khoảng ngày */
+function getRemainingCount(room, checkIn, checkOut) {
+  const activeStatuses = ['confirmed','checked_in','cleaning','checkout_pending'];
+  const occupied = KSAN.getBookings().filter(b => {
+    if (!activeStatuses.includes(b.status) || b.roomId !== room.id) return false;
+    const bIn  = new Date(b.checkIn);
+    const bOut = new Date(b.checkOut);
+    const rIn  = new Date(checkIn);
+    const rOut = new Date(checkOut);
+    return rIn < bOut && rOut > bIn;
+  }).length;
+  return Math.max(0, room.totalRooms - occupied);
+}
+
+/* Badge số phòng còn lại */
+function remainingBadge(remaining) {
+  if (remaining >= 4) return `<span style="font-size:.75rem;color:var(--success);font-weight:700">
+    <img src="Public/icon/check.png" style="height:11px;vertical-align:middle;margin-right:2px"> ${remaining} phòng còn trống</span>`;
+  if (remaining === 3) return `<span style="font-size:.75rem;color:var(--primary);font-weight:700">
+    <img src="Public/icon/check.png" style="height:11px;vertical-align:middle;margin-right:2px"> Còn ${remaining} phòng</span>`;
+  if (remaining === 2) return `<span style="font-size:.75rem;color:var(--warning);font-weight:700">
+    <img src="Public/icon/crisis.png" style="height:11px;vertical-align:middle;margin-right:2px"> Chỉ còn ${remaining} phòng</span>`;
+  return `<span style="font-size:.75rem;color:var(--danger);font-weight:700;animation:pulse 1s infinite">
+    <img src="Public/icon/crisis.png" style="height:11px;vertical-align:middle;margin-right:2px"> Chỉ còn 1 phòng cuối!</span>`;
+}
+
+function renderRooms() {
+  const nights   = KSAN.nightsBetween(currentCheckIn, currentCheckOut);
+  const available = KSAN.getAvailableRooms(currentCheckIn, currentCheckOut, currentGuests);
+  const filtered  = available.filter(r => !currentType || r.type === currentType);
+
+  /* summary */
+  const summary = document.getElementById('search-summary');
+  summary.innerHTML = `
+    <div>
+      <strong>${filtered.length}</strong> phòng phù hợp
+      <span class="text-light" style="margin-left:8px;font-size:.85rem">
+        · ${KSAN.formatDate(currentCheckIn)} → ${KSAN.formatDate(currentCheckOut)}
+        · ${nights} đêm · ${currentGuests} khách
+      </span>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      ${KSAN.PROMOTIONS.slice(0,2).map(p =>
+        `<span class="badge badge-gold" style="cursor:pointer" title="${p.description}"><img src="Public/icon/promo-code.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> ${p.code}</span>`
+      ).join('')}
+    </div>`;
+
+  const list = document.getElementById('rooms-list');
+  if (!filtered.length) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon"><img src="Public/icon/reception.png" style="height:24px;vertical-align:middle;opacity:.75"></div>
+        <h3>Không có phòng phù hợp</h3>
+        <p>Hãy thử điều chỉnh ngày hoặc số lượng khách.</p>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(r => {
+    const { base, total } = KSAN.calcTotal(r, nights, null);
+    const remaining = getRemainingCount(r, currentCheckIn, currentCheckOut);
+    const isLast    = remaining === 1;
+    return `
+    <div class="card" style="display:grid;grid-template-columns:280px 1fr auto;gap:0;margin-bottom:20px;overflow:hidden;cursor:pointer;${isLast?'border:2px solid var(--danger)':''}"
+      onclick="showRoomDetail('${r.id}')">
+      <div style="overflow:hidden;position:relative">
+        <img src="${r.image}" alt="${r.name}"
+          style="width:100%;height:220px;object-fit:cover;transition:transform .4s ease"
+          onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+        ${remaining <= 2 ? `<div style="position:absolute;bottom:10px;left:10px;background:${remaining===1?'var(--danger)':'var(--warning)'};color:#fff;padding:4px 10px;border-radius:20px;font-size:.72rem;font-weight:700">
+          ${remaining===1?'Phòng cuối!':'Chỉ còn '+remaining+' phòng'}
+        </div>` : ''}
+      </div>
+      <div style="padding:24px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap">
+          <h3 style="margin:0">${r.name}</h3>
+          <span class="badge badge-gold">${r.type}</span>
+          ${remainingBadge(remaining)}
+        </div>
+        <div style="display:flex;gap:16px;font-size:.82rem;color:var(--text-light);margin-bottom:12px;flex-wrap:wrap">
+          <span><img src="Public/icon/room.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> ${r.size}m²</span>
+          <span><img src="Public/icon/số lượng.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> Tối đa ${r.capacity} khách</span>
+          <span><img src="Public/icon/bed.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> ${r.beds}</span>
+          <span><img src="Public/icon/view.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> ${r.view}</span>
+        </div>
+        <p style="font-size:.88rem;color:var(--text-light);margin-bottom:14px;line-height:1.7">${r.description}</p>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          ${r.amenities.slice(0,5).map(a => `<span class="amenity-tag">${a}</span>`).join('')}
+          ${r.amenities.length > 5 ? `<span class="amenity-tag">+${r.amenities.length-5}</span>` : ''}
+        </div>
+      </div>
+      <div style="padding:24px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;border-left:1px solid var(--border);min-width:180px">
+        <div style="text-align:right">
+          <div style="font-size:.8rem;color:var(--text-light)">Giá / đêm</div>
+          <div style="font-size:1.5rem;font-weight:700;color:var(--primary);font-family:'Playfair Display',Georgia,serif">${KSAN.formatCurrency(r.price)}</div>
+          <div style="font-size:.8rem;color:var(--text-light);margin-top:4px">Tổng ${nights} đêm:</div>
+          <div style="font-size:1rem;font-weight:700;color:var(--secondary)">${KSAN.formatCurrency(base)}</div>
+          <div style="margin-top:8px;padding:6px 10px;background:${remaining<=1?'#fdecea':remaining<=2?'#fef9e7':'var(--primary-pale)'};border-radius:8px;font-size:.75rem;font-weight:700;color:${remaining<=1?'var(--danger)':remaining<=2?'var(--warning)':'var(--primary)'}">
+            <img src="Public/icon/${remaining<=2?'crisis':'check'}.png" style="height:11px;vertical-align:middle;margin-right:3px">
+            Còn ${remaining}/${r.totalRooms} phòng
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;width:100%">
+          <button class="btn btn-outline btn-sm btn-full" onclick="event.stopPropagation();showRoomDetail('${r.id}')">Chi tiết</button>
+          <a href="booking.html?room=${r.id}&checkin=${currentCheckIn}&checkout=${currentCheckOut}&guests=${currentGuests}"
+            class="btn btn-primary btn-sm btn-full" onclick="event.stopPropagation()">
+            Đặt ngay
+          </a>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  /* auto-open if ?room= */
+  if (selectedRoomId) {
+    showRoomDetail(selectedRoomId);
+    selectedRoomId = null;
+  }
+}
+
+function showRoomDetail(roomId) {
+  const r = KSAN.ROOMS.find(x => x.id === roomId);
+  if (!r) return;
+  const nights = KSAN.nightsBetween(currentCheckIn, currentCheckOut);
+  const { base } = KSAN.calcTotal(r, nights, null);
+
+  document.getElementById('modal-room-name').textContent = r.name;
+  document.getElementById('modal-room-body').innerHTML = `
+    <div style="height:260px;overflow:hidden;border-radius:10px;margin-bottom:20px">
+      <img src="${r.image}" alt="${r.name}" style="width:100%;height:100%;object-fit:cover">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
+      <div>
+        <h4 style="margin-bottom:8px">Thông tin phòng</h4>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:.88rem">
+          <div><strong>Diện tích:</strong> ${r.size}m²</div>
+          <div><strong>Sức chứa:</strong> Tối đa ${r.capacity} khách</div>
+          <div><strong>Giường:</strong> ${r.beds}</div>
+          <div><strong>Tầm nhìn:</strong> ${r.view}</div>
+          <div><strong>Giá:</strong> <span style="color:var(--primary);font-weight:700">${KSAN.formatCurrency(r.price)}/đêm</span></div>
+        </div>
+      </div>
+      <div>
+        <h4 style="margin-bottom:8px">Tiện nghi</h4>
+        <div class="room-amenities-grid">
+          ${r.amenities.map(a => `<div class="room-amenity-item">${a}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--primary-pale);padding:16px;border-radius:10px;margin-bottom:16px">
+      <h4 style="margin-bottom:4px">Tổng quan chuyến đi</h4>
+      <p style="font-size:.85rem;color:var(--text-light);margin:0">
+        ${KSAN.formatDate(currentCheckIn)} → ${KSAN.formatDate(currentCheckOut)} · ${nights} đêm · ${currentGuests} khách
+        · Tổng: <strong>${KSAN.formatCurrency(base)}</strong>
+      </p>
+    </div>
+    <p style="font-size:.88rem;color:var(--text-light);line-height:1.8">${r.description}</p>`;
+
+  document.getElementById('modal-book-btn').onclick = () => {
+    location.href = `booking.html?room=${r.id}&checkin=${currentCheckIn}&checkout=${currentCheckOut}&guests=${currentGuests}`;
+  };
+  openModal('room-modal');
+}
+
+renderRooms();
+</script>
+<script src="js/footer.js"></script>
+</body>
+</html>
+
+
+
+

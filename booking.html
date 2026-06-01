@@ -1,0 +1,547 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đặt phòng — KSAN Hotel</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="header">
+  <div class="container">
+    <div class="header-inner">
+      <a href="index.html" class="logo">
+        <img src="Public/logo KS.png" alt="KSAN Logo">
+      </a>
+      <nav class="nav" id="main-nav">
+        <a href="index.html">Trang chủ</a>
+        <a href="rooms.html">Phòng</a>
+        <a href="services.html">Dịch vụ</a>
+        <a href="about.html">Về chúng tôi</a>
+        <a href="travel-guide.html">Cẩm nang</a>
+        <a href="my-booking.html">Đặt phòng của tôi</a>      </nav>
+      <div class="header-actions" id="header-actions"></div>
+      <button class="mobile-toggle" id="mobile-toggle">☰</button>
+    </div>
+  </div>
+</header>
+
+<section class="page-hero">
+  <div class="container page-hero-content">
+    <h1>Đặt phòng</h1>
+    <div class="breadcrumb">
+      <a href="index.html">Trang chủ</a><span>›</span>
+      <a href="rooms.html">Phòng</a><span>›</span>
+      <span>Đặt phòng</span>
+    </div>
+  </div>
+</section>
+
+<section class="section-sm">
+  <div class="container">
+    <!-- Steps -->
+    <div class="booking-steps" id="booking-steps">
+      <div class="step active" data-step="1">
+        <div class="step-num">1</div>
+        <div class="step-label">Thông tin</div>
+      </div>
+      <div class="step" data-step="2">
+        <div class="step-num">2</div>
+        <div class="step-label">Thanh toán</div>
+      </div>
+      <div class="step" data-step="3">
+        <div class="step-num">3</div>
+        <div class="step-label">Xác nhận</div>
+      </div>
+    </div>
+
+    <div class="booking-layout">
+      <!-- Left: Form -->
+      <div>
+        <!-- Step 1 -->
+        <div id="step-1" class="tab-pane active">
+          <div class="card">
+            <div class="card-body">
+              <h3 style="margin-bottom:20px">Thông tin khách hàng</h3>
+
+              <div id="guest-prefill-notice" class="alert alert-info d-none">
+                <img src="Public/icon/success.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> Đã điền thông tin từ tài khoản của bạn. Kiểm tra lại trước khi tiếp tục.
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Họ và tên *</label>
+                  <input type="text" class="form-control" id="g-name" placeholder="Nguyễn Văn A">
+                </div>
+                <div class="form-group">
+                  <label>Số điện thoại *</label>
+                  <input type="tel" class="form-control" id="g-phone" placeholder="0901234567">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Email *</label>
+                  <input type="email" class="form-control" id="g-email" placeholder="your@email.com">
+                  <div class="form-hint">Xác nhận đặt phòng sẽ được gửi qua email này.</div>
+                </div>
+                <div class="form-group">
+                  <label>Số CCCD / Hộ chiếu</label>
+                  <input type="text" class="form-control" id="g-cccd" placeholder="079xxxxxxxxxxxx">
+                </div>
+              </div>
+
+              <h3 style="margin:24px 0 16px">Thông tin lưu trú</h3>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Ngày nhận phòng *</label>
+                  <input type="date" class="form-control" id="b-checkin">
+                </div>
+                <div class="form-group">
+                  <label>Ngày trả phòng *</label>
+                  <input type="date" class="form-control" id="b-checkout">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Số lượng khách *</label>
+                  <select class="form-control" id="b-guests">
+                    <option value="1">1 khách</option>
+                    <option value="2" selected>2 khách</option>
+                    <option value="3">3 khách</option>
+                    <option value="4">4 khách</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Loại phòng</label>
+                  <select class="form-control" id="b-roomtype" onchange="onRoomTypeChange()">
+                    <option value="">-- Chọn loại phòng --</option>
+                    <option value="R001">Standard — 800,000đ/đêm</option>
+                    <option value="R002">Deluxe — 1,200,000đ/đêm</option>
+                    <option value="R003">Suite — 2,500,000đ/đêm</option>
+                    <option value="R004">Family — 1,800,000đ/đêm</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Yêu cầu đặc biệt</label>
+                <textarea class="form-control" id="b-special" rows="3"
+                  placeholder="VD: phòng tầng cao, view biển, giường đôi, cần cũi cho trẻ..."></textarea>
+              </div>
+
+              <!-- Promo -->
+              <div style="background:var(--primary-pale);padding:16px;border-radius:10px;margin-top:8px">
+                <h4 style="margin-bottom:12px;font-size:.9rem;display:flex;align-items:center;gap:6px"><img src="Public/icon/promo-code.png" style="height:18px"> Mã khuyến mãi</h4>
+                <div style="display:flex;gap:10px">
+                  <input type="text" class="form-control" id="promo-input" placeholder="Nhập mã khuyến mãi (VD: SUMMER25)" style="text-transform:uppercase">
+                  <button class="btn btn-outline" id="promo-btn" style="white-space:nowrap">Áp dụng</button>
+                </div>
+                <div id="promo-result" style="margin-top:8px"></div>
+                <div style="margin-top:10px;font-size:.8rem;color:var(--text-light)">
+                  Mã có sẵn: <strong>SUMMER25</strong> (−25%) · <strong>WELCOME10</strong> (−10%) · <strong>KSAN20</strong> (−20%)
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;justify-content:flex-end;margin-top:16px">
+            <button class="btn btn-primary btn-lg" id="step1-next">Tiếp theo →</button>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div id="step-2" class="tab-pane">
+          <div class="card">
+            <div class="card-body">
+              <h3 style="margin-bottom:6px">Thanh toán đặt cọc</h3>
+              <p style="color:var(--text-light);font-size:.88rem;margin-bottom:20px">
+                Bạn cần thanh toán <strong id="deposit-amount-label">30%</strong> tiền cọc để xác nhận đặt phòng. Số tiền còn lại thanh toán khi nhận phòng.
+              </p>
+
+              <div class="alert alert-info" style="margin-bottom:20px">
+                <strong><img src="Public/icon/deposit.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> Số tiền đặt cọc:</strong>
+                <span id="deposit-display" style="font-size:1.1rem;font-weight:700;color:var(--primary);margin-left:8px"></span>
+              </div>
+
+              <h4 style="margin-bottom:14px">Chọn phương thức thanh toán</h4>
+              <div id="payment-methods" style="display:flex;flex-direction:column;gap:10px">
+                <label class="payment-option" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color .2s">
+                  <input type="radio" name="payment" value="bank" style="accent-color:var(--primary)">
+                  <img src="Public/icon/bank.png" style="height:28px;object-fit:contain">
+                  <div>
+                    <div style="font-weight:700;font-size:.9rem">Chuyển khoản ngân hàng</div>
+                    <div style="font-size:.78rem;color:var(--text-light)">Visa, Mastercard, thẻ ATM nội địa</div>
+                  </div>
+                </label>
+                <label class="payment-option" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color .2s">
+                  <input type="radio" name="payment" value="momo" style="accent-color:var(--primary)">
+                  <img src="Public/icon/Logo-MoMo-Square-768x768.webp" style="height:28px;border-radius:4px">
+                  <div>
+                    <div style="font-weight:700;font-size:.9rem">Ví MoMo</div>
+                    <div style="font-size:.78rem;color:var(--text-light)">Thanh toán nhanh qua ứng dụng MoMo</div>
+                  </div>
+                </label>
+                <label class="payment-option" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color .2s">
+                  <input type="radio" name="payment" value="zalopay" style="accent-color:var(--primary)">
+                  <img src="Public/icon/zalo pay.png" style="height:28px;object-fit:contain">
+                  <div>
+                    <div style="font-weight:700;font-size:.9rem">ZaloPay / VNPay</div>
+                    <div style="font-size:.78rem;color:var(--text-light)">Ví điện tử phổ biến tại Việt Nam</div>
+                  </div>
+                </label>
+              </div>
+
+              <div id="payment-detail-area" style="margin-top:16px"></div>
+
+              <div style="margin-top:20px;padding:14px;background:var(--primary-pale);border-radius:10px;font-size:.85rem">
+                <strong><img src="Public/icon/id-card.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> Chính sách hủy phòng:</strong><br>
+                • Hủy trước 48h: Miễn phí hoàn toàn<br>
+                • Hủy 24–48h trước: Phạt 30% tiền cọc<br>
+                • Hủy trong vòng 24h: Mất 100% tiền cọc
+              </div>
+
+              <div style="margin-top:16px">
+                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:.85rem">
+                  <input type="checkbox" id="agree-policy" style="margin-top:2px;accent-color:var(--primary)">
+                  <span>Tôi đã đọc và đồng ý với <strong>chính sách đặt phòng</strong> và <strong>chính sách hủy phòng</strong> của khách sạn.</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;margin-top:16px">
+            <button class="btn btn-outline" onclick="goToStep(1)">← Quay lại</button>
+            <button class="btn btn-primary btn-lg" id="step2-pay">
+              <img src="Public/icon/deposit.png" style="height:14px;vertical-align:middle;filter:invert(1);margin-right:4px"> Xác nhận thanh toán
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 3 — Processing -->
+        <div id="step-3" class="tab-pane">
+          <div class="card" style="text-align:center;padding:60px 40px">
+            <div id="step3-content">
+              <div style="font-size:3rem;margin-bottom:16px">⏳</div>
+              <h3>Đang xử lý thanh toán...</h3>
+              <p style="color:var(--text-light)">Vui lòng chờ trong giây lát.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Summary -->
+      <div>
+        <div class="card booking-summary-card">
+          <div class="summary-room-img">
+            <img src="Public/room1.jpg" alt="Room" id="summary-img">
+          </div>
+          <div class="card-body">
+            <h4 id="summary-room-name" style="margin-bottom:4px">—</h4>
+            <div id="summary-room-meta" style="font-size:.8rem;color:var(--text-light);margin-bottom:16px">—</div>
+
+            <div class="summary-line">
+              <span>Nhận phòng</span>
+              <span id="sum-checkin" style="font-weight:600">—</span>
+            </div>
+            <div class="summary-line">
+              <span>Trả phòng</span>
+              <span id="sum-checkout" style="font-weight:600">—</span>
+            </div>
+            <div class="summary-line">
+              <span>Số đêm</span>
+              <span id="sum-nights" style="font-weight:600">—</span>
+            </div>
+            <div class="summary-line">
+              <span>Số khách</span>
+              <span id="sum-guests" style="font-weight:600">—</span>
+            </div>
+            <div class="summary-line">
+              <span>Giá phòng</span>
+              <span id="sum-base">—</span>
+            </div>
+            <div class="summary-line" id="sum-discount-row" style="display:none">
+              <span>Giảm giá (<span id="sum-promo-code"></span>)</span>
+              <span id="sum-discount" style="color:var(--success)">—</span>
+            </div>
+            <div class="summary-line total">
+              <span>Tổng cộng</span>
+              <span id="sum-total">—</span>
+            </div>
+            <div class="summary-line deposit">
+              <span><img src="Public/icon/deposit.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> Đặt cọc ngay (30%)</span>
+              <span id="sum-deposit" style="font-weight:700;color:var(--primary)">—</span>
+            </div>
+            <div style="margin-top:8px;font-size:.78rem;color:var(--text-light)">
+              Số tiền còn lại thanh toán khi check-in: <span id="sum-remaining" style="font-weight:600"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Policy reminder -->
+        <div class="card" style="margin-top:14px">
+          <div class="card-body" style="padding:16px">
+            <h4 style="font-size:.85rem;margin-bottom:10px"><img src="Public/icon/invoice.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> Lưu ý quan trọng</h4>
+            <ul style="font-size:.8rem;color:var(--text-light);padding-left:16px;display:flex;flex-direction:column;gap:6px">
+              <li>Check-in: 14:00 — Check-out: 12:00</li>
+              <li>Mang theo CCCD/Hộ chiếu khi nhận phòng</li>
+              <li>Xuất trình mã booking tại quầy lễ tân</li>
+              <li>Trả phòng trễ có thể tính thêm phí</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+let state = {
+  roomId:   params.get('room') || 'R001',
+  checkIn:  params.get('checkin')  || todayStr(),
+  checkOut: params.get('checkout') || tomorrowStr(),
+  guests:   parseInt(params.get('guests') || 2),
+  promo:    null,
+  payMethod: ''
+};
+
+/* ── Init form ── */
+function initForm() {
+  document.getElementById('b-checkin').value  = state.checkIn;
+  document.getElementById('b-checkout').value = state.checkOut;
+  document.getElementById('b-guests').value   = String(state.guests);
+  if (state.roomId) document.getElementById('b-roomtype').value = state.roomId;
+
+  /* prefill from logged-in user */
+  const user = KSAN.getCurrentUser();
+  if (user) {
+    document.getElementById('g-name').value  = user.name;
+    document.getElementById('g-email').value = user.email;
+    document.getElementById('g-phone').value = user.phone;
+    document.getElementById('guest-prefill-notice').classList.remove('d-none');
+  }
+
+  document.getElementById('b-checkin').min  = todayStr();
+  document.getElementById('b-checkout').min = tomorrowStr();
+
+  document.getElementById('b-checkin').addEventListener('change', () => {
+    state.checkIn  = document.getElementById('b-checkin').value;
+    const next = addDays(state.checkIn, 1);
+    if (state.checkOut <= state.checkIn) {
+      state.checkOut = next;
+      document.getElementById('b-checkout').value = next;
+    }
+    updateSummary();
+  });
+  document.getElementById('b-checkout').addEventListener('change', () => {
+    state.checkOut = document.getElementById('b-checkout').value;
+    updateSummary();
+  });
+  document.getElementById('b-guests').addEventListener('change', () => {
+    state.guests = parseInt(document.getElementById('b-guests').value);
+    updateSummary();
+  });
+
+  updateSummary();
+}
+
+function onRoomTypeChange() {
+  state.roomId = document.getElementById('b-roomtype').value;
+  updateSummary();
+}
+
+function updateSummary() {
+  const room = state.roomId ? KSAN.ROOMS.find(r => r.id === state.roomId) : null;
+  if (!room) {
+    ['summary-room-name','summary-room-meta','sum-checkin','sum-checkout','sum-nights',
+     'sum-guests','sum-base','sum-total','sum-deposit','sum-remaining'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = '—';
+    });
+    return;
+  }
+
+  const nights = KSAN.nightsBetween(state.checkIn, state.checkOut);
+  const { base, disc, total, deposit } = KSAN.calcTotal(room, nights, state.promo);
+
+  document.getElementById('summary-img').src = room.image;
+  document.getElementById('summary-room-name').textContent = room.name;
+  document.getElementById('summary-room-meta').textContent = `${room.size}m² · Tối đa ${room.capacity} khách`;
+  document.getElementById('sum-checkin').textContent  = KSAN.formatDate(state.checkIn);
+  document.getElementById('sum-checkout').textContent = KSAN.formatDate(state.checkOut);
+  document.getElementById('sum-nights').textContent   = nights + ' đêm';
+  document.getElementById('sum-guests').textContent   = state.guests + ' khách';
+  document.getElementById('sum-base').textContent     = KSAN.formatCurrency(base);
+  document.getElementById('sum-total').textContent    = KSAN.formatCurrency(total);
+  document.getElementById('sum-deposit').textContent  = KSAN.formatCurrency(deposit);
+  document.getElementById('sum-remaining').textContent = KSAN.formatCurrency(total - deposit);
+  document.getElementById('deposit-display').textContent = KSAN.formatCurrency(deposit);
+
+  if (disc > 0 && state.promo) {
+    document.getElementById('sum-discount-row').style.display = 'flex';
+    document.getElementById('sum-promo-code').textContent = state.promo.code;
+    document.getElementById('sum-discount').textContent = '−' + KSAN.formatCurrency(disc);
+  } else {
+    document.getElementById('sum-discount-row').style.display = 'none';
+  }
+}
+
+/* ── Promo ── */
+document.getElementById('promo-btn').addEventListener('click', () => {
+  const code   = document.getElementById('promo-input').value.trim();
+  const nights = KSAN.nightsBetween(state.checkIn, state.checkOut);
+  if (!code) return;
+  const res = KSAN.validatePromo(code, nights);
+  const el  = document.getElementById('promo-result');
+  if (!res.ok) {
+    el.innerHTML = `<div class="form-error"><img src="Public/icon/cross.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> ${res.msg}</div>`;
+    state.promo = null;
+  } else {
+    el.innerHTML = `<div style="color:var(--success);font-size:.85rem"><img src="Public/icon/success.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> Áp dụng thành công: ${res.promo.description}</div>`;
+    state.promo = res.promo;
+  }
+  updateSummary();
+});
+
+/* ── Step navigation ── */
+function goToStep(n) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+  document.querySelectorAll('.step').forEach(s => {
+    const sn = parseInt(s.dataset.step);
+    s.classList.toggle('active', sn === n);
+    s.classList.toggle('done', sn < n);
+  });
+}
+
+document.getElementById('step1-next').addEventListener('click', () => {
+  const name  = document.getElementById('g-name').value.trim();
+  const email = document.getElementById('g-email').value.trim();
+  const phone = document.getElementById('g-phone').value.trim();
+  const roomId = document.getElementById('b-roomtype').value;
+  const ci    = document.getElementById('b-checkin').value;
+  const co    = document.getElementById('b-checkout').value;
+
+  if (!name || !email || !phone) {
+    showToast('Vui lòng điền đầy đủ thông tin khách hàng.', 'warning'); return;
+  }
+  if (!roomId) {
+    showToast('Vui lòng chọn loại phòng.', 'warning'); return;
+  }
+  if (!ci || !co || new Date(co) <= new Date(ci)) {
+    showToast('Ngày nhận và trả phòng không hợp lệ.', 'warning'); return;
+  }
+
+  state.roomId  = roomId;
+  state.checkIn = ci; state.checkOut = co;
+  state.guests  = parseInt(document.getElementById('b-guests').value);
+  updateSummary();
+  goToStep(2);
+});
+
+/* payment option styling */
+document.querySelectorAll('.payment-option input').forEach(radio => {
+  radio.addEventListener('change', () => {
+    document.querySelectorAll('.payment-option').forEach(el => {
+      el.style.borderColor = 'var(--border)';
+      el.style.background  = '#fff';
+    });
+    const chosen = radio.closest('.payment-option');
+    chosen.style.borderColor = 'var(--primary)';
+    chosen.style.background  = 'var(--primary-pale)';
+    state.payMethod = radio.value;
+    renderPaymentDetail(radio.value);
+  });
+});
+
+function renderPaymentDetail(method) {
+  const area = document.getElementById('payment-detail-area');
+  if (method === 'bank') {
+    area.innerHTML = `
+      <div style="background:#f8f8f8;padding:16px;border-radius:10px;font-size:.85rem">
+        <div style="font-weight:700;margin-bottom:10px">Thông tin chuyển khoản (Demo):</div>
+        <div>Ngân hàng: <strong>Vietcombank</strong></div>
+        <div>Số TK: <strong>1234 5678 9012</strong></div>
+        <div>Chủ TK: <strong>CONG TY KSAN HOTEL</strong></div>
+        <div>Nội dung: <strong id="transfer-content">KSAN + Tên + SĐT</strong></div>
+        <div style="margin-top:8px;color:var(--warning)"><img src="Public/icon/crisis.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> Đây là demo — không cần chuyển khoản thật.</div>
+      </div>`;
+  } else if (method === 'momo') {
+    area.innerHTML = `
+      <div style="background:#f8f8f8;padding:16px;border-radius:10px;text-align:center;font-size:.85rem">
+        <img src="Public/icon/Logo-MoMo-Square-768x768.webp" style="height:48px;border-radius:8px;margin:0 auto 8px">
+        <div style="font-weight:700">MoMo — Demo</div>
+        <div style="color:var(--text-light);margin-top:4px">Quét QR hoặc nhập SĐT 0901234567 (Demo)</div>
+      </div>`;
+  } else {
+    area.innerHTML = `
+      <div style="background:#f8f8f8;padding:16px;border-radius:10px;text-align:center;font-size:.85rem">
+        <img src="Public/icon/zalo pay.png" style="height:48px;object-fit:contain;margin:0 auto 8px">
+        <div style="font-weight:700">ZaloPay / VNPay — Demo</div>
+        <div style="color:var(--text-light);margin-top:4px">Chuyển hướng đến cổng thanh toán (Demo)</div>
+      </div>`;
+  }
+}
+
+/* ── Confirm payment ── */
+let payAttempts = 0;
+document.getElementById('step2-pay').addEventListener('click', () => {
+  if (!state.payMethod) { showToast('Vui lòng chọn phương thức thanh toán.', 'warning'); return; }
+  if (!document.getElementById('agree-policy').checked) {
+    showToast('Vui lòng đồng ý với chính sách đặt phòng.', 'warning'); return;
+  }
+
+  goToStep(3);
+  payAttempts++;
+
+  /* Simulate payment processing */
+  setTimeout(() => {
+    processBooking();
+  }, 1800);
+});
+
+function processBooking() {
+  const room = KSAN.ROOMS.find(r => r.id === state.roomId);
+  const nights = KSAN.nightsBetween(state.checkIn, state.checkOut);
+  const { base, disc, total, deposit } = KSAN.calcTotal(room, nights, state.promo);
+
+  const user = KSAN.getCurrentUser();
+  const booking = KSAN.createBooking({
+    customerId:  user ? user.id : 'guest',
+    guestName:   document.getElementById('g-name').value.trim(),
+    guestEmail:  document.getElementById('g-email').value.trim(),
+    guestPhone:  document.getElementById('g-phone').value.trim(),
+    guestCCCD:   document.getElementById('g-cccd').value.trim(),
+    roomId:      room.id,
+    roomName:    room.name,
+    roomImage:   room.image,
+    checkIn:     state.checkIn,
+    checkOut:    state.checkOut,
+    nights,
+    guests:      state.guests,
+    specialReq:  document.getElementById('b-special').value.trim(),
+    basePrice:   base,
+    discount:    disc,
+    promoCode:   state.promo ? state.promo.code : '',
+    totalPrice:  total,
+    deposit,
+    paymentMethod: state.payMethod
+  });
+
+  /* add loyalty points */
+  if (user) KSAN.addPoints(user.id, deposit);
+
+  /* redirect to confirmation */
+  location.href = `confirmation.html?id=${booking.id}`;
+}
+
+initForm();
+</script>
+<script src="js/footer.js"></script>
+</body>
+</html>
+
+
+

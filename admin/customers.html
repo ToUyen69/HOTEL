@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý khách hàng — KSAN Admin</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <style>
+    .tier-badge-large {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 14px; border-radius: 20px; font-size: .78rem; font-weight: 700;
+    }
+    .tier-silver   { background: #e8e8e8; color: #555; }
+    .tier-gold     { background: #fff8e1; color: #f57f17; }
+    .tier-platinum { background: #1B4332; color: #F2EDC2; }
+    .feedback-card {
+      padding: 12px 14px; border-radius: 8px; border-left: 3px solid;
+      margin-bottom: 10px; background: #fff;
+    }
+    .feedback-card.praise    { border-color: #2e7d32; }
+    .feedback-card.suggestion{ border-color: var(--info); }
+    .feedback-card.complaint { border-color: var(--danger); }
+    .star-row { color: #f57f17; font-size: .9rem; letter-spacing: 1px; }
+  </style>
+</head>
+<body>
+<div class="admin-wrapper">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <div class="admin-main">
+    <header class="admin-header">
+      <h1><img src="../Public/icon/user.png" style="height:18px;vertical-align:middle;margin-right:6px">Quản lý khách hàng</h1>
+      <div class="admin-header-right">
+        <span class="admin-time" id="admin-time"></span>
+        <span class="header-badge" id="role-badge"></span>
+      </div>
+    </header>
+
+    <main class="admin-content">
+      <!-- Stats -->
+      <div class="stats-row" id="stats-row"></div>
+
+      <!-- Tabs -->
+      <div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:18px">
+        <button class="view-btn active" id="tab-customers-btn" onclick="switchTab('customers')"
+          style="border:none;border-bottom:2px solid var(--dark);border-radius:0;padding:10px 20px;color:var(--dark);background:none">
+          Danh sách khách hàng
+        </button>
+        <button class="view-btn" id="tab-feedback-btn" onclick="switchTab('feedback')"
+          style="border:none;border-bottom:2px solid transparent;border-radius:0;padding:10px 20px;color:var(--text-sm);background:none">
+          Phản hồi & Khiếu nại
+        </button>
+        <button class="view-btn" id="tab-loyalty-btn" onclick="switchTab('loyalty')"
+          style="border:none;border-bottom:2px solid transparent;border-radius:0;padding:10px 20px;color:var(--text-sm);background:none">
+          Chương trình thành viên (F37)
+        </button>
+      </div>
+
+      <!-- Tab: Customers -->
+      <div id="tab-customers">
+        <div class="filter-bar">
+          <div class="filter-group">
+            <label>Tìm kiếm</label>
+            <input type="text" class="form-control" id="f-customer-search" placeholder="Tên, email, số điện thoại...">
+          </div>
+          <div class="filter-group-sm">
+            <label>Hạng thành viên</label>
+            <select class="form-control" id="f-tier">
+              <option value="">Tất cả</option>
+              <option value="Silver">Silver</option>
+              <option value="Gold">Gold</option>
+              <option value="Platinum">Platinum</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-end">
+            <button class="btn btn-primary btn-sm" onclick="renderCustomers()">
+              <img src="../Public/icon/search.png"> Tìm
+            </button>
+            <button class="btn btn-cream btn-sm" onclick="clearCustomerFilter()">Xóa lọc</button>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>ID</th>
+                <th>Khách hàng</th>
+                <th>Liên hệ</th>
+                <th>Hạng</th>
+                <th>Điểm</th>
+                <th>Tổng chi tiêu</th>
+                <th>Số booking</th>
+                <th>Ngày đăng ký</th>
+                <th>Thao tác</th>
+              </tr></thead>
+              <tbody id="customers-tbody"></tbody>
+            </table>
+          </div>
+          <div class="table-footer">
+            <span id="customer-count">Đang tải...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Feedback -->
+      <div id="tab-feedback" style="display:none">
+        <div class="filter-bar">
+          <div class="filter-group-sm">
+            <label>Loại phản hồi</label>
+            <select class="form-control" id="f-feedback-type" onchange="renderFeedbacks()">
+              <option value="">Tất cả</option>
+              <option value="complaint">Khiếu nại</option>
+              <option value="suggestion">Góp ý</option>
+              <option value="praise">Khen ngợi</option>
+            </select>
+          </div>
+        </div>
+        <div id="feedback-list"></div>
+      </div>
+
+      <!-- Tab: Loyalty (F37) -->
+      <div id="tab-loyalty" style="display:none">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px">
+          <div class="card">
+            <div class="card-body" style="text-align:center">
+              <img src="../Public/icon/silver-badge.png" style="height:48px;margin:0 auto 10px">
+              <div style="font-size:1.1rem;font-weight:700;color:#555">Silver</div>
+              <div id="loyalty-silver-count" style="font-size:2rem;font-weight:700;font-family:Georgia,serif;color:var(--dark)">0</div>
+              <div style="font-size:.75rem;color:var(--text-sm)">thành viên · 0–199 điểm</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body" style="text-align:center">
+              <img src="../Public/icon/gold.png" style="height:48px;margin:0 auto 10px">
+              <div style="font-size:1.1rem;font-weight:700;color:#f57f17">Gold</div>
+              <div id="loyalty-gold-count" style="font-size:2rem;font-weight:700;font-family:Georgia,serif;color:var(--dark)">0</div>
+              <div style="font-size:.75rem;color:var(--text-sm)">thành viên · 200–499 điểm</div>
+            </div>
+          </div>
+          <div class="card" style="background:var(--dark)">
+            <div class="card-body" style="text-align:center">
+              <img src="../Public/icon/platinum.png" style="height:48px;margin:0 auto 10px">
+              <div style="font-size:1.1rem;font-weight:700;color:var(--cream)">Platinum</div>
+              <div id="loyalty-plat-count" style="font-size:2rem;font-weight:700;font-family:Georgia,serif;color:var(--cream)">0</div>
+              <div style="font-size:.75rem;color:var(--light)">thành viên · 500+ điểm</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3><img src="../Public/icon/gold.png" style="height:16px"> Cấu hình chương trình thành viên</h3>
+          </div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+              <div>
+                <h4 style="font-size:.84rem;margin-bottom:12px;color:var(--dark)">Quy tắc tích điểm</h4>
+                <div class="form-group">
+                  <label>Điểm per 100,000đ chi tiêu</label>
+                  <input type="number" class="form-control" id="loyalty-rate" value="1" min="1">
+                </div>
+                <div class="form-group">
+                  <label>Ngưỡng nâng hạng Gold (điểm)</label>
+                  <input type="number" class="form-control" id="loyalty-gold-threshold" value="200">
+                </div>
+                <div class="form-group">
+                  <label>Ngưỡng nâng hạng Platinum (điểm)</label>
+                  <input type="number" class="form-control" id="loyalty-plat-threshold" value="500">
+                </div>
+                <div class="form-group">
+                  <label>Thời hạn hạng thành viên (tháng)</label>
+                  <input type="number" class="form-control" id="loyalty-validity" value="12">
+                </div>
+              </div>
+              <div>
+                <h4 style="font-size:.84rem;margin-bottom:12px;color:var(--dark)">Ưu đãi theo hạng</h4>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="padding:12px;background:var(--cream2);border-radius:8px;font-size:.82rem">
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+                      <img src="../Public/icon/silver-badge.png" style="height:18px"><strong>Silver</strong>
+                    </div>
+                    <ul style="margin:0;padding-left:16px;color:var(--text-sm);line-height:1.8">
+                      <li>Ưu tiên đặt phòng</li>
+                      <li>Check-in nhanh</li>
+                    </ul>
+                  </div>
+                  <div style="padding:12px;background:#fff8e1;border-radius:8px;font-size:.82rem">
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+                      <img src="../Public/icon/gold.png" style="height:18px"><strong style="color:#f57f17">Gold</strong>
+                    </div>
+                    <ul style="margin:0;padding-left:16px;color:var(--text-sm);line-height:1.8">
+                      <li>Giảm 10% tiền phòng</li>
+                      <li>Late check-out đến 14:00</li>
+                      <li>Quà sinh nhật</li>
+                    </ul>
+                  </div>
+                  <div style="padding:12px;background:#1B4332;border-radius:8px;font-size:.82rem">
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+                      <img src="../Public/icon/platinum.png" style="height:18px"><strong style="color:var(--cream)">Platinum</strong>
+                    </div>
+                    <ul style="margin:0;padding-left:16px;color:rgba(255,255,255,.7);line-height:1.8">
+                      <li>Giảm 20% toàn bộ dịch vụ</li>
+                      <li>Nâng hạng phòng khi còn chỗ</li>
+                      <li>Dịch vụ butler</li>
+                      <li>Lounge access</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top:14px">
+              <button class="btn btn-primary btn-sm" onclick="showToast('Đã lưu cấu hình chương trình thành viên.','success')">
+                <img src="../Public/icon/check.png"> Lưu cấu hình
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ═══ CUSTOMER DETAIL MODAL ═══ -->
+<div class="modal-overlay" id="customer-detail-modal">
+  <div class="modal" style="max-width:680px">
+    <div class="modal-header">
+      <h3><img src="../Public/icon/user.png">Hồ sơ khách hàng</h3>
+      <button class="modal-close" onclick="closeModal('customer-detail-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <!-- Profile header -->
+      <div id="cd-profile-header" style="display:flex;align-items:center;gap:16px;padding:16px;background:var(--cream2);border-radius:10px;margin-bottom:18px"></div>
+
+      <!-- Tabs inside modal -->
+      <div style="display:flex;gap:0;border-bottom:1.5px solid var(--border);margin-bottom:16px">
+        <button onclick="switchCdTab('info')"    id="cd-tab-info"    class="view-btn active" style="border:none;border-bottom:2px solid var(--dark);border-radius:0;padding:8px 16px;font-size:.8rem">Thông tin</button>
+        <button onclick="switchCdTab('history')" id="cd-tab-history" class="view-btn" style="border:none;border-bottom:2px solid transparent;border-radius:0;padding:8px 16px;font-size:.8rem;color:var(--text-sm)">Lịch sử đặt phòng</button>
+        <button onclick="switchCdTab('membership')" id="cd-tab-membership" class="view-btn" style="border:none;border-bottom:2px solid transparent;border-radius:0;padding:8px 16px;font-size:.8rem;color:var(--text-sm)">Thành viên</button>
+      </div>
+
+      <div id="cd-tab-info-content">
+        <div class="form-row2">
+          <div class="form-group"><label>Họ và tên</label><input type="text" class="form-control" id="cd-name"></div>
+          <div class="form-group"><label>Số điện thoại</label><input type="tel" class="form-control" id="cd-phone"></div>
+        </div>
+        <div class="form-row2">
+          <div class="form-group"><label>Email</label><input type="email" class="form-control" id="cd-email" disabled style="background:#f5f5f5"></div>
+          <div class="form-group"><label>Ngày sinh</label><input type="date" class="form-control" id="cd-dob"></div>
+        </div>
+        <input type="hidden" id="cd-customer-id">
+      </div>
+
+      <div id="cd-tab-history-content" style="display:none">
+        <div id="cd-booking-history"></div>
+      </div>
+
+      <div id="cd-tab-membership-content" style="display:none">
+        <div id="cd-membership-info" style="margin-bottom:16px"></div>
+        <h4 style="font-size:.84rem;margin-bottom:10px;color:var(--dark)">Điều chỉnh thành viên (F37)</h4>
+        <div class="form-row2">
+          <div class="form-group">
+            <label>Hạng thành viên</label>
+            <select class="form-control" id="cd-tier">
+              <option value="Silver">Silver</option>
+              <option value="Gold">Gold</option>
+              <option value="Platinum">Platinum</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Điểm tích lũy</label>
+            <input type="number" class="form-control" id="cd-points" min="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Lý do điều chỉnh</label>
+          <input type="text" class="form-control" id="cd-adjust-reason" placeholder="Ghi rõ lý do điều chỉnh...">
+        </div>
+        <button class="btn btn-primary btn-sm" id="cd-save-membership-btn">
+          <img src="../Public/icon/check.png"> Lưu điều chỉnh
+        </button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('customer-detail-modal')">Đóng</button>
+      <button class="btn btn-primary btn-sm" id="cd-save-info-btn">
+        <img src="../Public/icon/check.png"> Lưu thông tin
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ HANDLE COMPLAINT MODAL (F35) ═══ -->
+<div class="modal-overlay" id="complaint-modal">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-header">
+      <h3><img src="../Public/icon/crisis.png">Xử lý khiếu nại (F35)</h3>
+      <button class="modal-close" onclick="closeModal('complaint-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="complaint-info" style="background:var(--cream2);padding:14px;border-radius:8px;margin-bottom:14px;font-size:.84rem"></div>
+      <div class="form-group">
+        <label>Kết quả xử lý</label>
+        <select class="form-control" id="complaint-result">
+          <option value="resolved">Đã giải quyết — gửi lời xin lỗi + voucher</option>
+          <option value="escalated">Leo thang lên quản lý cấp trên</option>
+          <option value="rejected">Từ chối (có lý do hợp lệ)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Nội dung phản hồi cho khách</label>
+        <textarea class="form-control" id="complaint-response" rows="4"
+          placeholder="Kính gửi quý khách, chúng tôi xin lỗi về sự bất tiện này..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Voucher bồi thường</label>
+        <select class="form-control" id="complaint-voucher">
+          <option value="">Không gửi voucher</option>
+          <option value="SORRY10">SORRY10 — Giảm 10%</option>
+          <option value="SORRY20">SORRY20 — Giảm 20%</option>
+          <option value="SORRY500K">SORRY500K — Giảm 500,000đ</option>
+          <option value="SORRYFREE">SORRYFREE — 1 đêm miễn phí</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('complaint-modal')">Hủy</button>
+      <button class="btn btn-primary btn-sm" id="complaint-submit-btn">
+        <img src="../Public/icon/check.png"> Xác nhận xử lý
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/data.js"></script>
+<script src="js/admin.js"></script>
+<script>
+const acc = AdminAuth.require();
+renderSidebar('customers');
+startClock();
+document.getElementById('role-badge').textContent = acc.roleLabel;
+
+/* ── Stats ── */
+function renderStats() {
+  const customers = KSAN.getCustomers();
+  const bookings  = KSAN.getBookings();
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card green">
+      <div class="stat-label"><img src="../Public/icon/user.png" style="height:12px;vertical-align:middle;margin-right:4px">Tổng khách hàng</div>
+      <div class="stat-value">${customers.length}</div>
+      <div class="stat-sub">Đã đăng ký</div>
+    </div>
+    <div class="stat-card medium">
+      <div class="stat-label"><img src="../Public/icon/gold.png" style="height:12px;vertical-align:middle;margin-right:4px">Gold & Platinum</div>
+      <div class="stat-value" style="color:var(--warn)">${customers.filter(c=>c.tier!=='Silver').length}</div>
+      <div class="stat-sub">Thành viên cao cấp</div>
+    </div>
+    <div class="stat-card warn">
+      <div class="stat-label"><img src="../Public/icon/invoice.png" style="height:12px;vertical-align:middle;margin-right:4px">Tổng booking</div>
+      <div class="stat-value" style="color:var(--dark)">${bookings.length}</div>
+      <div class="stat-sub">Tất cả trạng thái</div>
+    </div>
+    <div class="stat-card danger">
+      <div class="stat-label"><img src="../Public/icon/crisis.png" style="height:12px;vertical-align:middle;margin-right:4px">Khiếu nại chờ xử lý</div>
+      <div class="stat-value" style="color:var(--danger)">${KSAN.getFeedbacks().filter(f=>f.type==='complaint' && !f.resolved).length}</div>
+      <div class="stat-sub">Cần xử lý trong 24h</div>
+    </div>`;
+}
+
+/* ── Tab switching ── */
+let currentTab = 'customers';
+function switchTab(tab) {
+  currentTab = tab;
+  ['customers','feedback','loyalty'].forEach(t => {
+    document.getElementById(`tab-${t}`).style.display = t===tab ? 'block' : 'none';
+    const btn = document.getElementById(`tab-${t}-btn`);
+    if (btn) {
+      btn.style.borderBottom = t===tab ? '2px solid var(--dark)' : '2px solid transparent';
+      btn.style.color = t===tab ? 'var(--dark)' : 'var(--text-sm)';
+      btn.style.fontWeight = t===tab ? '700' : '400';
+    }
+  });
+  if (tab==='feedback')  renderFeedbacks();
+  if (tab==='loyalty')   renderLoyaltyCounts();
+  if (tab==='customers') renderCustomers();
+}
+
+/* ── Customers ── */
+function clearCustomerFilter() {
+  document.getElementById('f-customer-search').value = '';
+  document.getElementById('f-tier').value = '';
+  renderCustomers();
+}
+function renderCustomers() {
+  const search = document.getElementById('f-customer-search').value.toLowerCase().trim();
+  const tier   = document.getElementById('f-tier').value;
+  const customers = KSAN.getCustomers().filter(c => {
+    if (tier && c.tier !== tier) return false;
+    if (search && !`${c.name} ${c.email} ${c.phone}`.toLowerCase().includes(search)) return false;
+    return true;
+  });
+  const bookings = KSAN.getBookings();
+  const tbody = document.getElementById('customers-tbody');
+  if (!customers.length) {
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:28px;color:var(--text-sm)">Không tìm thấy khách hàng nào.</td></tr>`;
+    document.getElementById('customer-count').textContent = '0 khách hàng';
+    return;
+  }
+  tbody.innerHTML = customers.map(c => {
+    const cBookings = bookings.filter(b => b.customerId === c.id);
+    const tierIcon = { Silver: '../Public/icon/silver-badge.png', Gold: '../Public/icon/gold.png', Platinum: '../Public/icon/platinum.png' }[c.tier] || '../Public/icon/silver-badge.png';
+    return `<tr>
+      <td><code style="font-size:.72rem;background:var(--cream2);padding:2px 5px;border-radius:4px">${c.id}</code></td>
+      <td>
+        <div style="font-weight:600;font-size:.84rem">${c.name}</div>
+        <div style="font-size:.72rem;color:var(--text-sm)">${c.dob ? formatDate(c.dob) : '—'}</div>
+      </td>
+      <td>
+        <div style="font-size:.82rem">${c.phone}</div>
+        <div style="font-size:.72rem;color:var(--text-sm)">${c.email}</div>
+      </td>
+      <td><span class="tier-badge-large tier-${c.tier.toLowerCase()}">
+        <img src="${tierIcon}" style="height:14px"> ${c.tier}
+      </span></td>
+      <td style="font-weight:700;color:var(--dark)">${c.points || 0}</td>
+      <td style="font-size:.83rem;font-weight:600">${formatCurrency(c.totalSpend || 0)}</td>
+      <td class="td-center"><strong>${cBookings.length}</strong></td>
+      <td style="font-size:.78rem;color:var(--text-sm)">${formatDate(c.createdAt)}</td>
+      <td>
+        <div class="action-btns">
+          <button class="btn btn-sm btn-outline" onclick="openCustomerDetail('${c.id}')">
+            <img src="../Public/icon/view.png"> Hồ sơ
+          </button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+  document.getElementById('customer-count').textContent = `${customers.length} khách hàng`;
+}
+
+/* ── Customer detail ── */
+let currentCustomerId = null;
+function switchCdTab(tab) {
+  ['info','history','membership'].forEach(t => {
+    document.getElementById(`cd-tab-${t}-content`).style.display = t===tab ? 'block' : 'none';
+    const btn = document.getElementById(`cd-tab-${t}`);
+    if (btn) {
+      btn.style.borderBottom = t===tab ? '2px solid var(--dark)' : '2px solid transparent';
+      btn.style.color = t===tab ? 'var(--dark)' : 'var(--text-sm)';
+      btn.style.fontWeight = t===tab ? '700' : '400';
+    }
+  });
+  const saveBtn = document.getElementById('cd-save-info-btn');
+  if (saveBtn) saveBtn.style.display = tab==='info' ? 'inline-flex' : 'none';
+}
+
+function openCustomerDetail(id) {
+  const c = KSAN.getCustomers().find(x => x.id === id);
+  if (!c) return;
+  currentCustomerId = id;
+  const cBookings = KSAN.getCustomerBookings(id);
+  const tierIcon = { Silver: '../Public/icon/silver-badge.png', Gold: '../Public/icon/gold.png', Platinum: '../Public/icon/platinum.png' }[c.tier] || '../Public/icon/silver-badge.png';
+
+  document.getElementById('cd-profile-header').innerHTML = `
+    <div style="width:52px;height:52px;border-radius:50%;background:var(--dark);
+      display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:700;color:var(--cream);flex-shrink:0">
+      ${c.name[0]}
+    </div>
+    <div style="flex:1">
+      <div style="font-size:1.1rem;font-weight:700;color:var(--dark)">${c.name}</div>
+      <div style="font-size:.78rem;color:var(--text-sm);margin-top:2px">${c.email} · ${c.phone}</div>
+      <div style="margin-top:6px;display:flex;gap:10px;flex-wrap:wrap">
+        <span class="tier-badge-large tier-${c.tier.toLowerCase()}">
+          <img src="${tierIcon}" style="height:14px"> ${c.tier}
+        </span>
+        <span class="badge badge-confirmed">
+          <img src="../Public/icon/note.png" style="height:10px"> ${c.points||0} điểm
+        </span>
+        <span class="badge badge-pending">${cBookings.length} booking</span>
+      </div>
+    </div>`;
+
+  // Info tab
+  document.getElementById('cd-name').value  = c.name;
+  document.getElementById('cd-phone').value = c.phone;
+  document.getElementById('cd-email').value = c.email;
+  document.getElementById('cd-dob').value   = c.dob || '';
+  document.getElementById('cd-customer-id').value = id;
+
+  // History tab
+  document.getElementById('cd-booking-history').innerHTML = cBookings.length
+    ? cBookings.map(b => `
+      <div style="display:flex;gap:12px;align-items:center;padding:10px;background:var(--cream2);border-radius:8px;margin-bottom:8px;font-size:.82rem">
+        <img src="../${b.roomImage || 'Public/room1.jpg'}" style="width:60px;height:48px;object-fit:cover;border-radius:6px;flex-shrink:0">
+        <div style="flex:1">
+          <div style="font-weight:600">${b.roomName}</div>
+          <div style="color:var(--text-sm)">${formatDate(b.checkIn)} → ${formatDate(b.checkOut)} · ${b.nights} đêm</div>
+        </div>
+        <div style="text-align:right">
+          ${statusBadge(b.status)}<br>
+          <strong style="color:var(--dark)">${formatCurrency(b.totalPrice)}</strong>
+        </div>
+      </div>`).join('')
+    : '<div style="color:var(--text-sm);text-align:center;padding:20px">Chưa có lịch sử đặt phòng.</div>';
+
+  // Membership tab
+  document.getElementById('cd-tier').value   = c.tier;
+  document.getElementById('cd-points').value = c.points || 0;
+  document.getElementById('cd-adjust-reason').value = '';
+  document.getElementById('cd-membership-info').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+      <div style="background:var(--cream2);padding:12px;border-radius:8px;text-align:center">
+        <div style="font-size:.7rem;color:var(--text-sm);text-transform:uppercase;letter-spacing:.5px">Hạng hiện tại</div>
+        <div style="font-size:1.1rem;font-weight:700;color:var(--dark);margin-top:4px">${c.tier}</div>
+      </div>
+      <div style="background:var(--cream2);padding:12px;border-radius:8px;text-align:center">
+        <div style="font-size:.7rem;color:var(--text-sm);text-transform:uppercase;letter-spacing:.5px">Tổng điểm</div>
+        <div style="font-size:1.1rem;font-weight:700;color:var(--dark);margin-top:4px">${c.points||0}</div>
+      </div>
+      <div style="background:var(--cream2);padding:12px;border-radius:8px;text-align:center">
+        <div style="font-size:.7rem;color:var(--text-sm);text-transform:uppercase;letter-spacing:.5px">Tổng chi tiêu</div>
+        <div style="font-size:1.1rem;font-weight:700;color:var(--dark);margin-top:4px">${formatCurrency(c.totalSpend||0)}</div>
+      </div>
+    </div>`;
+
+  switchCdTab('info');
+  openModal('customer-detail-modal');
+}
+
+document.getElementById('cd-save-info-btn').addEventListener('click', () => {
+  const id = document.getElementById('cd-customer-id').value;
+  KSAN.updateCustomer(id, {
+    name:  document.getElementById('cd-name').value.trim(),
+    phone: document.getElementById('cd-phone').value.trim(),
+    dob:   document.getElementById('cd-dob').value
+  });
+  showToast('Đã cập nhật thông tin khách hàng.', 'success');
+  closeModal('customer-detail-modal');
+  renderCustomers();
+});
+
+document.getElementById('cd-save-membership-btn').addEventListener('click', () => {
+  const id     = document.getElementById('cd-customer-id').value;
+  const reason = document.getElementById('cd-adjust-reason').value.trim();
+  if (!reason) { showToast('Vui lòng ghi lý do điều chỉnh.', 'warning'); return; }
+  KSAN.updateCustomer(id, {
+    tier:   document.getElementById('cd-tier').value,
+    points: parseInt(document.getElementById('cd-points').value || 0)
+  });
+  showToast('Đã cập nhật hạng thành viên.', 'success');
+  renderCustomers();
+  renderLoyaltyCounts();
+  openCustomerDetail(id);
+});
+
+/* ── Feedback ── */
+let currentComplaintId = null;
+function renderFeedbacks() {
+  const type = document.getElementById('f-feedback-type').value;
+  const feedbacks = KSAN.getFeedbacks()
+    .filter(f => !type || f.type === type)
+    .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const container = document.getElementById('feedback-list');
+  if (!feedbacks.length) {
+    container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-sm)">
+      <img src="../Public/icon/info.png" style="height:32px;opacity:.3;margin:0 auto 10px">
+      Không có phản hồi nào.
+    </div>`; return;
+  }
+  const typeLabel = { praise:'Khen ngợi', suggestion:'Góp ý', complaint:'Khiếu nại' };
+  const typeBadge = { praise:'badge-confirmed', suggestion:'badge-checkin', complaint:'badge-cancelled' };
+  container.innerHTML = feedbacks.map(f => `
+    <div class="feedback-card ${f.type}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+            <strong style="font-size:.88rem">${f.guestName || 'Ẩn danh'}</strong>
+            <span class="badge ${typeBadge[f.type] || 'badge-pending'}">${typeLabel[f.type] || f.type}</span>
+            ${f.resolved ? `<span class="badge badge-confirmed">Đã xử lý</span>` : (f.type==='complaint' ? `<span class="badge badge-cancelled">Chờ xử lý</span>` : '')}
+          </div>
+          <div class="star-row">${'★'.repeat(f.rating||0)}${'☆'.repeat(5-(f.rating||0))}</div>
+          <div style="font-size:.83rem;color:var(--text);margin-top:6px;line-height:1.6">${f.comment || '(Không có nội dung)'}</div>
+          ${f.roomName ? `<div style="font-size:.72rem;color:var(--text-sm);margin-top:4px">Phòng: ${f.roomName} · Booking: ${f.bookingId||'—'}</div>` : ''}
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:.72rem;color:var(--text-sm)">${formatDateTime(f.createdAt)}</div>
+          ${f.type==='complaint' && !f.resolved
+            ? `<button class="btn btn-danger btn-xs mt-8" onclick="openComplaint('${f.id}')">
+                <img src="../Public/icon/note.png"> Xử lý
+               </button>`
+            : ''}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function openComplaint(id) {
+  currentComplaintId = id;
+  const f = KSAN.getFeedbacks().find(x => x.id === id);
+  document.getElementById('complaint-info').innerHTML = `
+    <strong>${f.guestName}</strong> — ${formatDate(f.createdAt)}<br>
+    <div class="star-row" style="margin:4px 0">${'★'.repeat(f.rating||0)}${'☆'.repeat(5-(f.rating||0))}</div>
+    <em style="color:var(--text-sm)">${f.comment}</em>`;
+  document.getElementById('complaint-response').value = '';
+  openModal('complaint-modal');
+}
+document.getElementById('complaint-submit-btn').addEventListener('click', () => {
+  const feedbacks = KSAN.getFeedbacks();
+  const idx = feedbacks.findIndex(f => f.id === currentComplaintId);
+  if (idx < 0) return;
+  feedbacks[idx].resolved   = true;
+  feedbacks[idx].resolvedBy = AdminAuth.current()?.name;
+  feedbacks[idx].response   = document.getElementById('complaint-response').value;
+  feedbacks[idx].voucher    = document.getElementById('complaint-voucher').value;
+  KSAN._set('feedbacks', feedbacks);
+  closeModal('complaint-modal');
+  showToast('Đã xử lý khiếu nại và ghi nhận vào hệ thống.', 'success');
+  renderFeedbacks(); renderStats();
+});
+
+/* ── Loyalty counts ── */
+function renderLoyaltyCounts() {
+  const customers = KSAN.getCustomers();
+  document.getElementById('loyalty-silver-count').textContent = customers.filter(c=>c.tier==='Silver').length;
+  document.getElementById('loyalty-gold-count').textContent   = customers.filter(c=>c.tier==='Gold').length;
+  document.getElementById('loyalty-plat-count').textContent   = customers.filter(c=>c.tier==='Platinum').length;
+}
+
+/* ── Search on enter ── */
+document.getElementById('f-customer-search').addEventListener('keydown', e => { if(e.key==='Enter') renderCustomers(); });
+
+/* ── Init ── */
+renderStats();
+renderCustomers();
+renderLoyaltyCounts();
+</script>
+</body>
+</html>

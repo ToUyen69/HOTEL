@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý đặt phòng — KSAN Admin</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <style>
+    /* ── Dropdown action menu ── */
+    .action-menu { position:relative; display:inline-block; }
+    .action-menu-btn { background:#fff; border:1.5px solid var(--border); border-radius:7px;
+      padding:5px 12px; font-size:.78rem; font-weight:600; cursor:pointer; color:var(--text-sm);
+      display:flex; align-items:center; gap:5px; transition:all .2s; white-space:nowrap; }
+    .action-menu-btn:hover { border-color:var(--dark); color:var(--dark); }
+    .action-menu-dropdown {
+      position:absolute; right:0; top:calc(100% + 4px); background:#fff;
+      border:1.5px solid var(--border); border-radius:10px; box-shadow:var(--shadow-md);
+      min-width:185px; z-index:50; overflow:hidden; display:none;
+    }
+    .action-menu.open .action-menu-dropdown { display:block; }
+    .action-item {
+      display:block; width:100%; padding:9px 14px; text-align:left;
+      background:none; border:none; cursor:pointer; font-size:.82rem;
+      color:var(--text); transition:background .15s; white-space:nowrap;
+    }
+    .action-item:hover { background:var(--cream2); }
+    .action-item.danger { color:var(--danger); }
+    .action-item.danger:hover { background:#fce4ec; }
+    .action-item.primary { color:var(--dark); font-weight:700; }
+    .action-item.secondary { color:#1565c0; font-weight:700; }
+    .action-item:disabled { opacity:.4; cursor:not-allowed; }
+    .action-divider { height:1px; background:var(--border); margin:4px 0; }
+
+    /* Quick status buttons (prominent) */
+    .quick-ci  { background:var(--dark); color:#fff; border:none; border-radius:6px;
+      padding:5px 12px; font-size:.78rem; font-weight:700; cursor:pointer; }
+    .quick-co  { background:#1565c0; color:#fff; border:none; border-radius:6px;
+      padding:5px 12px; font-size:.78rem; font-weight:700; cursor:pointer; }
+    .quick-ci:hover { background:#0f2b1e; }
+    .quick-co:hover { background:#0d47a1; }
+
+    /* Service tag */
+    .svc-tag { display:inline-flex;align-items:center;gap:4px;background:#e8f4fb;
+      color:#1565c0;padding:2px 8px;border-radius:12px;font-size:.72rem;font-weight:600;margin:2px; }
+  </style>
+</head>
+<body>
+<div class="admin-wrapper">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <div class="admin-main">
+    <header class="admin-header">
+      <h1><img src="../Public/icon/bed.png" style="height:18px;vertical-align:middle;margin-right:6px">Quản lý đặt phòng</h1>
+      <div class="admin-header-right">
+        <span class="admin-time" id="admin-time"></span>
+        <span class="header-badge">Quản trị viên</span>
+      </div>
+    </header>
+
+    <main class="admin-content">
+      <!-- Stats -->
+      <div class="stats-row" id="stats-row"></div>
+
+      <!-- Filter -->
+      <div class="filter-bar">
+        <div class="filter-group">
+          <label>Tìm kiếm</label>
+          <input type="text" class="form-control" id="f-search" placeholder="Mã booking, tên, SĐT, email...">
+        </div>
+        <div class="filter-group-sm">
+          <label>Trạng thái</label>
+          <select class="form-control" id="f-status">
+            <option value="">Tất cả</option>
+            <option value="confirmed">Đã xác nhận</option>
+            <option value="checked_in">Đang lưu trú</option>
+            <option value="checked_out">Đã trả phòng</option>
+            <option value="cancelled">Đã hủy</option>
+          </select>
+        </div>
+        <div class="filter-group-sm">
+          <label>Loại phòng</label>
+          <select class="form-control" id="f-type">
+            <option value="">Tất cả</option>
+            <option value="R001">Standard</option>
+            <option value="R002">Deluxe</option>
+            <option value="R003">Suite</option>
+            <option value="R004">Family</option>
+          </select>
+        </div>
+        <div class="filter-group-sm">
+          <label>Check-in từ ngày</label>
+          <input type="date" class="form-control" id="f-date">
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-end">
+          <button class="btn btn-primary btn-sm" onclick="applyFilter()">Tìm kiếm</button>
+          <button class="btn btn-cream btn-sm" onclick="clearFilter()">Xóa lọc</button>
+        </div>
+        <div style="margin-left:auto;align-self:flex-end">
+          <button class="btn btn-secondary" onclick="openModal('new-booking-modal')">
+            + Tạo đặt phòng mới
+          </button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-card">
+        <div class="table-wrap">
+          <table id="bookings-table">
+            <thead>
+              <tr>
+                <th>Mã booking</th>
+                <th>Khách hàng</th>
+                <th>Loại phòng</th>
+                <th>Số phòng</th>
+                <th>Check-in</th>
+                <th>Check-out</th>
+                <th class="td-center">Đêm</th>
+                <th>Tổng tiền</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="bookings-tbody"></tbody>
+          </table>
+        </div>
+        <div class="table-footer">
+          <span id="booking-count">Đang tải...</span>
+          <span class="text-muted fs-sm">Hiển thị 50 bản ghi mới nhất</span>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ═══ CHECK-IN MODAL (F17, F18) ═══ -->
+<div class="modal-overlay" id="checkin-modal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <h3><img src="../Public/icon/check.png">Nhận phòng — Check-in</h3>
+      <button class="modal-close" onclick="closeModal('checkin-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="ci-alert"></div>
+      <div id="ci-booking-info" class="alert alert-info" style="font-size:.84rem;margin-bottom:16px"></div>
+
+      <div class="form-row2">
+        <div class="form-group">
+          <label>Số CCCD / Hộ chiếu *</label>
+          <input type="text" class="form-control" id="ci-cccd" placeholder="079xxxxxxxxxxxx">
+          <div class="form-hint">Xác thực giấy tờ tùy thân của khách</div>
+        </div>
+        <div class="form-group">
+          <label>Số khách thực tế</label>
+          <input type="number" class="form-control" id="ci-guests" min="1" max="10">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Chọn số phòng cụ thể *</label>
+        <select class="form-control" id="ci-room-number">
+          <option value="">-- Chọn phòng --</option>
+        </select>
+        <div class="form-hint">Chỉ hiển thị phòng trống cùng loại với đặt phòng này</div>
+      </div>
+
+      <div class="form-group">
+        <label>Mã thẻ từ / Chìa khóa phòng</label>
+        <input type="text" class="form-control" id="ci-keycard" placeholder="VD: KF-101-A">
+        <div class="form-hint">Lập trình thẻ từ và ghi nhận mã thẻ vào hệ thống</div>
+      </div>
+
+      <div class="form-group">
+        <label>Ghi chú nhận phòng</label>
+        <textarea class="form-control" id="ci-notes" rows="2"
+          placeholder="Yêu cầu đặc biệt, tình trạng phòng khi giao..."></textarea>
+      </div>
+
+      <!-- Extra guest warning -->
+      <div id="ci-extra-guest-warn" style="display:none" class="alert alert-warning" style="font-size:.82rem"></div>
+
+      <!-- Thu tiền phòng còn lại -->
+      <div style="background:var(--cream2);border:1.5px solid var(--border);border-radius:10px;padding:14px;margin-top:4px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <strong style="font-size:.88rem;color:var(--dark)">Thu tiền phòng còn lại tại check-in</strong>
+          <span id="ci-remaining-badge" class="badge badge-confirmed"></span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.83rem;margin-bottom:10px">
+          <div><span style="color:var(--text-sm)">Tổng tiền phòng:</span> <strong id="ci-total-show">—</strong></div>
+          <div><span style="color:var(--text-sm)">Đã cọc:</span> <strong id="ci-deposit-show">—</strong></div>
+          <div style="grid-column:span 2;padding:10px;background:#fff;border-radius:8px;display:flex;justify-content:space-between;align-items:center">
+            <span style="color:var(--dark);font-weight:700">Số tiền cần thu ngay:</span>
+            <strong id="ci-remaining-show" style="font-size:1.1rem;color:var(--dark)">—</strong>
+          </div>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Phương thức thanh toán số tiền còn lại</label>
+          <select class="form-control" id="ci-payment-method">
+            <option value="cash">Tiền mặt</option>
+            <option value="card">Thẻ ngân hàng / Visa</option>
+            <option value="momo">Ví MoMo</option>
+            <option value="zalopay">ZaloPay / VNPay</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="alert alert-info" style="font-size:.8rem;margin-top:10px">
+        <strong>Nhắc nhở khách:</strong> Check-out tiêu chuẩn <strong>12:00 trưa</strong>.
+        WiFi: <strong>KSAN@2025</strong>. Bữa sáng: <strong>6:30–10:00</strong>.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('checkin-modal')">Hủy</button>
+      <button class="btn btn-primary" id="ci-confirm-btn">Xác nhận Check-in & Thu tiền</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CHECK-OUT MULTI-STEP MODAL ═══ -->
+<div class="modal-overlay" id="checkout-modal">
+  <div class="modal" style="max-width:680px">
+    <div class="modal-header">
+      <h3><img src="../Public/icon/invoice.png">Quy trình trả phòng</h3>
+      <button class="modal-close" onclick="closeModal('checkout-modal')">×</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Progress steps -->
+      <div class="checkout-steps">
+        <div class="cstep active" id="cstep-1">
+          <div class="cstep-num">1</div>
+          <div class="cstep-label">Kiểm tra phòng</div>
+        </div>
+        <div class="cstep" id="cstep-2">
+          <div class="cstep-num">2</div>
+          <div class="cstep-label">Chi phí phát sinh</div>
+        </div>
+        <div class="cstep" id="cstep-3">
+          <div class="cstep-num">3</div>
+          <div class="cstep-label">Thanh toán</div>
+        </div>
+      </div>
+
+      <div id="co-alert"></div>
+
+      <!-- ── STEP 1: Kiểm tra phòng ── -->
+      <div class="co-step active" id="co-step-1">
+        <div id="co-booking-info" class="alert alert-info" style="font-size:.84rem;margin-bottom:14px"></div>
+
+        <!-- Inspector info -->
+        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--cream2);
+          border-radius:8px;margin-bottom:14px;border-left:3px solid var(--medium)">
+          <img src="../Public/icon/user.png" style="height:20px;opacity:.6">
+          <div>
+            <div style="font-size:.78rem;color:var(--text-sm)">Nhân viên kiểm tra phòng</div>
+            <div style="font-weight:700;font-size:.9rem" id="co-inspector-name">—</div>
+          </div>
+          <span class="badge badge-inspecting" style="margin-left:auto">Đang kiểm tra</span>
+        </div>
+
+        <!-- Checklist -->
+        <div style="font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+          color:var(--dark);margin-bottom:8px">Danh sách kiểm tra tài sản phòng</div>
+        <div id="insp-checklist"></div>
+      </div>
+
+      <!-- ── STEP 2: Chi phí phát sinh ── -->
+      <div class="co-step" id="co-step-2">
+        <!-- Tiền phòng đã thu -->
+        <div class="alert alert-success" style="font-size:.82rem;margin-bottom:14px">
+          <img src="../Public/icon/success.png" style="height:13px;vertical-align:middle;margin-right:4px">
+          Tiền phòng <strong id="co-room-paid"></strong> đã thu đầy đủ tại check-in. Check-out chỉ thu phát sinh.
+        </div>
+
+        <!-- Dịch vụ auto-sync -->
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-header" style="padding:10px 14px">
+            <h3 style="font-size:.84rem"><img src="../Public/icon/spa.png" style="height:13px"> Dịch vụ đã sử dụng</h3>
+            <span class="badge badge-checkin" id="co-svc-count">0 dịch vụ</span>
+          </div>
+          <div id="co-svc-list" style="padding:10px 14px;font-size:.82rem"></div>
+        </div>
+
+        <!-- Hư hỏng từ kiểm tra -->
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-header" style="padding:10px 14px">
+            <h3 style="font-size:.84rem"><img src="../Public/icon/crisis.png" style="height:13px"> Hư hỏng ghi nhận</h3>
+            <span class="badge badge-cancelled" id="co-damage-count">0 khoản</span>
+          </div>
+          <div id="co-damage-list" style="padding:10px 14px;font-size:.82rem"></div>
+        </div>
+
+        <!-- Late fee -->
+        <div id="co-late-info" style="display:none;margin-bottom:12px">
+          <div class="alert alert-warning" style="font-size:.82rem">
+            <img src="../Public/icon/crisis.png" style="height:13px;vertical-align:middle;margin-right:4px">
+            <span id="co-late-text"></span>
+          </div>
+        </div>
+
+        <!-- Tổng kết -->
+        <div style="background:var(--cream2);padding:14px;border-radius:10px">
+          <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;
+            letter-spacing:.5px;color:var(--dark);margin-bottom:10px">Tổng hóa đơn phát sinh</div>
+          <div id="co-invoice-lines" style="display:flex;flex-direction:column;gap:5px"></div>
+          <hr style="border-color:var(--border);margin:10px 0">
+          <div style="display:flex;justify-content:space-between;font-weight:700;font-size:1rem;color:var(--dark)">
+            <span>Tổng cần thu thêm</span>
+            <span id="co-total-extra">0đ</span>
+          </div>
+          <div style="font-size:.74rem;color:var(--text-sm);margin-top:3px">
+            Nếu không phát sinh → bấm Tiếp để hoàn tất.
+          </div>
+        </div>
+      </div>
+
+      <!-- ── STEP 3: Thanh toán ── -->
+      <div class="co-step" id="co-step-3">
+        <div style="background:var(--cream2);padding:16px;border-radius:10px;margin-bottom:16px" id="co-final-summary"></div>
+        <div class="form-group">
+          <label>Phương thức thanh toán phát sinh</label>
+          <select class="form-control" id="co-payment">
+            <option value="cash">Tiền mặt</option>
+            <option value="card">Thẻ ngân hàng / Visa</option>
+            <option value="momo">Ví MoMo</option>
+            <option value="zalopay">ZaloPay / VNPay</option>
+          </select>
+        </div>
+        <div class="alert alert-warning" style="font-size:.82rem">
+          <img src="../Public/icon/info.png" style="height:13px;vertical-align:middle;margin-right:4px">
+          Sau khi xác nhận: trạng thái booking → <strong>Đã trả phòng</strong>,
+          phòng → <strong>Đang dọn</strong>. Nhân viên buồng phòng tiến hành dọn.
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" id="co-back-btn" style="display:none" onclick="coGoStep(coCurrentStep-1)">← Quay lại</button>
+      <button class="btn btn-outline btn-sm" onclick="closeModal('checkout-modal')">Đóng</button>
+      <button class="btn btn-primary" id="co-next-btn" onclick="coNextStep()">Tiếp theo →</button>
+      <button class="btn btn-primary" id="co-confirm-btn" style="display:none">Xác nhận Check-out</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ THU TIỀN PHÁT SINH & HOÀN TẤT CHECK-OUT ═══ -->
+<div class="modal-overlay" id="final-payment-modal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <h3><img src="../Public/icon/deposit.png">Thu tiền phát sinh & Hoàn tất Check-out</h3>
+      <button class="modal-close" onclick="closeModal('final-payment-modal')">×</button>
+    </div>
+    <div class="modal-body" id="fp-content"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('final-payment-modal')">Hủy</button>
+      <button class="btn btn-primary" id="fp-confirm-btn">Xác nhận & Hoàn tất Check-out</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ HỦY ĐẶT PHÒNG MODAL ═══ -->
+<div class="modal-overlay" id="cancel-booking-modal">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-header">
+      <h3><img src="../Public/icon/cross.png">Hủy đặt phòng</h3>
+      <button class="modal-close" onclick="closeModal('cancel-booking-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="cb-booking-info" class="alert alert-info" style="font-size:.84rem;margin-bottom:16px"></div>
+
+      <!-- Chính sách hoàn tiền -->
+      <div id="cb-refund-info" style="margin-bottom:16px"></div>
+
+      <div class="form-group">
+        <label>Lý do hủy *</label>
+        <select class="form-control" id="cb-reason" onchange="updateRefundInfo()">
+          <option value="guest_request">Khách yêu cầu hủy</option>
+          <option value="no_show">No-show (không đến nhận phòng)</option>
+          <option value="hotel_error">Lỗi từ phía khách sạn</option>
+          <option value="overbooking">Overbooking — khách sạn không đủ phòng</option>
+          <option value="other">Lý do khác</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Ghi chú thêm</label>
+        <textarea class="form-control" id="cb-note" rows="2" placeholder="Ghi rõ chi tiết nếu cần..."></textarea>
+      </div>
+      <div id="cb-hotel-fault-note" style="display:none">
+        <div class="alert alert-warning" style="font-size:.8rem">
+          <img src="../Public/icon/info.png" style="height:12px;vertical-align:middle;margin-right:4px">
+          Lỗi từ phía khách sạn: Hoàn tiền 100% không áp dụng phí hủy.
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('cancel-booking-modal')">Giữ đặt phòng</button>
+      <button class="btn btn-danger" id="cb-confirm-btn">Xác nhận hủy</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TẠO ĐẶT PHÒNG MỚI (F14) ═══ -->
+<div class="modal-overlay" id="new-booking-modal">
+  <div class="modal" style="max-width:620px">
+    <div class="modal-header">
+      <h3><img src="../Public/icon/note.png">Tạo đặt phòng mới (Walk-in / Điện thoại)</h3>
+      <button class="modal-close" onclick="closeModal('new-booking-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="nb-alert"></div>
+      <div class="form-row2">
+        <div class="form-group">
+          <label>Họ và tên khách *</label>
+          <input type="text" class="form-control" id="nb-name" placeholder="Nguyễn Văn A">
+        </div>
+        <div class="form-group">
+          <label>Số điện thoại *</label>
+          <input type="tel" class="form-control" id="nb-phone" placeholder="0901234567">
+        </div>
+      </div>
+      <div class="form-row2">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" class="form-control" id="nb-email" placeholder="email@example.com">
+        </div>
+        <div class="form-group">
+          <label>Số CCCD</label>
+          <input type="text" class="form-control" id="nb-cccd" placeholder="079xxxxxxxxxxxx">
+        </div>
+      </div>
+      <div class="form-row2">
+        <div class="form-group">
+          <label>Ngày nhận phòng *</label>
+          <input type="date" class="form-control" id="nb-checkin" onchange="updateNbPrice()">
+        </div>
+        <div class="form-group">
+          <label>Ngày trả phòng *</label>
+          <input type="date" class="form-control" id="nb-checkout" onchange="updateNbPrice()">
+        </div>
+      </div>
+      <div class="form-row2">
+        <div class="form-group">
+          <label>Loại phòng *</label>
+          <select class="form-control" id="nb-room" onchange="updateNbPrice()">
+            <option value="">-- Chọn loại phòng --</option>
+            <option value="R001">Standard — 800,000đ/đêm</option>
+            <option value="R002">Deluxe — 1,200,000đ/đêm</option>
+            <option value="R003">Suite — 2,500,000đ/đêm</option>
+            <option value="R004">Family — 1,800,000đ/đêm</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Số khách</label>
+          <select class="form-control" id="nb-guests">
+            <option value="1">1 khách</option>
+            <option value="2" selected>2 khách</option>
+            <option value="3">3 khách</option>
+            <option value="4">4 khách</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row2">
+        <div class="form-group">
+          <label>Kênh đặt phòng</label>
+          <select class="form-control" id="nb-channel">
+            <option value="walkin">Walk-in (trực tiếp tại quầy)</option>
+            <option value="phone">Qua điện thoại</option>
+            <option value="website">Website KSAN</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Mã khuyến mãi</label>
+          <input type="text" class="form-control" id="nb-promo" placeholder="Để trống nếu không có" style="text-transform:uppercase">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Yêu cầu đặc biệt</label>
+        <textarea class="form-control" id="nb-special" rows="2" placeholder="Tầng cao, view thành phố, giường đôi, cần cũi cho bé..."></textarea>
+      </div>
+
+      <!-- Tóm tắt giá -->
+      <div id="nb-price-box" style="display:none;background:var(--cream2);padding:14px;border-radius:10px;font-size:.84rem">
+        <div id="nb-price-lines" style="display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+
+      <div class="form-group mt-12">
+        <label>Hình thức thanh toán đặt cọc ngay</label>
+        <select class="form-control" id="nb-deposit-method">
+          <option value="cash">Tiền mặt tại quầy</option>
+          <option value="transfer">Chuyển khoản ngân hàng</option>
+          <option value="later">Chưa thanh toán (sẽ thu sau)</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('new-booking-modal')">Hủy</button>
+      <button class="btn btn-primary" id="nb-create-btn">Tạo đặt phòng</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CHỈNH SỬA ĐẶT PHÒNG (F16) ═══ -->
+<div class="modal-overlay" id="edit-booking-modal">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-header">
+      <h3><img src="../Public/icon/note.png">Chỉnh sửa thông tin đặt phòng</h3>
+      <button class="modal-close" onclick="closeModal('edit-booking-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="eb-alert"></div>
+      <input type="hidden" id="eb-booking-id">
+      <div class="form-row2">
+        <div class="form-group"><label>Họ và tên</label><input type="text" class="form-control" id="eb-name"></div>
+        <div class="form-group"><label>Số điện thoại</label><input type="tel" class="form-control" id="eb-phone"></div>
+      </div>
+      <div class="form-row2">
+        <div class="form-group"><label>Ngày nhận phòng</label><input type="date" class="form-control" id="eb-checkin"></div>
+        <div class="form-group"><label>Ngày trả phòng</label><input type="date" class="form-control" id="eb-checkout"></div>
+      </div>
+      <div class="form-row2">
+        <div class="form-group">
+          <label>Số khách</label>
+          <select class="form-control" id="eb-guests">
+            <option value="1">1</option><option value="2">2</option>
+            <option value="3">3</option><option value="4">4</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Yêu cầu đặc biệt</label><input type="text" class="form-control" id="eb-special"></div>
+      </div>
+      <div class="form-group">
+        <label>Lý do chỉnh sửa *</label>
+        <input type="text" class="form-control" id="eb-reason" placeholder="Bắt buộc ghi lý do để lưu lịch sử chỉnh sửa">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('edit-booking-modal')">Hủy</button>
+      <button class="btn btn-primary btn-sm" id="eb-save-btn">Lưu thay đổi</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ THÊM DỊCH VỤ (F19) ═══ -->
+<div class="modal-overlay" id="add-service-modal">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <h3><img src="../Public/icon/spa.png">Ghi nhận dịch vụ bổ sung — F19</h3>
+      <button class="modal-close" onclick="closeModal('add-service-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="as-booking-info" class="alert alert-info" style="font-size:.84rem;margin-bottom:14px"></div>
+      <div class="form-group">
+        <label>Loại dịch vụ *</label>
+        <select class="form-control" id="as-service" onchange="updateAsPrice()">
+          <option value="">-- Chọn dịch vụ --</option>
+          <option value="SPA:350000">Spa & Massage — 350,000đ/lần</option>
+          <option value="YOGA:150000">Yoga & Thể dục — 150,000đ/buổi</option>
+          <option value="SAUNA:200000">Xông hơi — 200,000đ/lần</option>
+          <option value="LAUNDRY:50000">Giặt là — 50,000đ/món</option>
+          <option value="TRANSFER:250000">Đưa đón sân bay — 250,000đ/chiều</option>
+          <option value="CAFE:180000">Đặt bàn nhà hàng — 180,000đ/người</option>
+          <option value="MINIBAR:0">Minibar (nhập giá thủ công)</option>
+          <option value="OTHER:0">Khác (nhập giá thủ công)</option>
+        </select>
+      </div>
+      <div class="form-row2">
+        <div class="form-group">
+          <label>Số lượng</label>
+          <input type="number" class="form-control" id="as-qty" value="1" min="1" onchange="updateAsPrice()">
+        </div>
+        <div class="form-group">
+          <label>Đơn giá (VNĐ)</label>
+          <input type="number" class="form-control" id="as-unit-price" placeholder="0" onchange="updateAsPrice()">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Mô tả chi tiết</label>
+        <input type="text" class="form-control" id="as-desc" placeholder="Chi tiết dịch vụ đã cung cấp...">
+      </div>
+      <div style="background:var(--cream2);padding:12px;border-radius:8px;display:flex;justify-content:space-between;font-size:.88rem">
+        <span style="color:var(--text-sm)">Thành tiền:</span>
+        <strong id="as-total" style="color:var(--dark);font-size:1rem">0đ</strong>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('add-service-modal')">Hủy</button>
+      <button class="btn btn-primary btn-sm" id="as-add-btn">Ghi nhận vào hóa đơn</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ GIA HẠN LƯU TRÚ (F21) ═══ -->
+<div class="modal-overlay" id="extend-modal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header">
+      <h3><img src="../Public/icon/calendar.png">Gia hạn lưu trú — F21</h3>
+      <button class="modal-close" onclick="closeModal('extend-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="ex-info" class="alert alert-info" style="font-size:.84rem;margin-bottom:14px"></div>
+      <div id="ex-alert"></div>
+      <div class="form-group">
+        <label>Ngày trả phòng mới *</label>
+        <input type="date" class="form-control" id="ex-new-checkout" onchange="updateExtendPreview()">
+        <div class="form-hint" id="ex-hint"></div>
+      </div>
+      <div id="ex-price-info" style="background:var(--cream2);padding:12px;border-radius:8px;font-size:.84rem;display:none"></div>
+      <div class="form-group mt-12">
+        <label>Thanh toán phí gia hạn</label>
+        <select class="form-control" id="ex-payment">
+          <option value="now">Thu tiền ngay (tiền mặt / chuyển khoản)</option>
+          <option value="checkout">Cộng vào hóa đơn khi trả phòng</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('extend-modal')">Hủy</button>
+      <button class="btn btn-primary btn-sm" id="ex-confirm-btn">Xác nhận gia hạn</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ĐỔI PHÒNG (F20) ═══ -->
+<div class="modal-overlay" id="change-room-modal">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header">
+      <h3><img src="../Public/icon/room.png">Đổi phòng — F20</h3>
+      <button class="modal-close" onclick="closeModal('change-room-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="cr-info" class="alert alert-info" style="font-size:.84rem;margin-bottom:14px"></div>
+      <div id="cr-alert"></div>
+      <div class="form-group">
+        <label>Loại phòng mới *</label>
+        <select class="form-control" id="cr-new-room" onchange="updateChangeRoomPreview()">
+          <option value="">-- Chọn loại phòng mới --</option>
+          <option value="R001">Standard — 800,000đ/đêm</option>
+          <option value="R002">Deluxe — 1,200,000đ/đêm</option>
+          <option value="R003">Suite — 2,500,000đ/đêm</option>
+          <option value="R004">Family — 1,800,000đ/đêm</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Lý do đổi phòng *</label>
+        <select class="form-control" id="cr-reason" onchange="checkHotelFault()">
+          <option value="noise">Tiếng ồn, ảnh hưởng giấc ngủ</option>
+          <option value="smell">Mùi lạ trong phòng</option>
+          <option value="equipment">Thiết bị hỏng (điều hòa, TV...)</option>
+          <option value="upgrade">Nâng hạng — khách yêu cầu và chấp nhận trả thêm</option>
+          <option value="hotel_error">Lỗi khách sạn — đổi phòng không thu thêm phí</option>
+          <option value="other">Lý do khác</option>
+        </select>
+      </div>
+      <div id="cr-price-diff" style="background:var(--cream2);padding:12px;border-radius:8px;font-size:.84rem;margin-top:8px;display:none"></div>
+      <div id="cr-hotel-fault-note" class="alert alert-warning mt-8" style="font-size:.8rem;display:none">
+        Đổi phòng do lỗi khách sạn: Nếu nâng hạng phòng sẽ không tính thêm phí chênh lệch.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('change-room-modal')">Hủy</button>
+      <button class="btn btn-primary btn-sm" id="cr-confirm-btn">Xác nhận đổi phòng</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ HÓA ĐƠN ═══ -->
+<div class="modal-overlay" id="invoice-modal">
+  <div class="modal" style="max-width:620px">
+    <div class="modal-header">
+      <h3><img src="../Public/icon/invoice.png">Hóa đơn chi tiết</h3>
+      <button class="modal-close" onclick="closeModal('invoice-modal')">×</button>
+    </div>
+    <div class="modal-body" id="invoice-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('invoice-modal')">Đóng</button>
+      <button class="btn btn-primary btn-sm" onclick="window.print()">
+        <img src="../Public/icon/printer.png"> In hóa đơn
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/data.js"></script>
+<script src="js/admin.js"></script>
+<script>
+AdminAuth.require();
+renderSidebar('bookings');
+startClock();
+
+document.getElementById('nb-checkin').value  = todayStr();
+document.getElementById('nb-checkout').value = tomorrowStr();
+
+/* ── Stats ── */
+function renderStats() {
+  const bks = KSAN.getBookings();
+  const today = todayStr();
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card green">
+      <div class="stat-label">Tổng đặt phòng</div>
+      <div class="stat-value">${bks.length}</div>
+      <div class="stat-sub">Trong hệ thống</div>
+    </div>
+    <div class="stat-card medium">
+      <div class="stat-label">Đang lưu trú</div>
+      <div class="stat-value" style="color:#1565c0">${bks.filter(b=>b.status==='checked_in').length}</div>
+      <div class="stat-sub">Phòng có khách</div>
+    </div>
+    <div class="stat-card warn">
+      <div class="stat-label">Check-in hôm nay</div>
+      <div class="stat-value" style="color:var(--warn)">${bks.filter(b=>b.checkIn===today && b.status==='confirmed').length}</div>
+      <div class="stat-sub">Chờ nhận phòng</div>
+    </div>
+    <div class="stat-card danger">
+      <div class="stat-label">Check-out hôm nay</div>
+      <div class="stat-value" style="color:var(--danger)">${bks.filter(b=>b.checkOut===today && b.status==='checked_in').length}</div>
+      <div class="stat-sub">Chờ trả phòng</div>
+    </div>`;
+}
+
+/* ── Filter ── */
+function applyFilter() {
+  const search = document.getElementById('f-search').value.toLowerCase().trim();
+  const status = document.getElementById('f-status').value;
+  const type   = document.getElementById('f-type').value;
+  const date   = document.getElementById('f-date').value;
+  currentBookings = KSAN.getBookings()
+    .sort((a,b) => new Date(b.createdAt)-new Date(a.createdAt))
+    .filter(b => {
+      if (status && b.status !== status) return false;
+      if (type   && b.roomId !== type)   return false;
+      if (date   && b.checkIn < date)    return false;
+      if (search && !`${b.id} ${b.guestName} ${b.guestPhone} ${b.guestEmail}`.toLowerCase().includes(search)) return false;
+      return true;
+    }).slice(0, 50);
+  renderTable();
+}
+function clearFilter() {
+  ['f-search','f-date'].forEach(id => document.getElementById(id).value='');
+  ['f-status','f-type'].forEach(id => document.getElementById(id).value='');
+  applyFilter();
+}
+
+let currentBookings = [];
+function renderTable() {
+  const tbody = document.getElementById('bookings-tbody');
+  document.getElementById('booking-count').textContent = `${currentBookings.length} đặt phòng`;
+  if (!currentBookings.length) {
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:32px;color:var(--text-sm)">Không tìm thấy đặt phòng nào.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = currentBookings.map(b => {
+    const room    = KSAN.ROOMS.find(r => r.id === b.roomId);
+    const today   = todayStr();
+    const svcs    = getBookingServices(b.id);
+
+    // Xác định hành động có thể làm
+    const canCheckin      = b.status === 'confirmed' && b.checkIn <= today;
+    const canCheckout     = b.status === 'checked_in';
+    const isCleaning      = b.status === 'cleaning';
+    const pendingPayment  = b.status === 'checkout_pending';
+    const canEdit         = ['confirmed','checked_in'].includes(b.status);
+    const canCancel       = b.status === 'confirmed';
+    const isActive        = ['checked_in','cleaning','checkout_pending'].includes(b.status);
+
+    // Nút nổi bật
+    let prominentBtn = '';
+    if (canCheckin)    prominentBtn = `<button class="quick-ci" onclick="openCheckin('${b.id}')">Check-in</button>`;
+    if (canCheckout)   prominentBtn = `<button class="quick-co" onclick="doInitiateCheckout('${b.id}')">Trả phòng</button>`;
+    if (isCleaning)    prominentBtn = `<button class="quick-co" disabled style="background:#92400e;opacity:.8;cursor:default">
+      Đang dọn: ${b.assignedCleaner||'—'}</button>`;
+    if (pendingPayment) prominentBtn = `<button class="quick-co" onclick="openFinalPayment('${b.id}')" style="background:#c2410c">
+      Thu tiền & Hoàn tất</button>`;
+
+    // Menu thao tác khác
+    const menuItems = [
+      { label: 'Xem hóa đơn',       action: `openInvoice('${b.id}')`, always: true },
+      { label: 'Chỉnh sửa thông tin', action: `openEditBooking('${b.id}')`, show: canEdit },
+      { label: '—', divider: true, show: isActive },
+      { label: 'Ghi nhận dịch vụ thêm', action: `openAddService('${b.id}')`, show: isActive },
+      { label: 'Gia hạn lưu trú',     action: `openExtend('${b.id}')`,      show: isActive },
+      { label: 'Đổi phòng',           action: `openChangeRoom('${b.id}')`,   show: isActive },
+      { label: '—', divider: true, show: canCancel },
+      { label: 'Hủy đặt phòng',       action: `openCancelBooking('${b.id}')`, show: canCancel, danger: true },
+    ].filter(m => m.always || m.show);
+
+    return `<tr>
+      <td><code style="font-size:.72rem;background:var(--cream2);padding:2px 6px;border-radius:4px">${b.id}</code></td>
+      <td>
+        <div style="font-weight:600;font-size:.84rem">${b.guestName}</div>
+        <div style="font-size:.72rem;color:var(--text-sm)">${b.guestPhone}</div>
+        ${svcs.length ? `<div style="margin-top:3px">${svcs.slice(0,2).map(s=>`<span class="svc-tag">${s.serviceName}</span>`).join('')}${svcs.length>2?`<span class="svc-tag">+${svcs.length-2}</span>`:''}</div>` : ''}
+      </td>
+      <td>
+        <div style="font-weight:600;font-size:.84rem">${room?.name || b.roomId}</div>
+        <div style="font-size:.72rem;color:var(--text-sm)">${b.guests} khách · ${b.nights} đêm</div>
+      </td>
+      <td style="font-weight:600;color:var(--dark)">${b.assignedRoomNumber || '<span style="color:var(--text-sm);font-weight:400">Chưa gán</span>'}</td>
+      <td style="font-size:.83rem">${formatDate(b.checkIn)}</td>
+      <td style="font-size:.83rem">${formatDate(b.checkOut)}</td>
+      <td class="td-center"><strong>${b.nights}</strong></td>
+      <td>
+        <div style="font-size:.83rem;font-weight:600;color:var(--dark)">${formatCurrency(b.totalPrice)}</div>
+        <div style="font-size:.7rem;color:var(--text-sm)">Cọc: ${formatCurrency(b.deposit)}</div>
+      </td>
+      <td>${statusBadge(b.status)}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          ${prominentBtn}
+          <div class="action-menu" id="menu-${b.id}">
+            <button class="action-menu-btn" onclick="toggleMenu('${b.id}')">
+              Thao tác ▾
+            </button>
+            <div class="action-menu-dropdown">
+              ${menuItems.map(m => m.divider
+                ? `<div class="action-divider"></div>`
+                : `<button class="action-item ${m.danger?'danger':''}" onclick="closeAllMenus();${m.action}">${m.label}</button>`
+              ).join('')}
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── Dropdown menu ── */
+function toggleMenu(id) {
+  const menu = document.getElementById('menu-' + id);
+  const isOpen = menu.classList.contains('open');
+  closeAllMenus();
+  if (!isOpen) menu.classList.add('open');
+}
+function closeAllMenus() {
+  document.querySelectorAll('.action-menu.open').forEach(m => m.classList.remove('open'));
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.action-menu')) closeAllMenus();
+});
+
+/* ── CHECK-IN ── */
+let currentBookingId = null;
+function openCheckin(id) {
+  const b = KSAN.getBookingById(id);
+  if (!b) return;
+  currentBookingId = id;
+  const room = KSAN.ROOMS.find(r=>r.id===b.roomId);
+  const remaining = b.totalPrice - b.deposit;
+
+  document.getElementById('ci-booking-info').innerHTML = `
+    <strong>${b.guestName}</strong> · ${b.guestPhone} ·
+    Phòng: <strong>${room?.name}</strong> · ${b.nights} đêm ·
+    Check-in: <strong>${formatDate(b.checkIn)}</strong> → Check-out: <strong>${formatDate(b.checkOut)}</strong>`;
+
+  document.getElementById('ci-cccd').value    = b.guestCCCD || '';
+  document.getElementById('ci-guests').value  = b.guests;
+  document.getElementById('ci-keycard').value = '';
+  document.getElementById('ci-notes').value   = b.specialReq || '';
+  document.getElementById('ci-alert').innerHTML = '';
+
+  // Hiển thị số tiền cần thu
+  document.getElementById('ci-total-show').textContent   = formatCurrency(b.totalPrice);
+  document.getElementById('ci-deposit-show').textContent = formatCurrency(b.deposit);
+  document.getElementById('ci-remaining-show').textContent = formatCurrency(remaining);
+  document.getElementById('ci-remaining-badge').textContent = remaining > 0 ? `Cần thu: ${formatCurrency(remaining)}` : 'Đã thanh toán đủ';
+  document.getElementById('ci-remaining-badge').className  = `badge ${remaining > 0 ? 'badge-noshow' : 'badge-confirmed'}`;
+
+  // Ẩn/hiện warning extra guests
+  document.getElementById('ci-extra-guest-warn').style.display = 'none';
+
+  // Theo dõi extra guests
+  document.getElementById('ci-guests').addEventListener('change', function() {
+    const actual = parseInt(this.value);
+    const max    = room?.capacity || 4;
+    const warn   = document.getElementById('ci-extra-guest-warn');
+    if (actual > max) {
+      warn.style.display = 'block';
+      warn.innerHTML = `<img src="../Public/icon/crisis.png" style="height:13px;vertical-align:middle;margin-right:4px">
+        <strong>Cảnh báo:</strong> ${actual} khách vượt quá sức chứa tối đa của phòng (${max} khách).
+        Cần phê duyệt từ Quản lý hoặc đổi sang phòng có sức chứa lớn hơn.`;
+    } else { warn.style.display = 'none'; }
+  }, { once: false });
+
+  // Load phòng trống
+  const available = getAvailableRoomNumbers(b.roomId, b.checkIn, b.checkOut);
+  const sel = document.getElementById('ci-room-number');
+  sel.innerHTML = '<option value="">-- Chọn số phòng --</option>' +
+    available.map(r => `<option value="${r.number}">Phòng ${r.number} (Tầng ${r.floor})</option>`).join('');
+
+  openModal('checkin-modal');
+}
+
+document.getElementById('ci-confirm-btn').addEventListener('click', () => {
+  const cccd    = document.getElementById('ci-cccd').value.trim();
+  const roomNum = document.getElementById('ci-room-number').value;
+  const actual  = parseInt(document.getElementById('ci-guests').value);
+  const b       = KSAN.getBookingById(currentBookingId);
+  const room    = KSAN.ROOMS.find(r=>r.id===b.roomId);
+
+  if (!cccd)    { document.getElementById('ci-alert').innerHTML='<div class="alert alert-danger">Vui lòng nhập số CCCD / Hộ chiếu.</div>'; return; }
+  if (!roomNum) { document.getElementById('ci-alert').innerHTML='<div class="alert alert-danger">Vui lòng chọn số phòng cụ thể.</div>'; return; }
+  if (actual > (room?.capacity||4)) {
+    if (!confirm(`${actual} khách vượt sức chứa (${room?.capacity} khách). Xác nhận vẫn nhận phòng?`)) return;
+  }
+
+  const res = performCheckIn(currentBookingId, cccd, actual,
+    document.getElementById('ci-notes').value, roomNum);
+  if (!res.ok) { document.getElementById('ci-alert').innerHTML=`<div class="alert alert-danger">${res.msg}</div>`; return; }
+
+  // Ghi nhận thanh toán tiền còn lại
+  const bks = KSAN.getBookings();
+  const idx = bks.findIndex(x=>x.id===currentBookingId);
+  if (idx>=0) {
+    bks[idx].checkinPaymentMethod = document.getElementById('ci-payment-method').value;
+    bks[idx].checkinPaid = b.totalPrice - b.deposit;
+    KSAN.saveBookings(bks);
+  }
+
+  closeModal('checkin-modal');
+  const remaining = b.totalPrice - b.deposit;
+  showToast(`Check-in thành công! Phòng ${roomNum}${remaining>0?' — Đã thu '+formatCurrency(remaining):''}`, 'success');
+  renderStats(); applyFilter();
+});
+
+/* ══════════════════════════════
+   CHECKOUT FLOW
+══════════════════════════════ */
+
+/* Bước 1: Lễ tân nhấn "Trả phòng" → giao nhân viên dọn */
+function doInitiateCheckout(id) {
+  const b = KSAN.getBookingById(id);
+  const msg = `Xác nhận trả phòng cho khách "${b.guestName}"?\nPhòng ${b.assignedRoomNumber||''} sẽ được giao cho nhân viên buồng phòng kiểm tra.`;
+  if (!confirm(msg)) return;
+  const updated = initiateCheckout(id);
+  showToast(`Đã giao phòng ${updated.assignedRoomNumber||''} cho ${updated.assignedCleaner} kiểm tra.`, 'success');
+  renderStats(); applyFilter();
+}
+
+/* Bước 3: Thu tiền phát sinh sau khi kiểm tra xong */
+function openFinalPayment(id) {
+  currentBookingId = id;
+  const b    = KSAN.getBookingById(id);
+  const room = KSAN.ROOMS.find(r=>r.id===b.roomId);
+  const svcs = getBookingServices(id);
+  const damages = b.inspectionDamages || [];
+
+  // Late fee check
+  const now  = new Date();
+  const sch  = new Date(b.checkOut + 'T12:00:00');
+  const diffH = (now - sch) / 36e5;
+  const ppn   = b.totalPrice / b.nights;
+  let lateCharge = 0;
+  if (diffH > 6)      lateCharge = Math.round(ppn);
+  else if (diffH > 3) lateCharge = Math.round(ppn*0.5);
+  else if (diffH > 1) lateCharge = Math.round(ppn*0.3);
+
+  const svcTotal = svcs.reduce((s,o)=>s+o.totalPrice,0);
+  const dmgTotal = damages.reduce((s,d)=>s+d.amount,0);
+  const total    = svcTotal + dmgTotal + lateCharge;
+
+  document.getElementById('fp-content').innerHTML = `
+    <div class="alert alert-info" style="font-size:.83rem;margin-bottom:14px">
+      <strong>${b.guestName}</strong> — Phòng ${b.assignedRoomNumber||''} ${room?.name}<br>
+      Kiểm tra bởi: <strong>${b.assignedCleaner||'—'}</strong> lúc ${formatDateTime(b.inspectionCompleted)}
+    </div>
+    <div class="alert alert-success" style="font-size:.82rem;margin-bottom:14px">
+      Tiền phòng <strong>${formatCurrency(b.totalPrice)}</strong> đã thu tại check-in.
+    </div>
+
+    <!-- Dịch vụ -->
+    ${svcs.length ? `
+    <div style="margin-bottom:12px">
+      <div style="font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--dark);margin-bottom:7px">
+        Dịch vụ đã sử dụng (${svcs.length} khoản)
+      </div>
+      ${svcs.map(s=>`<div style="display:flex;justify-content:space-between;font-size:.82rem;padding:5px 0;border-bottom:1px solid var(--border)">
+        <span>${s.serviceName} · ${formatDate(s.date)}</span>
+        <strong>${s.totalPrice>0?formatCurrency(s.totalPrice):'Miễn phí'}</strong>
+      </div>`).join('')}
+    </div>` : ''}
+
+    <!-- Hư hỏng -->
+    ${damages.length ? `
+    <div style="margin-bottom:12px">
+      <div style="font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--danger);margin-bottom:7px">
+        Hư hỏng ghi nhận (${damages.length} khoản)
+      </div>
+      ${damages.map(d=>`
+        <div style="border:1px solid #fecaca;border-radius:7px;padding:8px 10px;margin-bottom:6px;background:#fef5f5">
+          <div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:4px">
+            <strong>${d.name}</strong>
+            <strong style="color:var(--danger)">${formatCurrency(d.amount)}</strong>
+          </div>
+          ${d.desc?`<div style="font-size:.75rem;color:var(--text-sm)">${d.desc}</div>`:''}
+          ${d.photoCount?`<div style="font-size:.72rem;color:var(--medium);margin-top:3px">${d.photoCount} ảnh đã tải lên</div>`:''}
+        </div>`).join('')}
+    </div>` : `<div class="alert alert-success" style="font-size:.82rem;margin-bottom:12px">
+      Không có hư hỏng tài sản.
+    </div>`}
+
+    ${lateCharge>0?`<div style="background:#fef9c3;padding:10px;border-radius:7px;margin-bottom:12px;font-size:.82rem;display:flex;justify-content:space-between">
+      <span>Phụ thu trả trễ (${diffH.toFixed(1)}h)</span><strong>${formatCurrency(lateCharge)}</strong>
+    </div>`:''}
+
+    <!-- Tổng -->
+    <div style="background:var(--cream2);padding:14px;border-radius:10px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;font-weight:700;font-size:1.05rem;color:var(--dark)">
+        <span>Tổng phát sinh cần thu</span>
+        <span style="font-size:1.2rem;color:${total>0?'var(--danger)':'#2e7d32'}">${total>0?formatCurrency(total):'Không có'}</span>
+      </div>
+    </div>
+
+    <div class="form-group" style="margin:0">
+      <label>Phương thức thanh toán</label>
+      <select class="form-control" id="fp-payment">
+        <option value="cash">Tiền mặt</option>
+        <option value="card">Thẻ ngân hàng / Visa</option>
+        <option value="momo">Ví MoMo</option>
+        <option value="zalopay">ZaloPay / VNPay</option>
+      </select>
+    </div>`;
+
+  openModal('final-payment-modal');
+}
+
+document.getElementById('fp-confirm-btn').addEventListener('click', () => {
+  const payMethod = document.getElementById('fp-payment').value;
+  const res = finalizeCheckout(currentBookingId, payMethod);
+  if (!res.ok) { showToast(res.msg, 'error'); return; }
+  closeModal('final-payment-modal');
+  showToast('Check-out hoàn tất! Phòng chuyển sang "Trống".', 'success');
+  renderStats(); applyFilter();
+});
+let extraChargesList = [];
+let damageItemsList  = [];
+let coCurrentStep    = 1;
+
+function coGoStep(n) {
+  coCurrentStep = n;
+  [1,2,3].forEach(i => {
+    document.getElementById('co-step-'+i).classList.toggle('active', i===n);
+    const cstep = document.getElementById('cstep-'+i);
+    cstep.classList.remove('active','done');
+    if (i < n) cstep.classList.add('done');
+    if (i === n) cstep.classList.add('active');
+  });
+  document.getElementById('co-back-btn').style.display    = n > 1 ? 'inline-flex' : 'none';
+  document.getElementById('co-next-btn').style.display    = n < 3 ? 'inline-flex' : 'none';
+  document.getElementById('co-confirm-btn').style.display = n === 3 ? 'inline-flex' : 'none';
+  if (n === 2) buildStep2();
+  if (n === 3) buildStep3();
+}
+
+function coNextStep() { coGoStep(coCurrentStep + 1); }
+
+function openCheckout(id) {
+  const b = KSAN.getBookingById(id);
+  if (!b) return;
+  currentBookingId = id;
+  extraChargesList = [];
+  damageItemsList  = [];
+  document.getElementById('co-alert').innerHTML = '';
+
+  // Kích hoạt "Đang kiểm tra" nếu chưa
+  if (b.status === 'checked_in') initiateCheckout(id);
+  const updated = KSAN.getBookingById(id);
+
+  const room = KSAN.ROOMS.find(r=>r.id===b.roomId);
+  document.getElementById('co-booking-info').innerHTML = `
+    <strong>${b.guestName}</strong> — Phòng <strong>${b.assignedRoomNumber||''} ${room?.name}</strong><br>
+    Check-out dự kiến: <strong>${formatDate(b.checkOut)} 12:00</strong> ·
+    Check-in thực tế: <strong>${formatDateTime(b.actualCheckIn)}</strong>`;
+
+  document.getElementById('co-inspector-name').textContent = updated.inspector || assignInspector(b.assignedRoomNumber||'1');
+  document.getElementById('co-room-paid').textContent = formatCurrency(b.totalPrice);
+
+  // Build inspection checklist (step 1)
+  buildInspectionChecklist();
+
+  coGoStep(1);
+  openModal('checkout-modal');
+}
+
+/* ── Checklist kiểm tra phòng ── */
+function buildInspectionChecklist() {
+  const list = document.getElementById('insp-checklist');
+  list.innerHTML = INSPECTION_ITEMS.map(item => `
+    <div class="insp-item" id="insp-${item.id}">
+      <div class="insp-item-header" onclick="toggleDamage('${item.id}')">
+        <input type="checkbox" id="dmg-check-${item.id}" style="accent-color:var(--danger);flex-shrink:0"
+          onclick="event.stopPropagation();toggleDamage('${item.id}',this.checked)">
+        <div style="flex:1">
+          <div style="font-size:.84rem;font-weight:600">${item.name}</div>
+          <div style="font-size:.72rem;color:var(--text-sm)">${item.category} · Giá gốc: ${item.price>0?formatCurrency(item.price):'Nhập thủ công'}</div>
+        </div>
+        <span class="badge badge-confirmed" id="insp-status-${item.id}">Bình thường</span>
+      </div>
+      <div class="insp-item-body" id="insp-body-${item.id}">
+        <div class="form-row2" style="margin-bottom:10px">
+          <div class="form-group" style="margin:0">
+            <label>Mức độ hư hỏng</label>
+            <select class="form-control" id="insp-level-${item.id}" onchange="updateItemPrice('${item.id}')">
+              <option value="minor">Nhẹ (25% giá)</option>
+              <option value="moderate" selected>Vừa (50% giá)</option>
+              <option value="severe">Nặng (100% giá)</option>
+              <option value="missing">Mất / Cần thay mới (100%)</option>
+              <option value="custom">Nhập giá thủ công</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0">
+            <label>Chi phí bồi thường (VNĐ)</label>
+            <input type="number" class="form-control" id="insp-price-${item.id}"
+              value="${Math.round(item.price*0.5)}" onchange="syncDamageItem('${item.id}')">
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:10px">
+          <label>Mô tả hư hỏng</label>
+          <input type="text" class="form-control" id="insp-desc-${item.id}" placeholder="Mô tả cụ thể...">
+        </div>
+        <!-- Photo upload -->
+        <div class="photo-upload-area" onclick="document.getElementById('photo-file-${item.id}').click()">
+          <input type="file" id="photo-file-${item.id}" accept="image/*" multiple style="display:none"
+            onchange="previewPhotos('${item.id}',this)">
+          <img src="../Public/icon/view.png" style="height:20px;opacity:.4;margin:0 auto 6px">
+          <div style="font-size:.78rem;color:var(--text-sm)">Nhấn để tải ảnh hư hỏng lên</div>
+          <div class="photo-preview" id="photo-preview-${item.id}"></div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleDamage(itemId, checked) {
+  const tile  = document.getElementById('insp-'+itemId);
+  const cb    = document.getElementById('dmg-check-'+itemId);
+  const isDmg = checked !== undefined ? checked : !cb.checked;
+  if (checked === undefined) cb.checked = isDmg;
+  tile.classList.toggle('damaged', isDmg);
+  document.getElementById('insp-status-'+itemId).textContent = isDmg ? 'Hư hỏng' : 'Bình thường';
+  document.getElementById('insp-status-'+itemId).className = `badge ${isDmg?'badge-cancelled':'badge-confirmed'}`;
+  if (isDmg) syncDamageItem(itemId);
+  else {
+    damageItemsList = damageItemsList.filter(d=>d.id!==itemId);
+  }
+}
+
+function updateItemPrice(itemId) {
+  const item  = INSPECTION_ITEMS.find(i=>i.id===itemId);
+  const level = document.getElementById('insp-level-'+itemId).value;
+  const base  = item.price;
+  let price   = base;
+  if (level==='minor')    price = Math.round(base*0.25);
+  if (level==='moderate') price = Math.round(base*0.5);
+  if (level==='severe' || level==='missing') price = base;
+  if (level==='custom') { document.getElementById('insp-price-'+itemId).focus(); return; }
+  document.getElementById('insp-price-'+itemId).value = price;
+  syncDamageItem(itemId);
+}
+
+function syncDamageItem(itemId) {
+  const item  = INSPECTION_ITEMS.find(i=>i.id===itemId);
+  const price = parseInt(document.getElementById('insp-price-'+itemId).value||0);
+  const desc  = document.getElementById('insp-desc-'+itemId).value || item.name;
+  damageItemsList = damageItemsList.filter(d=>d.id!==itemId);
+  if (document.getElementById('dmg-check-'+itemId).checked) {
+    damageItemsList.push({ id:itemId, name:item.name, desc, amount:price });
+  }
+}
+
+function previewPhotos(itemId, input) {
+  const preview = document.getElementById('photo-preview-'+itemId);
+  preview.innerHTML = '';
+  Array.from(input.files).slice(0,4).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.className = 'photo-thumb';
+      img.title = file.name;
+      preview.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  });
+  toggleDamage(itemId, true);
+}
+
+/* ── Build step 2 (chi phí phát sinh) ── */
+function buildStep2() {
+  const b = KSAN.getBookingById(currentBookingId);
+  const svcs = getBookingServices(currentBookingId);
+  document.getElementById('co-svc-count').textContent = `${svcs.length} dịch vụ`;
+  document.getElementById('co-svc-list').innerHTML = svcs.length
+    ? svcs.map(s=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:.82rem">
+        <span>${s.serviceName} · ${formatDate(s.date)} ${s.time} · ${s.quantity} lượt</span>
+        <strong>${s.totalPrice>0?formatCurrency(s.totalPrice):'Miễn phí'}</strong>
+      </div>`).join('')
+    : '<span style="color:var(--text-sm);font-size:.82rem">Không có dịch vụ nào.</span>';
+
+  document.getElementById('co-damage-count').textContent = `${damageItemsList.length} khoản`;
+  document.getElementById('co-damage-list').innerHTML = damageItemsList.length
+    ? damageItemsList.map(d=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:.82rem">
+        <span>${d.name}${d.desc&&d.desc!==d.name?' — '+d.desc:''}</span>
+        <strong style="color:var(--danger)">${formatCurrency(d.amount)}</strong>
+      </div>`).join('')
+    : '<span style="color:var(--text-sm);font-size:.82rem">Không ghi nhận hư hỏng.</span>';
+
+  // Late fee
+  const now = new Date();
+  const scheduled = new Date(b.checkOut + 'T12:00:00');
+  const diffH = (now - scheduled) / 36e5;
+  let lateCharge = 0;
+  const ppn = b.totalPrice / b.nights;
+  if (diffH > 6) lateCharge = Math.round(ppn);
+  else if (diffH > 3) lateCharge = Math.round(ppn*0.5);
+  else if (diffH > 1) lateCharge = Math.round(ppn*0.3);
+  const lateEl = document.getElementById('co-late-info');
+  if (diffH > 1) {
+    lateEl.style.display = 'block';
+    document.getElementById('co-late-text').textContent =
+      `Trả trễ ${diffH.toFixed(1)} tiếng → Phụ thu ${formatCurrency(lateCharge)}`;
+  } else lateEl.style.display = 'none';
+
+  const svcTotal = svcs.reduce((s,o)=>s+o.totalPrice, 0);
+  const dmgTotal = damageItemsList.reduce((s,d)=>s+d.amount, 0);
+  const total    = svcTotal + dmgTotal + lateCharge;
+
+  document.getElementById('co-invoice-lines').innerHTML = [
+    ...svcs.map(o=>({ label:`Dịch vụ: ${o.serviceName}`, val:o.totalPrice>0?formatCurrency(o.totalPrice):'Miễn phí' })),
+    ...damageItemsList.map(d=>({ label:`Bồi thường: ${d.name}`, val:formatCurrency(d.amount), danger:true })),
+    ...(lateCharge>0?[{ label:`Phụ thu trễ (${diffH.toFixed(1)}h)`, val:formatCurrency(lateCharge), warn:true }]:[]),
+  ].map(l=>`<div style="display:flex;justify-content:space-between;font-size:.82rem;
+    ${l.danger?'color:var(--danger)':l.warn?'color:var(--warn)':''};padding:2px 0">
+    <span>${l.label}</span><span>${l.val}</span></div>`).join('') ||
+    `<div style="color:var(--text-sm);font-size:.82rem">Không có khoản phát sinh.</div>`;
+
+  document.getElementById('co-total-extra').textContent = formatCurrency(total);
+}
+
+/* ── Build step 3 (thanh toán) ── */
+function buildStep3() {
+  const b = KSAN.getBookingById(currentBookingId);
+  const svcs = getBookingServices(currentBookingId);
+  const svcTotal = svcs.reduce((s,o)=>s+o.totalPrice, 0);
+  const dmgTotal = damageItemsList.reduce((s,d)=>s+d.amount, 0);
+  const total    = svcTotal + dmgTotal;
+  document.getElementById('co-final-summary').innerHTML = `
+    <div style="font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--dark);margin-bottom:10px">Xác nhận thanh toán</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.84rem;margin-bottom:12px">
+      <div><span style="color:var(--text-sm)">Khách:</span> <strong>${b.guestName}</strong></div>
+      <div><span style="color:var(--text-sm)">Phòng:</span> <strong>${b.assignedRoomNumber||''}${KSAN.ROOMS.find(r=>r.id===b.roomId)?.name}</strong></div>
+      <div><span style="color:var(--text-sm)">Tiền phòng (đã thu):</span> <span style="color:#2e7d32">${formatCurrency(b.totalPrice)}</span></div>
+      <div><span style="color:var(--text-sm)">Phát sinh cần thu:</span> <strong style="color:${total>0?'var(--danger)':'#2e7d32'};font-size:1rem">${total>0?formatCurrency(total):'Không có'}</strong></div>
+    </div>
+    ${damageItemsList.length?`<div style="font-size:.78rem;color:var(--text-sm)">Hư hỏng: ${damageItemsList.map(d=>d.name).join(', ')}</div>`:''}`;
+}
+
+/* ── Confirm checkout ── */
+document.getElementById('co-confirm-btn').addEventListener('click', () => {
+  // Save damage items as extra charges
+  const res = performCheckOut(currentBookingId, damageItemsList);
+  if (!res.ok) { document.getElementById('co-alert').innerHTML=`<div class="alert alert-danger">${res.msg}</div>`; coGoStep(1); return; }
+
+  // Save inspection result
+  saveInspection(currentBookingId, { damageItems: damageItemsList, inspector: document.getElementById('co-inspector-name').textContent });
+
+  closeModal('checkout-modal');
+  const dmgTotal = damageItemsList.reduce((s,d)=>s+d.amount,0);
+  showToast(`Check-out thành công!${dmgTotal>0?' Thu phát sinh '+formatCurrency(dmgTotal)+'.':''} Phòng → "Đang dọn".`, 'success');
+  renderStats(); applyFilter();
+});
+
+/* ── HỦY ĐẶT PHÒNG ── */
+function openCancelBooking(id) {
+  currentBookingId = id;
+  const b = KSAN.getBookingById(id);
+  document.getElementById('cb-booking-info').innerHTML =
+    `<strong>${b.guestName}</strong> · Phòng ${KSAN.ROOMS.find(r=>r.id===b.roomId)?.name} ·
+    Check-in: ${formatDate(b.checkIn)} · Tiền cọc đã thu: <strong>${formatCurrency(b.deposit)}</strong>`;
+  document.getElementById('cb-reason').value = 'guest_request';
+  document.getElementById('cb-hotel-fault-note').style.display = 'none';
+  document.getElementById('cb-note').value = '';
+  updateRefundInfo();
+  openModal('cancel-booking-modal');
+}
+
+function updateRefundInfo() {
+  const b = KSAN.getBookingById(currentBookingId);
+  if (!b) return;
+  const reason = document.getElementById('cb-reason').value;
+  const hotelFault = reason === 'hotel_error' || reason === 'overbooking';
+  document.getElementById('cb-hotel-fault-note').style.display = hotelFault ? 'block' : 'none';
+
+  let { penaltyPct, penalty, refund } = calcCancelRefund(b);
+  if (hotelFault) { penalty = 0; refund = b.deposit; penaltyPct = 0; }
+
+  const cinDate = new Date(b.checkIn);
+  const now = new Date();
+  const diffH = (cinDate - now) / 36e5;
+  const timeLabel = diffH < 0 ? 'Đã qua ngày check-in' : diffH < 24 ? `Còn ${diffH.toFixed(1)} tiếng` : `Còn ${(diffH/24).toFixed(1)} ngày`;
+
+  document.getElementById('cb-refund-info').innerHTML = `
+    <div style="background:var(--cream2);padding:14px;border-radius:10px;font-size:.84rem">
+      <div style="font-weight:700;color:var(--dark);margin-bottom:10px">Chính sách hoàn tiền</div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="display:flex;justify-content:space-between">
+          <span>Thời gian đến check-in:</span><strong>${timeLabel}</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between">
+          <span>Tiền cọc đã thu:</span><strong>${formatCurrency(b.deposit)}</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;color:var(--danger)">
+          <span>Phí hủy (${hotelFault?0:penaltyPct}%):</span><strong>− ${formatCurrency(penalty)}</strong>
+        </div>
+        <hr style="border-color:var(--border);margin:2px 0">
+        <div style="display:flex;justify-content:space-between;font-weight:700;font-size:.95rem;color:${refund>0?'#2e7d32':'var(--danger)'}">
+          <span>Hoàn tiền cho khách:</span><strong>${formatCurrency(refund)}</strong>
+        </div>
+        ${refund>0 ? `<div style="color:#2e7d32;font-size:.78rem">Hoàn tiền trong vòng 3–5 ngày làm việc qua phương thức thanh toán ban đầu.</div>` :
+          `<div style="color:var(--danger);font-size:.78rem">Không hoàn tiền theo chính sách hủy phòng.</div>`}
+      </div>
+    </div>`;
+}
+
+document.getElementById('cb-confirm-btn').addEventListener('click', () => {
+  const res = KSAN.cancelBooking(currentBookingId);
+  closeModal('cancel-booking-modal');
+  if (res.ok) {
+    const msg = res.refund > 0
+      ? `Đã hủy đặt phòng. Hoàn tiền ${formatCurrency(res.refund)} trong 3–5 ngày.`
+      : `Đã hủy đặt phòng. Tiền cọc không được hoàn.`;
+    showToast(msg, res.refund > 0 ? 'success' : 'warning', 5000);
+  } else showToast(res.msg, 'error');
+  renderStats(); applyFilter();
+});
+
+/* ── HÓA ĐƠN ── */
+function openInvoice(id) {
+  const b    = KSAN.getBookingById(id);
+  const room = KSAN.ROOMS.find(r => r.id === b.roomId);
+  const svcs = getBookingServices(id);
+  const svcTotal = svcs.reduce((s,o) => s + o.totalPrice, 0);
+  const extraCharges = b.extraCharges || [];
+  const extraTotal   = extraCharges.reduce((s,c) => s + c.amount, 0);
+  const grandTotal   = b.totalPrice + svcTotal + extraTotal;
+
+  document.getElementById('invoice-body').innerHTML = `
+    <div style="text-align:center;padding:14px 0 10px">
+      <img src="../Public/logo KS.png" style="height:50px;margin:0 auto 8px">
+      <div style="font-size:.72rem;color:var(--text-sm)">123 Nguyễn Huệ, Q.1, TP.HCM · (028) 1234 5678</div>
+      <div style="font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-top:6px;font-size:.9rem">Hóa đơn lưu trú</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;background:var(--cream2);padding:12px;border-radius:8px;margin:10px 0;font-size:.8rem">
+      <div><span style="color:var(--text-sm)">Mã HĐ:</span> <strong>${b.id}</strong></div>
+      <div><span style="color:var(--text-sm)">Ngày:</span> <strong>${formatDate(new Date().toISOString())}</strong></div>
+      <div><span style="color:var(--text-sm)">Khách:</span> <strong>${b.guestName}</strong></div>
+      <div><span style="color:var(--text-sm)">SĐT:</span> <strong>${b.guestPhone}</strong></div>
+      ${b.assignedRoomNumber ? `<div><span style="color:var(--text-sm)">Số phòng:</span> <strong>${b.assignedRoomNumber}</strong></div>` : ''}
+      ${b.actualCheckIn ? `<div><span style="color:var(--text-sm)">Check-in thực tế:</span> <strong>${formatDateTime(b.actualCheckIn)}</strong></div>` : ''}
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:.8rem;margin-bottom:10px">
+      <thead><tr style="background:var(--dark);color:var(--cream)">
+        <th style="padding:8px 10px;text-align:left;border-radius:6px 0 0 0">Khoản mục</th>
+        <th style="padding:8px;text-align:center">SL</th>
+        <th style="padding:8px 10px;text-align:right;border-radius:0 6px 0 0">Thành tiền</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:8px 10px">${room?.name} (${formatCurrency(room?.price)}/đêm)</td>
+          <td style="padding:8px;text-align:center">${b.nights} đêm</td>
+          <td style="padding:8px 10px;text-align:right">${formatCurrency(b.basePrice)}</td>
+        </tr>
+        ${b.discount>0?`<tr style="border-bottom:1px solid var(--border);color:#2e7d32">
+          <td style="padding:8px 10px">Giảm giá (${b.promoCode})</td>
+          <td style="padding:8px;text-align:center">—</td>
+          <td style="padding:8px 10px;text-align:right">−${formatCurrency(b.discount)}</td></tr>`:''}
+        ${svcs.map(o=>`<tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:8px 10px">Dịch vụ: ${o.serviceName} (${formatDate(o.date)})</td>
+          <td style="padding:8px;text-align:center">${o.quantity}</td>
+          <td style="padding:8px 10px;text-align:right">${o.totalPrice>0?formatCurrency(o.totalPrice):'Miễn phí'}</td></tr>`).join('')}
+        ${extraCharges.map(c=>`<tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:8px 10px">${c.name}</td>
+          <td style="padding:8px;text-align:center">—</td>
+          <td style="padding:8px 10px;text-align:right">${formatCurrency(c.amount)}</td></tr>`).join('')}
+        ${b.lateCharge>0?`<tr style="border-bottom:1px solid var(--border);color:var(--warn)">
+          <td style="padding:8px 10px">Phí trả phòng trễ</td>
+          <td style="padding:8px;text-align:center">—</td>
+          <td style="padding:8px 10px;text-align:right">${formatCurrency(b.lateCharge)}</td></tr>`:''}
+        <tr style="background:var(--cream2);font-weight:700">
+          <td style="padding:10px;border-radius:0 0 0 6px" colspan="2">TỔNG CỘNG</td>
+          <td style="padding:10px;text-align:right;color:var(--dark);font-size:1rem;border-radius:0 0 6px 0">${formatCurrency(grandTotal)}</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div style="background:#e6f4ea;padding:12px;border-radius:8px">
+        <div style="font-size:.68rem;color:#2e7d32;font-weight:700;text-transform:uppercase">Đã thanh toán (cọc)</div>
+        <div style="font-weight:700;font-size:1.1rem">${formatCurrency(b.deposit)}</div>
+      </div>
+      <div style="background:${grandTotal-b.deposit>0?'#fff8e1':'#e6f4ea'};padding:12px;border-radius:8px">
+        <div style="font-size:.68rem;color:${grandTotal-b.deposit>0?'var(--warn)':'#2e7d32'};font-weight:700;text-transform:uppercase">
+          ${grandTotal-b.deposit>0?'Còn lại cần thu':'Đã thanh toán đủ'}
+        </div>
+        <div style="font-weight:700;font-size:1.1rem">${formatCurrency(Math.abs(grandTotal-b.deposit))}</div>
+      </div>
+    </div>`;
+  openModal('invoice-modal');
+}
+
+/* ── TẠO BOOKING MỚI ── */
+function updateNbPrice() {
+  const roomId = document.getElementById('nb-room').value;
+  const ci = document.getElementById('nb-checkin').value;
+  const co = document.getElementById('nb-checkout').value;
+  const box = document.getElementById('nb-price-box');
+  if (!roomId || !ci || !co) { box.style.display='none'; return; }
+  const room = KSAN.ROOMS.find(r => r.id === roomId);
+  const nights = KSAN.nightsBetween(ci, co);
+  const { base, total, deposit } = KSAN.calcTotal(room, nights, null);
+  box.style.display = 'block';
+  document.getElementById('nb-price-lines').innerHTML = [
+    { l:'Giá phòng',    r:`${formatCurrency(room.price)}/đêm` },
+    { l:'Số đêm',       r:`${nights} đêm` },
+    { l:'Tổng tiền phòng', r:formatCurrency(total), bold:true },
+    { l:'Đặt cọc 30%', r:formatCurrency(deposit), green:true },
+    { l:'Còn lại khi check-in', r:formatCurrency(total-deposit) },
+  ].map(l=>`<div style="display:flex;justify-content:space-between;font-size:.83rem;${l.bold?'font-weight:700;':''}${l.green?'color:#2e7d32;':''}"><span>${l.l}</span><span>${l.r}</span></div>`).join('');
+}
+
+document.getElementById('nb-create-btn').addEventListener('click', () => {
+  const name  = document.getElementById('nb-name').value.trim();
+  const phone = document.getElementById('nb-phone').value.trim();
+  const ci    = document.getElementById('nb-checkin').value;
+  const co    = document.getElementById('nb-checkout').value;
+  const roomId= document.getElementById('nb-room').value;
+  const al    = document.getElementById('nb-alert');
+  if (!name||!phone||!ci||!co||!roomId) {
+    al.innerHTML='<div class="alert alert-danger">Vui lòng điền đầy đủ các trường bắt buộc (*).</div>'; return;
+  }
+  const room   = KSAN.ROOMS.find(r => r.id === roomId);
+  const nights = KSAN.nightsBetween(ci, co);
+  const { total, deposit } = KSAN.calcTotal(room, nights, null);
+  const booking = KSAN.createBooking({
+    customerId:'walkin', guestName:name,
+    guestEmail: document.getElementById('nb-email').value.trim(),
+    guestPhone: phone,
+    guestCCCD:  document.getElementById('nb-cccd').value.trim(),
+    roomId, roomName: room.name, roomImage: room.image,
+    checkIn:ci, checkOut:co, nights,
+    guests: parseInt(document.getElementById('nb-guests').value),
+    specialReq: document.getElementById('nb-special').value.trim(),
+    basePrice:total, discount:0, totalPrice:total, deposit,
+    paymentMethod: document.getElementById('nb-deposit-method').value
+  });
+  closeModal('new-booking-modal');
+  showToast(`Đã tạo đặt phòng ${booking.id} — ${name}`, 'success');
+  renderStats(); applyFilter();
+});
+
+/* ── CHỈNH SỬA ── */
+function openEditBooking(id) {
+  const b = KSAN.getBookingById(id);
+  document.getElementById('eb-booking-id').value = id;
+  document.getElementById('eb-name').value    = b.guestName;
+  document.getElementById('eb-phone').value   = b.guestPhone;
+  document.getElementById('eb-checkin').value = b.checkIn;
+  document.getElementById('eb-checkout').value= b.checkOut;
+  document.getElementById('eb-guests').value  = b.guests;
+  document.getElementById('eb-special').value = b.specialReq||'';
+  document.getElementById('eb-reason').value  = '';
+  document.getElementById('eb-alert').innerHTML = '';
+  openModal('edit-booking-modal');
+}
+document.getElementById('eb-save-btn').addEventListener('click', () => {
+  const id = document.getElementById('eb-booking-id').value;
+  const reason = document.getElementById('eb-reason').value.trim();
+  if (!reason) { document.getElementById('eb-alert').innerHTML='<div class="alert alert-warning">Bắt buộc ghi lý do chỉnh sửa.</div>'; return; }
+  const bks = KSAN.getBookings();
+  const idx = bks.findIndex(b => b.id === id);
+  bks[idx] = { ...bks[idx],
+    guestName: document.getElementById('eb-name').value.trim(),
+    guestPhone: document.getElementById('eb-phone').value.trim(),
+    checkIn: document.getElementById('eb-checkin').value,
+    checkOut: document.getElementById('eb-checkout').value,
+    nights: KSAN.nightsBetween(document.getElementById('eb-checkin').value, document.getElementById('eb-checkout').value),
+    guests: parseInt(document.getElementById('eb-guests').value),
+    specialReq: document.getElementById('eb-special').value.trim(),
+    lastEditReason: reason, lastEditBy: AdminAuth.current()?.name
+  };
+  KSAN.saveBookings(bks);
+  closeModal('edit-booking-modal');
+  showToast('Đã cập nhật thông tin đặt phòng.', 'success'); applyFilter();
+});
+
+/* ── THÊM DỊCH VỤ ── */
+function openAddService(id) {
+  const b = KSAN.getBookingById(id);
+  currentBookingId = id;
+  document.getElementById('as-booking-info').innerHTML =
+    `<strong>${b.guestName}</strong> — Phòng ${b.assignedRoomNumber || KSAN.ROOMS.find(r=>r.id===b.roomId)?.name}`;
+  document.getElementById('as-service').value = '';
+  document.getElementById('as-qty').value = '1';
+  document.getElementById('as-unit-price').value = '0';
+  document.getElementById('as-desc').value = '';
+  document.getElementById('as-total').textContent = '0đ';
+  openModal('add-service-modal');
+}
+function updateAsPrice() {
+  const svc = document.getElementById('as-service').value;
+  if (svc && svc.includes(':')) {
+    const up = parseInt(svc.split(':')[1]);
+    document.getElementById('as-unit-price').value = up;
+  }
+  const qty = parseInt(document.getElementById('as-qty').value||1);
+  const up  = parseInt(document.getElementById('as-unit-price').value||0);
+  document.getElementById('as-total').textContent = formatCurrency(qty * up);
+}
+document.getElementById('as-add-btn').addEventListener('click', () => {
+  const svc = document.getElementById('as-service').value;
+  if (!svc) { showToast('Vui lòng chọn loại dịch vụ.', 'warning'); return; }
+  const b   = KSAN.getBookingById(currentBookingId);
+  const qty = parseInt(document.getElementById('as-qty').value||1);
+  const up  = parseInt(document.getElementById('as-unit-price').value||0);
+  const desc= document.getElementById('as-desc').value.trim() || svc.split(':')[0];
+  KSAN.createServiceOrder({
+    bookingId: currentBookingId, customerId: b.customerId||'guest',
+    guestName: b.guestName, guestPhone: b.guestPhone, guestEmail: b.guestEmail,
+    serviceId: svc.split(':')[0], serviceName: desc,
+    serviceIcon: '../Public/icon/spa.png',
+    date: todayStr(), time: new Date().toTimeString().slice(0,5),
+    quantity: qty, unitPrice: up, notes: desc, paymentMethod: 'checkout'
+  });
+  closeModal('add-service-modal');
+  showToast(`Đã ghi nhận dịch vụ "${desc}" vào hóa đơn.`, 'success');
+  applyFilter();
+});
+
+/* ── GIA HẠN ── */
+function openExtend(id) {
+  const b = KSAN.getBookingById(id);
+  currentBookingId = id;
+  document.getElementById('ex-info').innerHTML =
+    `<strong>${b.guestName}</strong> · Check-out hiện tại: <strong>${formatDate(b.checkOut)}</strong> · ${b.nights} đêm`;
+  document.getElementById('ex-new-checkout').value = '';
+  document.getElementById('ex-new-checkout').min = b.checkOut;
+  document.getElementById('ex-hint').textContent = `Chỉ chọn ngày sau ${formatDate(b.checkOut)}`;
+  document.getElementById('ex-alert').innerHTML = '';
+  document.getElementById('ex-price-info').style.display = 'none';
+  openModal('extend-modal');
+}
+function updateExtendPreview() {
+  const b = KSAN.getBookingById(currentBookingId);
+  const newCo = document.getElementById('ex-new-checkout').value;
+  if (!b || !newCo) return;
+  const addNights = KSAN.nightsBetween(b.checkOut, newCo);
+  const room = KSAN.ROOMS.find(r => r.id === b.roomId);
+  const extraCost = room.price * addNights;
+  const el = document.getElementById('ex-price-info');
+  el.style.display = addNights > 0 ? 'block' : 'none';
+  el.innerHTML = addNights > 0
+    ? `Gia hạn thêm <strong>${addNights} đêm</strong> × ${formatCurrency(room.price)} = <strong style="color:var(--dark);font-size:1.05rem">${formatCurrency(extraCost)}</strong>`
+    : '';
+}
+document.getElementById('ex-confirm-btn').addEventListener('click', () => {
+  const newCo = document.getElementById('ex-new-checkout').value;
+  if (!newCo) { document.getElementById('ex-alert').innerHTML='<div class="alert alert-danger">Vui lòng chọn ngày mới.</div>'; return; }
+  const bks = KSAN.getBookings();
+  const idx = bks.findIndex(b => b.id === currentBookingId);
+  const b   = bks[idx];
+  const addN = KSAN.nightsBetween(b.checkOut, newCo);
+  if (addN <= 0) { document.getElementById('ex-alert').innerHTML='<div class="alert alert-danger">Ngày mới phải sau ngày trả phòng hiện tại.</div>'; return; }
+  const room = KSAN.ROOMS.find(r => r.id === b.roomId);
+  bks[idx] = { ...b, checkOut:newCo, nights:b.nights+addN, totalPrice:b.totalPrice + room.price*addN };
+  KSAN.saveBookings(bks);
+  closeModal('extend-modal');
+  showToast(`Đã gia hạn đến ${formatDate(newCo)}. Phí thêm: ${formatCurrency(room.price*addN)}`, 'success');
+  applyFilter();
+});
+
+/* ── ĐỔI PHÒNG ── */
+function openChangeRoom(id) {
+  const b = KSAN.getBookingById(id);
+  currentBookingId = id;
+  document.getElementById('cr-info').innerHTML =
+    `<strong>${b.guestName}</strong> · Phòng hiện tại: <strong>${b.assignedRoomNumber||''} — ${KSAN.ROOMS.find(r=>r.id===b.roomId)?.name}</strong>`;
+  document.getElementById('cr-new-room').value = '';
+  document.getElementById('cr-alert').innerHTML = '';
+  document.getElementById('cr-price-diff').style.display = 'none';
+  document.getElementById('cr-hotel-fault-note').style.display = 'none';
+  openModal('change-room-modal');
+}
+function updateChangeRoomPreview() {
+  const b = KSAN.getBookingById(currentBookingId);
+  const newId  = document.getElementById('cr-new-room').value;
+  if (!b||!newId) return;
+  const oldRoom = KSAN.ROOMS.find(r=>r.id===b.roomId);
+  const newRoom = KSAN.ROOMS.find(r=>r.id===newId);
+  const diff = (newRoom.price - oldRoom.price) * b.nights;
+  const el = document.getElementById('cr-price-diff');
+  el.style.display = 'block';
+  el.innerHTML = diff > 0
+    ? `Nâng hạng phòng → Phát sinh thêm <strong style="color:var(--dark)">${formatCurrency(diff)}</strong>`
+    : diff < 0 ? `Hạ hạng phòng → Hoàn lại <strong style="color:#2e7d32">${formatCurrency(Math.abs(diff))}</strong>`
+    : 'Cùng mức giá — không phát sinh thêm chi phí.';
+}
+function checkHotelFault() {
+  const val = document.getElementById('cr-reason').value;
+  document.getElementById('cr-hotel-fault-note').style.display =
+    val === 'hotel_error' ? 'block' : 'none';
+}
+document.getElementById('cr-confirm-btn').addEventListener('click', () => {
+  const newRoomId = document.getElementById('cr-new-room').value;
+  const reason    = document.getElementById('cr-reason').value;
+  if (!newRoomId) { document.getElementById('cr-alert').innerHTML='<div class="alert alert-danger">Vui lòng chọn loại phòng mới.</div>'; return; }
+  const bks = KSAN.getBookings();
+  const idx = bks.findIndex(b => b.id === currentBookingId);
+  const b   = bks[idx];
+  const newRoom  = KSAN.ROOMS.find(r => r.id === newRoomId);
+  const isHotelFault = reason === 'hotel_error';
+  const newTotal = isHotelFault && newRoom.price > KSAN.ROOMS.find(r=>r.id===b.roomId).price
+    ? b.totalPrice : newRoom.price * b.nights;
+  // Cập nhật trạng thái phòng cũ
+  if (b.assignedRoomNumber) setRoomStatus_byNumber(b.assignedRoomNumber, 'empty');
+  bks[idx] = { ...b, roomId:newRoomId, roomName:newRoom.name, roomImage:newRoom.image,
+    totalPrice:newTotal, assignedRoomNumber:null, changeRoomReason:reason };
+  KSAN.saveBookings(bks);
+  closeModal('change-room-modal');
+  showToast(`Đã đổi sang ${newRoom.name}. Cần check-in lại để chọn số phòng mới.`, 'success');
+  applyFilter();
+});
+
+/* ── Search on Enter ── */
+document.getElementById('f-search').addEventListener('keydown', e => { if(e.key==='Enter') applyFilter(); });
+
+/* ── Init ── */
+applyFilter();
+renderStats();
+</script>
+</body>
+</html>

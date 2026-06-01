@@ -1,0 +1,287 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phản hồi — KSAN Hotel</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="header">
+  <div class="container">
+    <div class="header-inner">
+      <a href="index.html" class="logo">
+        <img src="Public/logo KS.png" alt="KSAN Logo">
+      </a>
+      <nav class="nav" id="main-nav">
+        <a href="index.html">Trang chủ</a>
+        <a href="rooms.html">Phòng</a>
+        <a href="services.html">Dịch vụ</a>
+        <a href="about.html">Về chúng tôi</a>
+        <a href="travel-guide.html">Cẩm nang</a>
+        <a href="my-booking.html">Đặt phòng của tôi</a>      </nav>
+      <div class="header-actions" id="header-actions"></div>
+      <button class="mobile-toggle" id="mobile-toggle">☰</button>
+    </div>
+  </div>
+</header>
+
+<section class="page-hero">
+  <div class="container page-hero-content">
+    <h1>Gửi phản hồi</h1>
+    <div class="breadcrumb">
+      <a href="index.html">Trang chủ</a><span>›</span>
+      <span>Phản hồi</span>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container" style="max-width:760px">
+
+    <div id="success-state" class="d-none" style="text-align:center;padding:60px 20px">
+      <div class="confirm-icon" style="background:linear-gradient(135deg,var(--primary),var(--accent))"><img src="Public/icon/success.png" style="height:14px;vertical-align:middle;filter:invert(1);margin-right:4px"></div>
+      <h2 style="margin-bottom:10px">Cảm ơn bạn!</h2>
+      <p style="color:var(--text-light);max-width:400px;margin:0 auto 24px">
+        Phản hồi của bạn đã được ghi nhận. Chúng tôi sẽ cải thiện dịch vụ dựa trên góp ý của bạn.
+      </p>
+      <div id="voucher-reward" class="d-none" style="display:none">
+        <div style="background:var(--primary-pale);border:2px dashed var(--primary);border-radius:12px;padding:20px;margin:0 auto 24px;max-width:360px">
+          <p style="font-size:.82rem;color:var(--text-light);margin-bottom:8px"><img src="Public/icon/promo-code.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> Mã ưu đãi của bạn:</p>
+          <div style="display:flex;align-items:center;justify-content:center;gap:12px">
+            <code id="reward-code" style="font-size:1.3rem;font-weight:700;color:var(--primary);letter-spacing:2px"></code>
+            <button class="copy-btn" style="border-color:var(--primary);color:var(--primary)" onclick="copyText(document.getElementById('reward-code').textContent,this)">Sao chép</button>
+          </div>
+          <p id="reward-desc" style="font-size:.8rem;color:var(--text-light);margin:8px 0 0;text-align:center"></p>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;justify-content:center">
+        <a href="index.html" class="btn btn-primary">Về trang chủ</a>
+        <a href="rooms.html" class="btn btn-outline">Đặt phòng lại</a>
+      </div>
+    </div>
+
+    <div id="form-state">
+      <!-- Type selector -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px" id="type-selector">
+        <div class="feedback-type-card card" data-type="praise" style="padding:20px;text-align:center;cursor:pointer;border:2px solid var(--border);transition:all .2s" onclick="selectType('praise')">
+          <div style="margin-bottom:8px"><img src="Public/icon/success.png" style="height:40px;vertical-align:middle"></div>
+          <div style="font-weight:700;font-size:.9rem">Khen ngợi</div>
+          <div style="font-size:.78rem;color:var(--text-light);margin-top:4px">Trải nghiệm tuyệt vời</div>
+        </div>
+        <div class="feedback-type-card card" data-type="suggestion" style="padding:20px;text-align:center;cursor:pointer;border:2px solid var(--border);transition:all .2s" onclick="selectType('suggestion')">
+          <div style="margin-bottom:8px"><img src="Public/icon/info.png" style="height:40px;vertical-align:middle"></div>
+          <div style="font-weight:700;font-size:.9rem">Góp ý</div>
+          <div style="font-size:.78rem;color:var(--text-light);margin-top:4px">Đề xuất cải thiện</div>
+        </div>
+        <div class="feedback-type-card card" data-type="complaint" style="padding:20px;text-align:center;cursor:pointer;border:2px solid var(--border);transition:all .2s" onclick="selectType('complaint')">
+          <div style="margin-bottom:8px"><img src="Public/icon/crisis.png" style="height:40px;vertical-align:middle"></div>
+          <div style="font-weight:700;font-size:.9rem">Khiếu nại</div>
+          <div style="font-size:.78rem;color:var(--text-light);margin-top:4px">Vấn đề cần giải quyết</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div id="type-banner" class="d-none alert alert-info" style="margin-bottom:20px"></div>
+
+          <!-- Guest info -->
+          <h3 style="margin-bottom:18px">Thông tin của bạn</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Họ và tên *</label>
+              <input type="text" class="form-control" id="fb-name" placeholder="Nguyễn Văn A">
+            </div>
+            <div class="form-group">
+              <label>Email *</label>
+              <input type="email" class="form-control" id="fb-email" placeholder="your@email.com">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Mã đặt phòng (nếu có)</label>
+              <input type="text" class="form-control" id="fb-booking" placeholder="BK...">
+            </div>
+            <div class="form-group">
+              <label>Phòng đã lưu trú</label>
+              <select class="form-control" id="fb-room">
+                <option value="">-- Chọn loại phòng --</option>
+                <option>Standard</option>
+                <option>Deluxe</option>
+                <option>Suite</option>
+                <option>Family</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Rating -->
+          <h3 style="margin:20px 0 14px">Đánh giá của bạn</h3>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:16px">
+            <div class="form-group" style="margin:0">
+              <label>Tổng thể</label>
+              <div class="star-rating" id="rating-overall">
+                <input type="radio" name="r-overall" id="ro5" value="5"><label for="ro5">★</label>
+                <input type="radio" name="r-overall" id="ro4" value="4"><label for="ro4">★</label>
+                <input type="radio" name="r-overall" id="ro3" value="3"><label for="ro3">★</label>
+                <input type="radio" name="r-overall" id="ro2" value="2"><label for="ro2">★</label>
+                <input type="radio" name="r-overall" id="ro1" value="1"><label for="ro1">★</label>
+              </div>
+            </div>
+            <div class="form-group" style="margin:0">
+              <label>Phòng & Tiện nghi</label>
+              <div class="star-rating">
+                <input type="radio" name="r-room" id="rr5" value="5"><label for="rr5">★</label>
+                <input type="radio" name="r-room" id="rr4" value="4"><label for="rr4">★</label>
+                <input type="radio" name="r-room" id="rr3" value="3"><label for="rr3">★</label>
+                <input type="radio" name="r-room" id="rr2" value="2"><label for="rr2">★</label>
+                <input type="radio" name="r-room" id="rr1" value="1"><label for="rr1">★</label>
+              </div>
+            </div>
+            <div class="form-group" style="margin:0">
+              <label>Dịch vụ & Nhân viên</label>
+              <div class="star-rating">
+                <input type="radio" name="r-service" id="rs5" value="5"><label for="rs5">★</label>
+                <input type="radio" name="r-service" id="rs4" value="4"><label for="rs4">★</label>
+                <input type="radio" name="r-service" id="rs3" value="3"><label for="rs3">★</label>
+                <input type="radio" name="r-service" id="rs2" value="2"><label for="rs2">★</label>
+                <input type="radio" name="r-service" id="rs1" value="1"><label for="rs1">★</label>
+              </div>
+            </div>
+            <div class="form-group" style="margin:0">
+              <label>Vị trí & Tiện lợi</label>
+              <div class="star-rating">
+                <input type="radio" name="r-location" id="rl5" value="5"><label for="rl5">★</label>
+                <input type="radio" name="r-location" id="rl4" value="4"><label for="rl4">★</label>
+                <input type="radio" name="r-location" id="rl3" value="3"><label for="rl3">★</label>
+                <input type="radio" name="r-location" id="rl2" value="2"><label for="rl2">★</label>
+                <input type="radio" name="r-location" id="rl1" value="1"><label for="rl1">★</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Comment -->
+          <div class="form-group">
+            <label>Nội dung phản hồi *</label>
+            <textarea class="form-control" id="fb-comment" rows="5"
+              placeholder="Hãy chia sẻ chi tiết trải nghiệm của bạn — những điều bạn yêu thích, và những điều chúng tôi có thể cải thiện..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Bạn có muốn quay lại lưu trú tại KSAN?</label>
+            <div style="display:flex;gap:16px;margin-top:8px">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.9rem">
+                <input type="radio" name="return" value="yes" style="accent-color:var(--primary)"> Có, chắc chắn sẽ quay lại
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.9rem">
+                <input type="radio" name="return" value="maybe" style="accent-color:var(--primary)"> Có thể
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.9rem">
+                <input type="radio" name="return" value="no" style="accent-color:var(--primary)"> Chưa chắc
+              </label>
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-lg btn-full mt-8" id="submit-feedback-btn">
+            Gửi phản hồi →
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer"></footer>
+
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script>
+let selectedType = '';
+
+/* prefill from URL params */
+const params = new URLSearchParams(location.search);
+if (params.get('booking')) document.getElementById('fb-booking').value = params.get('booking');
+
+/* prefill from user */
+document.addEventListener('DOMContentLoaded', () => {
+  const user = KSAN.getCurrentUser();
+  if (user) {
+    document.getElementById('fb-name').value  = user.name;
+    document.getElementById('fb-email').value = user.email;
+  }
+});
+
+function selectType(type) {
+  selectedType = type;
+  document.querySelectorAll('.feedback-type-card').forEach(el => {
+    const isSelected = el.dataset.type === type;
+    el.style.borderColor = isSelected ? 'var(--primary)' : 'var(--border)';
+    el.style.background   = isSelected ? 'var(--primary-pale)' : '#fff';
+  });
+
+  const banner = document.getElementById('type-banner');
+  banner.classList.remove('d-none');
+  if (type === 'praise') {
+    banner.className = 'alert alert-success';
+    banner.innerHTML = '<img src="Public/icon/success.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> <strong>Khen ngợi</strong> — Cảm ơn bạn muốn chia sẻ trải nghiệm tích cực! Bạn sẽ nhận mã ưu đãi sau khi gửi.';
+  } else if (type === 'suggestion') {
+    banner.className = 'alert alert-info';
+    banner.innerHTML = '<img src="Public/icon/info.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> <strong>Góp ý</strong> — Mọi ý kiến đều được ban quản lý xem xét để cải thiện dịch vụ. Bạn sẽ nhận mã cảm ơn.';
+  } else {
+    banner.className = 'alert alert-warning';
+    banner.innerHTML = '<img src="Public/icon/crisis.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> <strong>Khiếu nại</strong> — Chúng tôi rất tiếc về trải nghiệm này. Đội ngũ sẽ liên hệ xử lý trong vòng 24 giờ. Bạn sẽ nhận mã bồi thường.';
+  }
+}
+
+document.getElementById('submit-feedback-btn').addEventListener('click', () => {
+  const name    = document.getElementById('fb-name').value.trim();
+  const email   = document.getElementById('fb-email').value.trim();
+  const comment = document.getElementById('fb-comment').value.trim();
+  const rating  = document.querySelector('input[name="r-overall"]:checked');
+
+  if (!name || !email) { showToast('Vui lòng nhập tên và email.', 'warning'); return; }
+  if (!comment)        { showToast('Vui lòng nhập nội dung phản hồi.', 'warning'); return; }
+  if (!rating)         { showToast('Vui lòng đánh giá tổng thể.', 'warning'); return; }
+
+  const ratingVal = parseInt(rating.value);
+  const type = selectedType || (ratingVal >= 4 ? 'praise' : ratingVal === 3 ? 'suggestion' : 'complaint');
+
+  KSAN.saveFeedback({
+    guestName:   name,
+    guestEmail:  email,
+    bookingId:   document.getElementById('fb-booking').value.trim(),
+    roomType:    document.getElementById('fb-room').value,
+    type,
+    rating:      ratingVal,
+    ratingRoom:  parseInt(document.querySelector('input[name="r-room"]:checked')?.value || 0),
+    ratingService: parseInt(document.querySelector('input[name="r-service"]:checked')?.value || 0),
+    ratingLocation: parseInt(document.querySelector('input[name="r-location"]:checked')?.value || 0),
+    comment,
+    willReturn: document.querySelector('input[name="return"]:checked')?.value || ''
+  });
+
+  /* Show success & voucher */
+  document.getElementById('form-state').classList.add('d-none');
+  document.getElementById('success-state').classList.remove('d-none');
+
+  /* Give voucher */
+  const vouchers = {
+    praise:     { code: 'THANKYOU15', desc: 'Giảm 15% cho lần đặt phòng tiếp theo' },
+    suggestion: { code: 'FEEDBACK10', desc: 'Giảm 10% — Cảm ơn bạn đã góp ý!' },
+    complaint:  { code: 'SORRY20',   desc: 'Xin lỗi vì sự bất tiện — Giảm 20% lần sau' }
+  };
+  const v = vouchers[type];
+  if (v) {
+    const el = document.getElementById('voucher-reward');
+    el.style.display = 'block';
+    document.getElementById('reward-code').textContent = v.code;
+    document.getElementById('reward-desc').textContent = v.desc;
+  }
+});
+</script>
+<script src="js/footer.js"></script>
+</body>
+</html>
+
+
+

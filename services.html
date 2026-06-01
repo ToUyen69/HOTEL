@@ -1,0 +1,675 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dịch vụ & Tiện ích — KSAN Hotel</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .svc-card {
+      background:#fff; border-radius:var(--radius-lg); overflow:hidden;
+      box-shadow:var(--shadow-sm); transition:all .25s ease; cursor:pointer;
+    }
+    .svc-card:hover { box-shadow:var(--shadow-md); transform:translateY(-3px); }
+    .svc-card-img { height:200px; overflow:hidden; position:relative; }
+    .svc-card-img img { width:100%;height:100%;object-fit:cover;transition:transform .4s ease; }
+    .svc-card:hover .svc-card-img img { transform:scale(1.06); }
+    .svc-card-free { position:absolute;top:10px;right:10px; }
+    .svc-card-body { padding:18px 20px 20px; }
+    .svc-card-icon { width:44px;height:44px;border-radius:10px;background:var(--primary-pale);
+      display:flex;align-items:center;justify-content:center;margin-bottom:10px; }
+    .svc-card-icon img { width:24px;height:24px;object-fit:contain; }
+    .svc-card-footer { display:flex;align-items:center;justify-content:space-between;
+      padding-top:12px;border-top:1px solid var(--border); }
+    .svc-price { font-size:1.1rem;font-weight:700;color:var(--primary);font-family:Georgia,serif; }
+    .svc-price-unit { font-size:.75rem;color:var(--text-light); }
+
+    .order-item { display:flex;align-items:center;gap:12px;padding:12px;
+      background:var(--bg);border-radius:10px;margin-bottom:10px; }
+    .order-item-icon { width:44px;height:44px;border-radius:8px;background:#fff;
+      border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+    .order-item-icon img { width:26px;height:26px;object-fit:contain; }
+
+    .time-slots { display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px; }
+    .time-slot { padding:8px 4px;text-align:center;border:1.5px solid var(--border);border-radius:8px;
+      cursor:pointer;font-size:.82rem;font-weight:600;transition:all .2s; }
+    .time-slot:hover,.time-slot.active { border-color:var(--primary);background:var(--primary-pale);color:var(--primary); }
+    .time-slot.disabled { opacity:.4;cursor:not-allowed;pointer-events:none; }
+
+    .payment-icon-row { display:flex;align-items:center;gap:8px;padding:12px 14px;
+      border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s; }
+    .payment-icon-row:hover,.payment-icon-row.active { border-color:var(--primary);background:var(--primary-pale); }
+    .payment-icon-row img { height:28px;object-fit:contain; }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="container">
+    <div class="header-inner">
+      <a href="index.html" class="logo">
+        <img src="Public/logo KS.png" alt="KSAN Logo">
+      </a>
+      <nav class="nav" id="main-nav">
+        <a href="index.html">Trang chủ</a>
+        <a href="rooms.html">Phòng</a>
+        <a href="services.html">Dịch vụ</a>
+        <a href="about.html">Về chúng tôi</a>
+        <a href="travel-guide.html">Cẩm nang</a>
+        <a href="my-booking.html">Đặt phòng của tôi</a>      </nav>
+      <div class="header-actions" id="header-actions"></div>
+      <button class="mobile-toggle" id="mobile-toggle">☰</button>
+    </div>
+  </div>
+</header>
+
+<section class="page-hero">
+  <div class="container page-hero-content">
+    <h1>Dịch vụ & Tiện ích</h1>
+    <div class="breadcrumb">
+      <a href="index.html">Trang chủ</a><span>›</span>
+      <span>Dịch vụ</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── Featured hero images ── -->
+<section class="section" style="padding-bottom:30px">
+  <div class="container">
+    <div class="section-header">
+      <h2>Trải nghiệm đẳng cấp</h2>
+      <p>Chọn dịch vụ phù hợp và đặt ngay — chúng tôi sẽ chuẩn bị cho bạn trước khi đến.</p>
+      <div class="divider-gold"></div>
+    </div>
+
+    <!-- Featured 2-col gallery -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:40px">
+      <div style="position:relative;border-radius:var(--radius-lg);overflow:hidden;height:340px;cursor:pointer" onclick="openServiceModal('SPA')">
+        <img src="Public/spa.jpg" style="width:100%;height:100%;object-fit:cover;transition:transform .4s" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+        <div style="position:absolute;inset:0;background:linear-gradient(transparent 40%,rgba(0,0,0,.65));display:flex;flex-direction:column;justify-content:flex-end;padding:24px">
+          <span class="badge badge-gold" style="width:fit-content;margin-bottom:10px">Nổi bật</span>
+          <h3 style="color:#fff;margin:0 0 6px;font-size:1.4rem">Spa & Chăm sóc sức khỏe</h3>
+          <p style="color:rgba(255,255,255,.85);margin:0;font-size:.88rem">Thư giãn toàn diện · Từ 350,000đ/lần</p>
+          <button class="btn btn-primary btn-sm" style="margin-top:14px;align-self:flex-start" onclick="event.stopPropagation();openServiceModal('SPA')">
+            <img src="Public/icon/spa.png" style="height:16px"> Đặt ngay
+          </button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-rows:1fr 1fr;gap:16px">
+        <div style="position:relative;border-radius:var(--radius-lg);overflow:hidden;cursor:pointer" onclick="openServiceModal('TRANSFER')">
+          <img src="Public/xe đưa đón.png" style="width:100%;height:160px;object-fit:cover;transition:transform .4s" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+          <div style="position:absolute;inset:0;background:linear-gradient(transparent 30%,rgba(0,0,0,.65));display:flex;flex-direction:column;justify-content:flex-end;padding:16px">
+            <h3 style="color:#fff;margin:0 0 2px;font-size:1rem">Đưa đón sân bay</h3>
+            <p style="color:rgba(255,255,255,.8);margin:0;font-size:.8rem">Từ 250,000đ/chiều · 24/7</p>
+          </div>
+        </div>
+        <div style="position:relative;border-radius:var(--radius-lg);overflow:hidden;cursor:pointer" onclick="openServiceModal('POOL')">
+          <img src="Public/hồ bơi.jpg" style="width:100%;height:160px;object-fit:cover;transition:transform .4s" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+          <div style="position:absolute;inset:0;background:linear-gradient(transparent 30%,rgba(0,0,0,.65));display:flex;flex-direction:column;justify-content:flex-end;padding:16px">
+            <h3 style="color:#fff;margin:0 0 2px;font-size:1rem">Hồ bơi ngoài trời</h3>
+            <p style="color:rgba(255,255,255,.8);margin:0;font-size:.8rem">Miễn phí · 6:00–22:00</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- All services grid -->
+    <div class="grid-3" id="services-grid"></div>
+  </div>
+</section>
+
+<!-- ── Tiện ích cơ bản (icon grid) ── -->
+<section class="section" style="background:#fff;padding:50px 0">
+  <div class="container">
+    <div class="section-header" style="margin-bottom:32px">
+      <h2>Tiện ích miễn phí dành cho khách</h2>
+      <div class="divider-gold"></div>
+    </div>
+    <div class="grid-4">
+      <div style="text-align:center;padding:20px">
+        <div style="width:60px;height:60px;background:var(--primary-pale);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+          <img src="Public/icon/wifi.png" style="width:28px;height:28px;object-fit:contain">
+        </div>
+        <div style="font-weight:700;margin-bottom:4px">WiFi tốc độ cao</div>
+        <div style="font-size:.8rem;color:var(--text-light)">Miễn phí toàn khu</div>
+      </div>
+      <div style="text-align:center;padding:20px">
+        <div style="width:60px;height:60px;background:var(--primary-pale);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+          <img src="Public/icon/breakfast.png" style="width:28px;height:28px;object-fit:contain">
+        </div>
+        <div style="font-weight:700;margin-bottom:4px">Bữa sáng</div>
+        <div style="font-size:.8rem;color:var(--text-light)">Buffet 6:30–10:00</div>
+      </div>
+      <div style="text-align:center;padding:20px">
+        <div style="width:60px;height:60px;background:var(--primary-pale);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+          <img src="Public/icon/parking-area.png" style="width:28px;height:28px;object-fit:contain">
+        </div>
+        <div style="font-weight:700;margin-bottom:4px">Bãi đỗ xe</div>
+        <div style="font-size:.8rem;color:var(--text-light)">Miễn phí 24/7</div>
+      </div>
+      <div style="text-align:center;padding:20px">
+        <div style="width:60px;height:60px;background:var(--primary-pale);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+          <img src="Public/icon/24-hours-support.png" style="width:28px;height:28px;object-fit:contain">
+        </div>
+        <div style="font-weight:700;margin-bottom:4px">Lễ tân 24/7</div>
+        <div style="font-size:.8rem;color:var(--text-light)">Hỗ trợ mọi lúc</div>
+      </div>
+      <div style="text-align:center;padding:20px">
+        <div style="width:60px;height:60px;background:var(--primary-pale);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+          <img src="Public/icon/pool.png" style="width:28px;height:28px;object-fit:contain">
+        </div>
+        <div style="font-weight:700;margin-bottom:4px">Hồ bơi</div>
+        <div style="font-size:.8rem;color:var(--text-light)">Ngoài trời 6:00–22:00</div>
+      </div>
+      <div style="text-align:center;padding:20px">
+        <div style="width:60px;height:60px;background:var(--primary-pale);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+          <img src="Public/icon/reception.png" style="width:28px;height:28px;object-fit:contain">
+        </div>
+        <div style="font-weight:700;margin-bottom:4px">Concierge</div>
+        <div style="font-size:.8rem;color:var(--text-light)">Hỗ trợ đặt tour</div>
+      </div>
+      <div style="text-align:center;padding:20px">
+        <div style="width:60px;height:60px;background:var(--primary-pale);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+          <img src="Public/icon/bed.png" style="width:28px;height:28px;object-fit:contain">
+        </div>
+        <div style="font-weight:700;margin-bottom:4px">Turn-down service</div>
+        <div style="font-size:.8rem;color:var(--text-light)">Dọn phòng buổi tối</div>
+      </div>
+      <div style="text-align:center;padding:20px">
+        <div style="width:60px;height:60px;background:var(--primary-pale);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+          <img src="Public/icon/note.png" style="width:28px;height:28px;object-fit:contain">
+        </div>
+        <div style="font-weight:700;margin-bottom:4px">Báo chí hàng ngày</div>
+        <div style="font-size:.8rem;color:var(--text-light)">Giao tận phòng</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Đơn dịch vụ của tôi ── -->
+<section class="section" id="my-orders-section" style="display:none">
+  <div class="container">
+    <div class="section-header" style="margin-bottom:28px;text-align:left">
+      <h2>Dịch vụ đã đặt</h2>
+    </div>
+    <div id="my-orders-list"></div>
+  </div>
+</section>
+
+<!-- ── Gallery ── -->
+<section class="section" style="background:#fff;padding:50px 0">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+      <div style="border-radius:var(--radius-lg);overflow:hidden;height:220px">
+        <img src="Public/yoga.jpg" style="width:100%;height:100%;object-fit:cover">
+      </div>
+      <div style="border-radius:var(--radius-lg);overflow:hidden;height:220px">
+        <img src="Public/xông hơi.jpg" style="width:100%;height:100%;object-fit:cover">
+      </div>
+      <div style="border-radius:var(--radius-lg);overflow:hidden;height:220px">
+        <img src="Public/cafe.jpg" style="width:100%;height:100%;object-fit:cover">
+      </div>
+      <div style="border-radius:var(--radius-lg);overflow:hidden;height:220px">
+        <img src="Public/ghe_ngoi.jpg" style="width:100%;height:100%;object-fit:cover">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SERVICE BOOKING MODAL ═══ -->
+<div class="modal-overlay" id="service-modal">
+  <div class="modal" style="max-width:620px">
+    <div class="modal-header">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div id="svc-modal-icon" style="width:36px;height:36px;background:var(--primary-pale);border-radius:8px;display:flex;align-items:center;justify-content:center">
+          <img id="svc-modal-icon-img" style="width:22px;height:22px;object-fit:contain">
+        </div>
+        <h3 id="svc-modal-title" style="margin:0"></h3>
+      </div>
+      <button class="modal-close" onclick="closeModal('service-modal')">×</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Service info -->
+      <div id="svc-modal-info" style="margin-bottom:20px"></div>
+
+      <!-- Booking form -->
+      <h4 style="margin-bottom:14px">
+        <img src="Public/icon/calendar.png" style="height:16px;vertical-align:middle;margin-right:6px">
+        Thông tin đặt dịch vụ
+      </h4>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Họ và tên *</label>
+          <input type="text" class="form-control" id="svc-name" placeholder="Nguyễn Văn A">
+        </div>
+        <div class="form-group">
+          <label>Số điện thoại *</label>
+          <input type="tel" class="form-control" id="svc-phone" placeholder="0901234567">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Email *</label>
+          <input type="email" class="form-control" id="svc-email" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label>Ngày sử dụng *</label>
+          <input type="date" class="form-control" id="svc-date">
+        </div>
+      </div>
+
+      <!-- Time slots -->
+      <div class="form-group" id="svc-time-group">
+        <label>Khung giờ *</label>
+        <div class="time-slots" id="svc-time-slots"></div>
+        <input type="hidden" id="svc-time-selected">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Số người / lượt</label>
+          <select class="form-control" id="svc-qty">
+            <option value="1">1 người</option>
+            <option value="2">2 người</option>
+            <option value="3">3 người</option>
+            <option value="4">4 người</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Gắn với đặt phòng (nếu có)</label>
+          <select class="form-control" id="svc-booking-link">
+            <option value="">-- Không gắn --</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Ghi chú đặc biệt</label>
+        <textarea class="form-control" id="svc-notes" rows="2" placeholder="Yêu cầu cụ thể, dị ứng, sở thích..."></textarea>
+      </div>
+
+      <!-- Price summary -->
+      <div id="svc-price-summary" style="background:var(--primary-pale);padding:14px;border-radius:10px;margin-top:4px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:.85rem;color:var(--text-light)">Tổng chi phí dự kiến</div>
+            <div style="font-size:1.4rem;font-weight:700;color:var(--primary);font-family:Georgia,serif" id="svc-total-price">—</div>
+          </div>
+          <div style="font-size:.78rem;color:var(--text-light);text-align:right">
+            Thanh toán tại<br>quầy lễ tân
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment method (for paid services) -->
+      <div id="svc-payment-section" style="margin-top:16px;display:none">
+        <h4 style="margin-bottom:12px">Phương thức thanh toán</h4>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <label class="payment-icon-row" id="pay-bank-row">
+            <input type="radio" name="svc-pay" value="bank" style="accent-color:var(--primary)">
+            <img src="Public/icon/bank.png" style="height:24px;object-fit:contain">
+            <div>
+              <div style="font-weight:700;font-size:.88rem">Chuyển khoản ngân hàng</div>
+              <div style="font-size:.75rem;color:var(--text-light)">Thanh toán tại quầy hoặc chuyển khoản</div>
+            </div>
+          </label>
+          <label class="payment-icon-row" id="pay-momo-row">
+            <input type="radio" name="svc-pay" value="momo" style="accent-color:var(--primary)">
+            <img src="Public/icon/Logo-MoMo-Square-768x768.webp" style="height:28px;border-radius:4px">
+            <div>
+              <div style="font-weight:700;font-size:.88rem">MoMo</div>
+              <div style="font-size:.75rem;color:var(--text-light)">Ví điện tử MoMo</div>
+            </div>
+          </label>
+          <label class="payment-icon-row" id="pay-zalo-row">
+            <input type="radio" name="svc-pay" value="zalopay" style="accent-color:var(--primary)">
+            <img src="Public/icon/zalo pay.png" style="height:28px;object-fit:contain">
+            <div>
+              <div style="font-weight:700;font-size:.88rem">ZaloPay</div>
+              <div style="font-size:.75rem;color:var(--text-light)">Thanh toán qua ZaloPay</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('service-modal')">Hủy</button>
+      <button class="btn btn-primary" id="svc-confirm-btn">
+        <img src="Public/icon/check.png" style="height:16px;filter:invert(1)"> Xác nhận đặt
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SUCCESS MODAL ═══ -->
+<div class="modal-overlay" id="svc-success-modal">
+  <div class="modal" style="max-width:440px;text-align:center">
+    <div class="modal-body" style="padding:36px 28px">
+      <div style="width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));
+        display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 4px 20px rgba(45,106,79,.3)">
+        <img src="Public/icon/success.png" style="width:36px;height:36px;filter:invert(1)">
+      </div>
+      <h3 style="margin-bottom:8px">Đặt dịch vụ thành công!</h3>
+      <p style="color:var(--text-light);margin-bottom:6px" id="success-svc-name"></p>
+      <div style="background:var(--primary-pale);border-radius:10px;padding:14px;margin:16px 0;text-align:left" id="success-svc-detail"></div>
+      <p style="font-size:.82rem;color:var(--text-light);margin-bottom:20px">
+        Nhân viên sẽ liên hệ xác nhận trong vòng 30 phút. Mang theo mã đơn khi sử dụng dịch vụ.
+      </p>
+      <div style="display:flex;gap:10px;justify-content:center">
+        <button class="btn btn-outline" onclick="closeModal('svc-success-modal')">Đóng</button>
+        <a href="my-booking.html" class="btn btn-primary">Xem đặt dịch vụ</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer"></footer>
+
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script>
+/* ── Extended service data ── */
+const ALL_SERVICES = [
+  {
+    id: 'SPA', name: 'Spa & Chăm sóc sức khỏe',
+    icon: 'Public/icon/spa.png', image: 'Public/spa.jpg',
+    price: 350000, unit: '/lần', free: false,
+    desc: 'Liệu pháp spa toàn thân với các sản phẩm thiên nhiên cao cấp. Đội ngũ chuyên viên được đào tạo chuyên nghiệp.',
+    packages: ['Massage thư giãn 60 phút — 350,000đ', 'Chăm sóc da mặt — 280,000đ', 'Trị liệu toàn thân 90 phút — 580,000đ'],
+    timeSlots: ['9:00','10:00','11:00','14:00','15:00','16:00','17:00','19:00'],
+    hours: '9:00–22:00', note: 'Đặt trước tối thiểu 2 giờ'
+  },
+  {
+    id: 'POOL', name: 'Hồ bơi ngoài trời',
+    icon: 'Public/icon/pool.png', image: 'Public/hồ bơi.jpg',
+    price: 0, unit: 'miễn phí', free: true,
+    desc: 'Hồ bơi ngoài trời rộng 300m², được bảo trì sạch sẽ hàng ngày. Khu vực nước nông cho trẻ em.',
+    packages: [],
+    timeSlots: ['6:00','7:00','8:00','9:00','10:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'],
+    hours: '6:00–22:00', note: 'Miễn phí cho tất cả khách lưu trú'
+  },
+  {
+    id: 'YOGA', name: 'Yoga & Thể dục buổi sáng',
+    icon: 'Public/icon/spa.png', image: 'Public/yoga.jpg',
+    price: 150000, unit: '/buổi', free: false,
+    desc: 'Lớp yoga và thể dục buổi sáng ngoài trời, phù hợp mọi trình độ. View đẹp, không khí trong lành.',
+    packages: ['Lớp yoga buổi sáng 60 phút — 150,000đ', 'Lớp thể dục tổng hợp — 120,000đ'],
+    timeSlots: ['6:30','7:30'],
+    hours: '6:30–8:00 hàng ngày', note: 'Đặt trước 1 ngày'
+  },
+  {
+    id: 'SAUNA', name: 'Xông hơi & Tắm nóng',
+    icon: 'Public/icon/spa.png', image: 'Public/xông hơi.jpg',
+    price: 200000, unit: '/lần', free: false,
+    desc: 'Phòng xông hơi khô và ướt cao cấp, nhiệt độ chuẩn quốc tế. Giúp thư giãn và thanh lọc cơ thể.',
+    packages: ['Xông hơi khô 45 phút — 200,000đ', 'Xông hơi ướt 45 phút — 200,000đ', 'Combo khô + ướt — 350,000đ'],
+    timeSlots: ['10:00','11:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'],
+    hours: '10:00–22:00', note: 'Không phù hợp cho người bị huyết áp'
+  },
+  {
+    id: 'CAFE', name: 'Nhà hàng & Café',
+    icon: 'Public/icon/breakfast.png', image: 'Public/cafe.jpg',
+    price: 0, unit: 'theo menu', free: false,
+    desc: 'Thực đơn đa dạng từ ẩm thực Á–Âu. Không gian sang trọng, phục vụ từ bữa sáng đến khuya.',
+    packages: ['Bữa sáng buffet — 180,000đ/người', 'Set lunch — 250,000đ/người', 'Set dinner — 350,000đ/người', 'Afternoon tea — 200,000đ/người'],
+    timeSlots: ['6:30','8:00','10:00','12:00','14:00','18:00','19:00','20:00'],
+    hours: '6:00–23:00', note: 'Đặt bàn trước để đảm bảo chỗ ngồi'
+  },
+  {
+    id: 'TRANSFER', name: 'Đưa đón sân bay',
+    icon: 'Public/icon/car.png', image: 'Public/xe đưa đón.png',
+    price: 250000, unit: '/chiều', free: false,
+    desc: 'Xe đưa đón sân bay Tân Sơn Nhất chuyên nghiệp, đúng giờ. Xe sạch, tài xế kinh nghiệm.',
+    packages: ['Sedan 4 chỗ — 250,000đ/chiều', 'MPV 7 chỗ — 350,000đ/chiều', 'Van 9 chỗ — 500,000đ/chiều'],
+    timeSlots: ['0:00','2:00','4:00','6:00','8:00','10:00','12:00','14:00','16:00','18:00','20:00','22:00'],
+    hours: '24/7', note: 'Đặt trước ít nhất 2 giờ'
+  },
+  {
+    id: 'LAUNDRY', name: 'Giặt là & Chăm sóc quần áo',
+    icon: 'Public/icon/laundry.png', image: 'Public/ghe_ngoi.jpg',
+    price: 50000, unit: '/món', free: false,
+    desc: 'Dịch vụ giặt là chuyên nghiệp, giao trả phòng trong ngày. Hấp, ủi, khử mùi theo yêu cầu.',
+    packages: ['Áo sơ mi / áo thun — 50,000đ', 'Quần — 60,000đ', 'Vest/Áo khoác — 120,000đ', 'Gói 5 món — 220,000đ'],
+    timeSlots: ['7:00','8:00','9:00','10:00','11:00'],
+    hours: 'Thu trước 10:00, trả trong ngày', note: 'Gọi lễ tân để thu đồ tận phòng'
+  },
+  {
+    id: 'TOUR', name: 'Đặt tour & Vé tham quan',
+    icon: 'Public/icon/view.png', image: 'Public/5.jpg',
+    price: 200000, unit: '/người', free: false,
+    desc: 'Concierge hỗ trợ đặt tour tham quan thành phố, địa điểm nổi tiếng và trải nghiệm văn hóa địa phương.',
+    packages: ['City tour nửa ngày — 200,000đ/người', 'Mekong Delta tour — 450,000đ/người', 'Cu Chi Tunnels — 350,000đ/người'],
+    timeSlots: ['7:00','8:00','9:00','13:00','14:00'],
+    hours: '8:00–18:00', note: 'Đặt trước 1 ngày'
+  },
+  {
+    id: 'GYM', name: 'Phòng Gym & Fitness',
+    icon: 'Public/icon/reception.png', image: 'Public/6.jpg',
+    price: 0, unit: 'miễn phí', free: true,
+    desc: 'Trung tâm thể dục hiện đại với đầy đủ thiết bị. Huấn luyện viên cá nhân theo yêu cầu.',
+    packages: ['Tập tự do — Miễn phí', 'Buổi PT 1:1 (60 phút) — 400,000đ'],
+    timeSlots: ['5:30','6:00','7:00','8:00','9:00','10:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'],
+    hours: '5:30–23:00', note: 'Miễn phí cho khách lưu trú'
+  }
+];
+
+let currentService = null;
+
+/* ── Render services grid ── */
+function renderServicesGrid() {
+  const grid = document.getElementById('services-grid');
+  grid.innerHTML = ALL_SERVICES.map(s => `
+    <div class="svc-card" onclick="openServiceModal('${s.id}')">
+      <div class="svc-card-img">
+        <img src="${s.image}" alt="${s.name}" loading="lazy">
+        ${s.free ? `<div class="svc-card-free"><span class="badge badge-green">Miễn phí</span></div>` : ''}
+      </div>
+      <div class="svc-card-body">
+        <div class="svc-card-icon"><img src="${s.icon}"></div>
+        <h4 style="margin-bottom:6px;font-size:.95rem">${s.name}</h4>
+        <p style="font-size:.82rem;color:var(--text-light);margin-bottom:14px;line-height:1.6">${s.desc.substring(0,90)}...</p>
+        <div class="svc-card-footer">
+          <div>
+            <span class="svc-price">${s.price > 0 ? KSAN.formatCurrency(s.price) : 'Miễn phí'}</span>
+            <span class="svc-price-unit"> ${s.unit}</span>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();openServiceModal('${s.id}')">Đặt ngay</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+/* ── Open service modal ── */
+function openServiceModal(id) {
+  const s = ALL_SERVICES.find(x => x.id === id);
+  if (!s) return;
+  currentService = s;
+
+  document.getElementById('svc-modal-title').textContent  = s.name;
+  document.getElementById('svc-modal-icon-img').src       = s.icon;
+  document.getElementById('svc-date').min = todayStr();
+  document.getElementById('svc-date').value = todayStr();
+
+  /* info block */
+  document.getElementById('svc-modal-info').innerHTML = `
+    <div style="display:grid;grid-template-columns:120px 1fr;gap:0;border-radius:10px;overflow:hidden;margin-bottom:4px">
+      <img src="${s.image}" style="width:100%;height:110px;object-fit:cover">
+      <div style="padding:12px 16px;background:var(--bg)">
+        <p style="font-size:.85rem;color:var(--text-light);margin-bottom:8px;line-height:1.6">${s.desc}</p>
+        <div style="font-size:.8rem;display:flex;gap:16px;flex-wrap:wrap">
+          <span style="display:flex;align-items:center;gap:4px">
+            <img src="Public/icon/24-hours-support.png" style="height:14px"> ${s.hours}
+          </span>
+          <span style="color:var(--text-light)">${s.note}</span>
+        </div>
+      </div>
+    </div>
+    ${s.packages.length ? `
+    <div style="margin-top:10px">
+      <div style="font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-light);margin-bottom:6px">Gói dịch vụ</div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        ${s.packages.map(p => `<div style="font-size:.82rem;padding:6px 10px;background:var(--bg);border-radius:6px">${p}</div>`).join('')}
+      </div>
+    </div>` : ''}`;
+
+  /* time slots */
+  document.getElementById('svc-time-slots').innerHTML = s.timeSlots.map(t => `
+    <div class="time-slot" onclick="selectTime('${t}', this)">${t}</div>`).join('');
+  document.getElementById('svc-time-selected').value = '';
+
+  /* prefill from user */
+  const user = KSAN.getCurrentUser();
+  if (user) {
+    document.getElementById('svc-name').value  = user.name;
+    document.getElementById('svc-phone').value = user.phone;
+    document.getElementById('svc-email').value = user.email;
+
+    /* fill booking link options */
+    const sel = document.getElementById('svc-booking-link');
+    sel.innerHTML = '<option value="">-- Không gắn --</option>';
+    KSAN.getCustomerBookings(user.id)
+      .filter(b => b.status === 'confirmed' || b.status === 'checked_in')
+      .forEach(b => {
+        const opt = document.createElement('option');
+        opt.value = b.id;
+        opt.textContent = `${b.id} — ${b.roomName} (${KSAN.formatDate(b.checkIn)})`;
+        sel.appendChild(opt);
+      });
+  }
+
+  /* show/hide payment */
+  document.getElementById('svc-payment-section').style.display = s.price > 0 ? 'block' : 'none';
+
+  updateSvcPrice();
+  openModal('service-modal');
+}
+
+function selectTime(t, el) {
+  document.querySelectorAll('.time-slot').forEach(x => x.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('svc-time-selected').value = t;
+}
+
+document.getElementById('svc-qty').addEventListener('change', updateSvcPrice);
+
+function updateSvcPrice() {
+  if (!currentService) return;
+  const qty   = parseInt(document.getElementById('svc-qty').value || 1);
+  const total = currentService.price * qty;
+  document.getElementById('svc-total-price').textContent = total > 0 ? KSAN.formatCurrency(total) : 'Miễn phí';
+}
+
+/* ── Payment row styling ── */
+document.querySelectorAll('.payment-icon-row input').forEach(radio => {
+  radio.addEventListener('change', () => {
+    document.querySelectorAll('.payment-icon-row').forEach(el => {
+      el.style.borderColor  = 'var(--border)';
+      el.style.background   = '#fff';
+    });
+    radio.closest('.payment-icon-row').style.borderColor = 'var(--primary)';
+    radio.closest('.payment-icon-row').style.background  = 'var(--primary-pale)';
+  });
+});
+
+/* ── Confirm order ── */
+document.getElementById('svc-confirm-btn').addEventListener('click', () => {
+  const name  = document.getElementById('svc-name').value.trim();
+  const phone = document.getElementById('svc-phone').value.trim();
+  const email = document.getElementById('svc-email').value.trim();
+  const date  = document.getElementById('svc-date').value;
+  const time  = document.getElementById('svc-time-selected').value;
+
+  if (!name || !phone || !email) { showToast('Vui lòng điền đầy đủ thông tin liên hệ.', 'warning'); return; }
+  if (!date) { showToast('Vui lòng chọn ngày sử dụng.', 'warning'); return; }
+  if (!time) { showToast('Vui lòng chọn khung giờ.', 'warning'); return; }
+  if (currentService.price > 0 && !document.querySelector('input[name="svc-pay"]:checked')) {
+    showToast('Vui lòng chọn phương thức thanh toán.', 'warning'); return;
+  }
+
+  const user = KSAN.getCurrentUser();
+  const qty  = parseInt(document.getElementById('svc-qty').value || 1);
+  const order = KSAN.createServiceOrder({
+    bookingId:   document.getElementById('svc-booking-link').value,
+    customerId:  user ? user.id : 'guest',
+    guestName:   name,
+    guestPhone:  phone,
+    guestEmail:  email,
+    serviceId:   currentService.id,
+    serviceName: currentService.name,
+    serviceIcon: currentService.icon,
+    date, time, quantity: qty,
+    unitPrice:   currentService.price,
+    notes:       document.getElementById('svc-notes').value.trim(),
+    paymentMethod: (document.querySelector('input[name="svc-pay"]:checked') || {}).value || 'counter'
+  });
+
+  closeModal('service-modal');
+
+  /* success modal */
+  document.getElementById('success-svc-name').textContent = currentService.name;
+  document.getElementById('success-svc-detail').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:6px;font-size:.85rem">
+      <div><strong>Mã đơn:</strong> <code style="background:#fff;padding:2px 8px;border-radius:4px">${order.id}</code></div>
+      <div><strong>Ngày:</strong> ${KSAN.formatDate(date)} lúc ${time}</div>
+      <div><strong>Số người:</strong> ${qty}</div>
+      <div><strong>Tổng chi phí:</strong> <span style="color:var(--primary);font-weight:700">${order.totalPrice > 0 ? KSAN.formatCurrency(order.totalPrice) : 'Miễn phí'}</span></div>
+    </div>`;
+  openModal('svc-success-modal');
+
+  loadMyOrders();
+});
+
+/* ── My orders ── */
+function loadMyOrders() {
+  const user = KSAN.getCurrentUser();
+  if (!user) return;
+  const orders = KSAN.getCustomerServiceOrders(user.id);
+  if (!orders.length) return;
+
+  document.getElementById('my-orders-section').style.display = 'block';
+  const list = document.getElementById('my-orders-list');
+  list.innerHTML = orders.map(o => {
+    const stat = KSAN.serviceOrderStatusLabel(o.status);
+    return `
+    <div class="order-item">
+      <div class="order-item-icon">
+        <img src="${o.serviceIcon || 'Public/icon/spa.png'}">
+      </div>
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+          <strong style="font-size:.9rem">${o.serviceName}</strong>
+          <span class="badge ${stat.cls}">${stat.label}</span>
+        </div>
+        <div style="font-size:.78rem;color:var(--text-light);display:flex;gap:12px;flex-wrap:wrap">
+          <span><img src="Public/icon/id-card.png" style="height:12px;vertical-align:middle;opacity:.6"> ${o.id}</span>
+          <span><img src="Public/icon/calendar.png" style="height:12px;vertical-align:middle;opacity:.6"> ${KSAN.formatDate(o.date)} ${o.time}</span>
+          <span><img src="Public/icon/số lượng.png" style="height:12px;vertical-align:middle;opacity:.6"> ${o.quantity} người</span>
+          ${o.bookingId ? `<span><img src="Public/icon/reception.png" style="height:12px;vertical-align:middle;opacity:.6"> Gắn với: ${o.bookingId}</span>` : ''}
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-weight:700;color:var(--primary);font-size:.9rem">${o.totalPrice > 0 ? KSAN.formatCurrency(o.totalPrice) : 'Miễn phí'}</div>
+        ${o.status === 'pending' ? `<button class="btn btn-danger btn-sm" style="margin-top:6px" onclick="cancelOrder('${o.id}')">Hủy</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function cancelOrder(id) {
+  if (!confirm('Bạn có chắc muốn hủy dịch vụ này?')) return;
+  KSAN.cancelServiceOrder(id);
+  showToast('Đã hủy đơn dịch vụ.', 'info');
+  loadMyOrders();
+}
+
+renderServicesGrid();
+loadMyOrders();
+</script>
+<script src="js/footer.js"></script>
+</body>
+</html>
+
+

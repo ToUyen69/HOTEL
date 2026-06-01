@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý phòng — KSAN Admin</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <style>
+    .view-toggle { display:flex; gap:6px; }
+    .view-btn { padding:6px 14px; border-radius:7px; border:1.5px solid var(--border);
+      background:#fff; cursor:pointer; font-size:.78rem; font-weight:600; color:var(--text-sm); transition:all .2s; }
+    .view-btn.active { background:var(--dark); color:#fff; border-color:var(--dark); }
+    .floor-label { font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:1px;
+      color:var(--text-sm); padding:10px 0 6px; border-bottom:1px solid var(--border); margin-bottom:10px; }
+    .legend { display:flex; gap:16px; flex-wrap:wrap; align-items:center; font-size:.76rem; }
+    .legend-item { display:flex; align-items:center; gap:5px; }
+    .legend-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+
+    /* Checklist items */
+    .check-item { display:flex; align-items:flex-start; gap:8px; padding:8px 10px;
+      border-radius:7px; background:var(--cream2); margin-bottom:6px; font-size:.83rem; }
+    .check-item input[type=checkbox] { accent-color:var(--dark); margin-top:2px; flex-shrink:0; }
+    .check-item label { cursor:pointer; flex:1; }
+    .room-tile.inspecting { border-color: #fbbf24; background: #fef3c7; }
+    .dot-inspecting { background: #92400e; }
+    .room-tile.cleaning { border-color: #fb923c; background: #fff7ed; }
+    .dot-cleaning { background: #c2410c; }
+    .room-tile-cleaner { font-size:.66rem; color:#c2410c; font-weight:600;
+      margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  </style>
+</head>
+<body>
+<div class="admin-wrapper">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <div class="admin-main">
+    <header class="admin-header">
+      <h1><img src="../Public/icon/room.png" style="height:18px;vertical-align:middle;margin-right:6px">Quản lý phòng</h1>
+      <div class="admin-header-right">
+        <span class="admin-time" id="admin-time"></span>
+        <span class="header-badge" id="role-badge"></span>
+      </div>
+    </header>
+
+    <main class="admin-content">
+      <!-- Stats -->
+      <div class="stats-row" id="stats-row"></div>
+
+      <!-- Toolbar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--medium)"></div>Trống</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#1565c0"></div>Đang sử dụng</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#92400e"></div>Đang kiểm tra</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#9a3412"></div>Đang dọn</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--danger)"></div>Bảo trì</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <select class="form-control" id="f-floor" onchange="renderRooms()" style="width:120px">
+            <option value="">Tất cả tầng</option>
+            <option value="1">Tầng 1</option>
+            <option value="2">Tầng 2</option>
+            <option value="3">Tầng 3</option>
+            <option value="4">Tầng 4</option>
+            <option value="5">Tầng 5</option>
+          </select>
+          <select class="form-control" id="f-status-room" onchange="renderRooms()" style="width:155px">
+            <option value="">Tất cả trạng thái</option>
+            <option value="empty">Trống</option>
+            <option value="occupied">Đang sử dụng</option>
+            <option value="cleaning">Đang dọn phòng</option>
+            <option value="maintenance">Bảo trì</option>
+          </select>
+          <div class="view-toggle">
+            <button class="view-btn active" id="btn-grid" onclick="setView('grid')">
+              <img src="../Public/icon/view.png" style="height:12px;vertical-align:middle"> Lưới
+            </button>
+            <button class="view-btn" id="btn-list" onclick="setView('list')">
+              <img src="../Public/icon/invoice.png" style="height:12px;vertical-align:middle"> Danh sách
+            </button>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openModal('edit-room-type-modal')">
+            <img src="../Public/icon/note.png"> Quản lý loại phòng
+          </button>
+        </div>
+      </div>
+
+      <!-- Grid view -->
+      <div id="grid-view">
+        <div id="rooms-grid-container"></div>
+      </div>
+
+      <!-- List view -->
+      <div id="list-view" style="display:none">
+        <div class="table-card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>Số phòng</th>
+                <th>Tầng</th>
+                <th>Loại phòng</th>
+                <th>Sức chứa</th>
+                <th>Giá/đêm</th>
+                <th>Trạng thái</th>
+                <th>Khách hiện tại</th>
+                <th>Thao tác</th>
+              </tr></thead>
+              <tbody id="rooms-list-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ═══ ROOM DETAIL / STATUS MODAL ═══ -->
+<div class="modal-overlay" id="room-detail-modal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <h3 id="rd-title"><img src="../Public/icon/room.png">Chi tiết phòng</h3>
+      <button class="modal-close" onclick="closeModal('room-detail-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <!-- Guest info (if occupied) -->
+      <div id="rd-guest-info"></div>
+
+      <!-- Room info -->
+      <div id="rd-room-info" style="background:var(--cream2);padding:14px;border-radius:10px;margin-bottom:16px"></div>
+
+      <!-- Status change -->
+      <h4 style="font-size:.85rem;margin-bottom:10px;color:var(--dark)">
+        <img src="../Public/icon/note.png" style="height:14px;vertical-align:middle;margin-right:4px">Cập nhật trạng thái phòng (F39)
+      </h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px" id="rd-status-btns"></div>
+
+      <!-- Maintenance note -->
+      <div id="rd-maintenance-form" style="display:none">
+        <div class="form-group">
+          <label>Mô tả sự cố / bảo trì</label>
+          <textarea class="form-control" id="rd-maintenance-note" rows="3" placeholder="Mô tả chi tiết vấn đề cần xử lý..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Ưu tiên</label>
+          <select class="form-control" id="rd-priority">
+            <option value="low">Thấp — xử lý trong ngày</option>
+            <option value="medium">Trung bình — trong ca</option>
+            <option value="high">Cao — xử lý ngay</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('room-detail-modal')">Đóng</button>
+      <button class="btn btn-primary btn-sm" id="rd-save-btn">
+        <img src="../Public/icon/check.png"> Lưu trạng thái
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ HOUSEKEEPING INSPECTION MODAL ═══ -->
+<div class="modal-overlay" id="housekeeping-modal">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-header">
+      <h3><img src="../Public/icon/check.png" style="height:16px;filter:invert(1) brightness(2)">Kiểm tra phòng sau trả phòng</h3>
+      <button class="modal-close" onclick="closeModal('housekeeping-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="hk-room-info" style="background:var(--cream2);padding:12px;border-radius:8px;margin-bottom:14px;font-size:.84rem"></div>
+
+      <div style="font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--dark);margin-bottom:8px">
+        Danh sách kiểm tra tài sản
+      </div>
+      <div id="hk-checklist"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('housekeeping-modal')">Hủy</button>
+      <button class="btn btn-primary" id="hk-done-btn">Kiểm tra xong — Gửi kết quả</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ EDIT ROOM TYPE MODAL (F42) ═══ -->
+<div class="modal-overlay" id="edit-room-type-modal">
+  <div class="modal" style="max-width:680px">
+    <div class="modal-header">
+      <h3><img src="../Public/icon/note.png">Quản lý loại phòng & giá (F42)</h3>
+      <button class="modal-close" onclick="closeModal('edit-room-type-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>ID</th><th>Loại phòng</th><th>Diện tích</th>
+            <th>Sức chứa</th><th>Giá/đêm</th><th>Số phòng</th><th>Sửa</th>
+          </tr></thead>
+          <tbody id="room-types-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('edit-room-type-modal')">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ EDIT SINGLE ROOM TYPE MODAL ═══ -->
+<div class="modal-overlay" id="edit-single-room-modal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header">
+      <h3><img src="../Public/icon/note.png">Sửa thông tin loại phòng</h3>
+      <button class="modal-close" onclick="closeModal('edit-single-room-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="esr-id">
+      <div class="form-row2">
+        <div class="form-group"><label>Tên loại phòng</label>
+          <input type="text" class="form-control" id="esr-name"></div>
+        <div class="form-group"><label>Diện tích (m²)</label>
+          <input type="number" class="form-control" id="esr-size"></div>
+      </div>
+      <div class="form-row2">
+        <div class="form-group"><label>Sức chứa tối đa</label>
+          <input type="number" class="form-control" id="esr-capacity"></div>
+        <div class="form-group"><label>Giá / đêm (VNĐ)</label>
+          <input type="number" class="form-control" id="esr-price"></div>
+      </div>
+      <div class="form-group"><label>Mô tả ngắn</label>
+        <textarea class="form-control" id="esr-desc" rows="2"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('edit-single-room-modal')">Hủy</button>
+      <button class="btn btn-primary btn-sm" id="esr-save-btn">
+        <img src="../Public/icon/check.png"> Lưu
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/data.js"></script>
+<script src="js/admin.js"></script>
+<script>
+const acc = AdminAuth.require();
+renderSidebar('rooms');
+startClock();
+document.getElementById('role-badge').textContent = acc.roleLabel;
+
+/* ── Extended room data with floor info ── */
+const ROOM_DETAILS = [
+  // Floor 1
+  { roomId:'R001', number:'101', floor:1, typeId:'R001' },
+  { roomId:'R001', number:'102', floor:1, typeId:'R001' },
+  { roomId:'R002', number:'103', floor:1, typeId:'R002' },
+  // Floor 2
+  { roomId:'R001', number:'201', floor:2, typeId:'R001' },
+  { roomId:'R002', number:'202', floor:2, typeId:'R002' },
+  { roomId:'R002', number:'203', floor:2, typeId:'R002' },
+  { roomId:'R004', number:'204', floor:2, typeId:'R004' },
+  // Floor 3
+  { roomId:'R002', number:'301', floor:3, typeId:'R002' },
+  { roomId:'R002', number:'302', floor:3, typeId:'R002' },
+  { roomId:'R004', number:'303', floor:3, typeId:'R004' },
+  { roomId:'R004', number:'304', floor:3, typeId:'R004' },
+  // Floor 4
+  { roomId:'R003', number:'401', floor:4, typeId:'R003' },
+  { roomId:'R003', number:'402', floor:4, typeId:'R003' },
+  { roomId:'R001', number:'403', floor:4, typeId:'R001' },
+  { roomId:'R001', number:'404', floor:4, typeId:'R001' },
+  // Floor 5
+  { roomId:'R001', number:'501', floor:5, typeId:'R001' },
+  { roomId:'R002', number:'502', floor:5, typeId:'R002' },
+];
+
+/* ── Stats ── */
+function renderStats() {
+  // Đếm từ getEffectiveStatus (phản ánh thực tế cả booking + localStorage)
+  const counts = { empty:0, occupied:0, cleaning:0, dirty:0, maintenance:0 };
+  ROOM_DETAILS.forEach(r => {
+    const st = getEffectiveStatus(r);
+    counts[st] = (counts[st] || 0) + 1;
+  });
+
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card green">
+      <div class="stat-label"><img src="../Public/icon/room.png" style="height:12px;vertical-align:middle;margin-right:4px">Phòng trống</div>
+      <div class="stat-value">${counts.empty}</div>
+      <div class="stat-sub">Sẵn sàng đón khách</div>
+    </div>
+    <div class="stat-card medium">
+      <div class="stat-label"><img src="../Public/icon/reception.png" style="height:12px;vertical-align:middle;margin-right:4px">Đang sử dụng</div>
+      <div class="stat-value" style="color:#1565c0">${counts.occupied}</div>
+      <div class="stat-sub">Có khách lưu trú</div>
+    </div>
+    <div class="stat-card warn">
+      <div class="stat-label"><img src="../Public/icon/crisis.png" style="height:12px;vertical-align:middle;margin-right:4px">Đang kiểm tra</div>
+      <div class="stat-value" style="color:#92400e">${counts.cleaning}</div>
+      <div class="stat-sub">NV đang tick checklist</div>
+    </div>
+    <div class="stat-card" style="border-left-color:#c2410c">
+      <div class="stat-label"><img src="../Public/icon/bed.png" style="height:12px;vertical-align:middle;margin-right:4px">Đang dọn</div>
+      <div class="stat-value" style="color:#c2410c">${counts.dirty}</div>
+      <div class="stat-sub">Chờ dọn xong → Trống</div>
+    </div>`;
+}
+
+/* ── Get effective room status ──
+   Trả về:
+   - 'occupied'   → Đang có khách lưu trú
+   - 'cleaning'   → Đang kiểm tra (NV tick checklist, upload ảnh)
+   - 'dirty'      → Đang dọn thực tế (sau kiểm tra xong, trước dọn sạch)
+   - 'maintenance'→ Bảo trì
+   - 'empty'      → Trống, sẵn sàng
+──────────────────────────────── */
+function getEffectiveStatus(room) {
+  const bks    = KSAN.getBookings();
+  const stored = JSON.parse(localStorage.getItem('ksan_room_status') || '{}');
+  const local  = stored[room.number] || 'empty';
+
+  // 1. Đang lưu trú
+  if (bks.find(b => b.status === 'checked_in' && b.assignedRoomNumber === room.number))
+    return 'occupied';
+
+  // 2. Đang kiểm tra (booking.status = 'cleaning' — nhân viên đang tick)
+  if (bks.find(b => b.status === 'cleaning' && b.assignedRoomNumber === room.number))
+    return 'cleaning';
+
+  // 3. Đang dọn thực tế: sau khi kiểm tra xong (checkout_pending + localStorage = dirty)
+  if (local === 'dirty') return 'dirty';
+
+  // 4. Bảo trì
+  if (local === 'maintenance') return 'maintenance';
+
+  return 'empty';
+}
+
+/* ── Lấy booking đang dọn của phòng ── */
+function getCleaningBooking(roomNumber) {
+  return KSAN.getBookings().find(b =>
+    ['cleaning','checkout_pending'].includes(b.status) && b.assignedRoomNumber === roomNumber
+  ) || null;
+}
+
+function setStatus(roomNumber, status) {
+  const stored = JSON.parse(localStorage.getItem('ksan_room_status') || '{}');
+  stored[roomNumber] = status;
+  localStorage.setItem('ksan_room_status', JSON.stringify(stored));
+}
+
+/* ── Filter ── */
+function getFilteredRooms() {
+  const floor  = document.getElementById('f-floor').value;
+  const status = document.getElementById('f-status-room').value;
+  return ROOM_DETAILS.filter(r => {
+    if (floor && String(r.floor) !== floor) return false;
+    if (status && getEffectiveStatus(r) !== status) return false;
+    return true;
+  });
+}
+
+/* ── Render ── */
+let currentView = 'grid';
+function setView(v) {
+  currentView = v;
+  document.getElementById('grid-view').style.display = v==='grid' ? 'block' : 'none';
+  document.getElementById('list-view').style.display = v==='list' ? 'block' : 'none';
+  document.getElementById('btn-grid').classList.toggle('active', v==='grid');
+  document.getElementById('btn-list').classList.toggle('active', v==='list');
+  renderRooms();
+}
+
+function renderRooms() {
+  const rooms = getFilteredRooms();
+  if (currentView === 'grid') renderGrid(rooms);
+  else renderList(rooms);
+}
+
+function renderGrid(rooms) {
+  const container = document.getElementById('rooms-grid-container');
+  const floors = [...new Set(rooms.map(r => r.floor))].sort();
+  container.innerHTML = floors.map(floor => {
+    const floorRooms = rooms.filter(r => r.floor === floor);
+    return `
+      <div class="floor-label">Tầng ${floor} — ${floorRooms.length} phòng</div>
+      <div class="rooms-grid" style="margin-bottom:20px">
+        ${floorRooms.map(r => {
+          const type = KSAN.ROOMS.find(t => t.id === r.typeId);
+          const status     = getEffectiveStatus(r);
+          const cleaningBk = getCleaningBooking(r.number);
+          const activeBk   = KSAN.getBookings().find(b => b.status==='checked_in' && b.assignedRoomNumber===r.number);
+          /* cleaning=đang kiểm tra(vàng), dirty=đang dọn(cam) */
+          const dotClass  = { empty:'dot-empty', occupied:'dot-occupied', cleaning:'dot-inspecting', dirty:'dot-cleaning', maintenance:'dot-maintenance' }[status] || 'dot-empty';
+          const tileClass = { empty:'empty', occupied:'occupied', cleaning:'inspecting', dirty:'cleaning', maintenance:'maintenance' }[status] || 'empty';
+          const tileClick = status==='cleaning'
+            ? `openHousekeeping('${r.number}','${r.number}')`
+            : status==='dirty'
+              ? `markRoomClean('${r.number}')`
+              : `openRoomDetail('${r.number}','${r.number}','${r.typeId}')`;
+          return `
+          <div class="room-tile ${tileClass}" onclick="${tileClick}" title="${status==='dirty'?'Nhấn để đánh dấu đã dọn xong':status==='cleaning'?'Nhấn để mở kiểm tra':''}">
+            <div class="room-status-dot ${dotClass}"></div>
+            <div class="room-tile-num">${r.number}</div>
+            <div class="room-tile-type">${type?.type || ''}</div>
+            <div class="room-tile-floor">${type?.size || ''}m²</div>
+            ${status==='occupied' && activeBooking
+              ? `<div class="room-tile-guest">${activeBk.guestName}</div>`
+              : status==='cleaning' && cleaningBk
+                ? `<div class="room-tile-cleaner" style="color:#92400e">Kiểm tra</div>
+                   <div style="font-size:.62rem;color:#92400e;font-weight:600">${cleaningBk.assignedCleaner?.split(' ').pop()||'—'}</div>`
+                : status==='dirty'
+                  ? `<div style="font-size:.66rem;color:#c2410c;font-weight:700;margin-top:5px">Đang dọn</div>
+                     <div style="font-size:.6rem;color:#c2410c">Nhấn: Dọn xong</div>`
+                  : `<div style="font-size:.68rem;margin-top:6px">${{ empty:'Trống', maintenance:'Bảo trì', occupied:'Có khách' }[status]||'—'}</div>`}
+          </div>`;
+        }).join('')}
+      </div>`;
+  }).join('');
+  if (!rooms.length) container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-sm)">Không có phòng phù hợp với bộ lọc.</div>`;
+}
+
+function renderList(rooms) {
+  const tbody = document.getElementById('rooms-list-tbody');
+  tbody.innerHTML = rooms.map(r => {
+    const type = KSAN.ROOMS.find(t => t.id === r.typeId);
+    const status      = getEffectiveStatus(r);
+    const activeBk    = KSAN.getBookings().find(b => b.status==='checked_in' && b.assignedRoomNumber===r.number);
+    const cleaningBk  = getCleaningBooking(r.number);
+    return `<tr>
+      <td><strong>${r.number}</strong></td>
+      <td>Tầng ${r.floor}</td>
+      <td>${type?.name || r.typeId}</td>
+      <td>${type?.capacity || '—'} khách</td>
+      <td style="font-weight:600;color:var(--dark)">${formatCurrency(type?.price || 0)}</td>
+      <td>${roomStatusBadge(status)}</td>
+      <td style="font-size:.8rem">
+        ${status==='occupied' && activeBk
+          ? `<strong>${activeBk.guestName}</strong><br><span style="color:var(--text-sm)">CO: ${formatDate(activeBk.checkOut)}</span>`
+          : (status==='cleaning' || status==='dirty') && cleaningBk
+            ? `<span style="color:#92400e;font-weight:600">${cleaningBk.assignedCleaner||'—'}</span><br>
+               <span style="font-size:.72rem;color:var(--text-sm)">${status==='cleaning'?'Đang kiểm tra':'Đang dọn thực tế'}</span>`
+            : '<span style="color:var(--text-sm)">—</span>'}
+      </td>
+      <td>
+        <div class="action-btns">
+          <button class="btn btn-sm btn-outline" onclick="openRoomDetail('${r.number}','${r.number}','${r.typeId}')">
+            Chi tiết
+          </button>
+          ${status==='cleaning' ? `
+            <button class="btn btn-sm btn-secondary" onclick="openHousekeeping('${r.number}','${r.number}')">
+              Kiểm tra phòng
+            </button>` : ''}
+          ${status==='dirty' ? `
+            <button class="btn btn-sm btn-primary" onclick="markRoomClean('${r.number}')">
+              Dọn xong → Trống
+            </button>` : ''}
+          ${status==='occupied' ? `
+            <button class="btn btn-sm btn-cream" onclick="openHousekeeping('${r.number}','${r.number}')">
+              <img src="../Public/icon/bed.png" style="filter:none"> HK
+            </button>` : ''}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── Room detail modal ── */
+let currentRoomKey = null, currentRoomNumber = null;
+function openRoomDetail(key, number, typeId) {
+  currentRoomKey = number;
+  currentRoomNumber = number;
+  const type = KSAN.ROOMS.find(t => t.id === typeId);
+  const status = getEffectiveStatus({ typeId, number });
+  const activeBooking = KSAN.getBookings().find(b => b.status==='checked_in' && b.roomId===typeId);
+
+  document.getElementById('rd-title').innerHTML =
+    `<img src="../Public/icon/room.png" style="height:16px;filter:invert(1) brightness(2)"> Phòng ${number} — ${type?.name}`;
+
+  document.getElementById('rd-guest-info').innerHTML = activeBooking ? `
+    <div class="alert alert-info" style="font-size:.82rem;margin-bottom:14px">
+      <strong>Khách hiện tại:</strong> ${activeBooking.guestName} · SĐT: ${activeBooking.guestPhone}<br>
+      Check-in: ${formatDate(activeBooking.checkIn)} · Check-out: ${formatDate(activeBooking.checkOut)}
+      · ${activeBooking.guests} khách
+    </div>` : '';
+
+  document.getElementById('rd-room-info').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.83rem">
+      <div><span style="color:var(--text-sm)">Loại:</span> <strong>${type?.type}</strong></div>
+      <div><span style="color:var(--text-sm)">Diện tích:</span> <strong>${type?.size}m²</strong></div>
+      <div><span style="color:var(--text-sm)">Sức chứa:</span> <strong>${type?.capacity} khách</strong></div>
+      <div><span style="color:var(--text-sm)">Giá:</span> <strong>${formatCurrency(type?.price)}/đêm</strong></div>
+      <div><span style="color:var(--text-sm)">Trạng thái:</span> ${roomStatusBadge(status)}</div>
+    </div>`;
+
+  const statusOptions = [
+    { val:'empty',       label:'Trống',         cls:'btn-primary',   disabled: status==='occupied' },
+    { val:'occupied',    label:'Đang sử dụng',  cls:'btn-outline',   disabled: true },
+    { val:'inspecting',  label:'Đang kiểm tra', cls:'btn-warn',      disabled: false },
+    { val:'dirty',       label:'Cần dọn',        cls:'btn-warn',      disabled: false },
+    { val:'maintenance', label:'Bảo trì',        cls:'btn-danger',    disabled: false },
+  ];
+  document.getElementById('rd-status-btns').innerHTML = statusOptions.map(o => `
+    <button class="btn btn-sm ${o.cls} ${status===o.val?'':'btn-outline'}" ${o.disabled?'disabled':''}
+      onclick="selectRoomStatus('${o.val}')" data-status="${o.val}" style="${status===o.val?'':''}">
+      ${o.label}
+    </button>`).join('');
+
+  selectedNewStatus = status;
+  document.getElementById('rd-maintenance-form').style.display = status==='maintenance' ? 'block' : 'none';
+  openModal('room-detail-modal');
+}
+
+let selectedNewStatus = 'empty';
+function selectRoomStatus(s) {
+  selectedNewStatus = s;
+  document.querySelectorAll('#rd-status-btns button').forEach(btn => {
+    const bs = btn.dataset.status;
+    btn.className = `btn btn-sm ${bs===s ? {'empty':'btn-primary','dirty':'btn-warn','maintenance':'btn-danger','occupied':'btn-secondary'}[s] || 'btn-primary' : 'btn-outline'}`;
+  });
+  document.getElementById('rd-maintenance-form').style.display = s==='maintenance' ? 'block' : 'none';
+}
+
+document.getElementById('rd-save-btn').addEventListener('click', () => {
+  setStatus(currentRoomKey, selectedNewStatus);
+  closeModal('room-detail-modal');
+  showToast(`Phòng ${currentRoomNumber}: Đã cập nhật → ${selectedNewStatus === 'empty' ? 'Trống' : selectedNewStatus === 'dirty' ? 'Cần dọn' : selectedNewStatus === 'maintenance' ? 'Bảo trì' : 'Đang sử dụng'}`, 'success');
+  renderStats(); renderRooms();
+});
+
+/* ── Housekeeping modal ── */
+let hkRoomKey = null;
+let hkCurrentBookingId = null;
+let hkDamageItems = [];
+
+function openHousekeeping(roomNumber, number) {
+  hkCurrentBookingId = null;
+  hkDamageItems = [];
+
+  // Tìm booking đang cleaning cho phòng này
+  const cleaning = KSAN.getBookings().find(b =>
+    b.status === 'cleaning' && b.assignedRoomNumber === roomNumber
+  );
+
+  const infoEl = document.getElementById('hk-room-info');
+  if (cleaning) {
+    hkCurrentBookingId = cleaning.id;
+    infoEl.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <div>
+          <strong>Phòng ${roomNumber}</strong> — Khách: <strong>${cleaning.guestName}</strong><br>
+          <span style="font-size:.78rem;color:var(--text-sm)">Check-out: ${formatDate(cleaning.checkOut)} · Nhân viên: ${cleaning.assignedCleaner}</span>
+        </div>
+        <span class="badge badge-inspecting">Đang dọn phòng</span>
+      </div>`;
+  } else {
+    infoEl.innerHTML = `<strong>Phòng ${roomNumber}</strong> — Kiểm tra thông thường (không có booking)`;
+  }
+
+  // Build checklist
+  buildHkChecklist();
+  openModal('housekeeping-modal');
+}
+
+function buildHkChecklist() {
+  const list = document.getElementById('hk-checklist');
+  list.innerHTML = INSPECTION_ITEMS.map(item => `
+    <div class="insp-item" id="hk-item-${item.id}" style="border:1.5px solid var(--border);border-radius:8px;margin-bottom:7px;overflow:hidden">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;cursor:pointer"
+          onclick="toggleHkDamage('${item.id}')">
+        <input type="checkbox" id="hk-check-${item.id}" style="accent-color:var(--danger);flex-shrink:0"
+          onclick="event.stopPropagation();toggleHkDamage('${item.id}',this.checked)">
+        <div style="flex:1">
+          <div style="font-size:.84rem;font-weight:600">${item.name}</div>
+          <div style="font-size:.72rem;color:var(--text-sm)">${item.category} · ${item.price > 0 ? 'Giá gốc: ' + formatCurrency(item.price) : 'Nhập thủ công'}</div>
+        </div>
+        <span class="badge badge-confirmed" id="hk-status-${item.id}">Bình thường</span>
+      </div>
+      <div id="hk-body-${item.id}" style="display:none;padding:12px;background:#fef5f5;border-top:1px solid #fecaca">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div class="form-group" style="margin:0">
+            <label style="font-size:.7rem">Mức độ hư hỏng</label>
+            <select class="form-control" id="hk-level-${item.id}" onchange="updateHkPrice('${item.id}')">
+              <option value="minor">Nhẹ (25%)</option>
+              <option value="moderate" selected>Vừa (50%)</option>
+              <option value="severe">Nặng (100%)</option>
+              <option value="missing">Mất / Thay mới</option>
+              <option value="custom">Nhập tay</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0">
+            <label style="font-size:.7rem">Chi phí bồi thường (VNĐ)</label>
+            <input type="number" class="form-control" id="hk-price-${item.id}"
+              value="${Math.round(item.price * 0.5)}"
+              onchange="syncHkItem('${item.id}')">
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:10px">
+          <label style="font-size:.7rem">Mô tả hư hỏng</label>
+          <input type="text" class="form-control" id="hk-desc-${item.id}" placeholder="Mô tả cụ thể...">
+        </div>
+        <div style="border:2px dashed var(--border);border-radius:8px;padding:12px;text-align:center;cursor:pointer;background:#fff"
+            onclick="document.getElementById('hk-photo-${item.id}').click()">
+          <input type="file" id="hk-photo-${item.id}" accept="image/*" multiple style="display:none"
+            onchange="previewHkPhotos('${item.id}', this)">
+          <img src="../Public/icon/view.png" style="height:18px;opacity:.4;display:block;margin:0 auto 5px">
+          <div style="font-size:.76rem;color:var(--text-sm)">Tải ảnh hư hỏng (tối đa 4 ảnh)</div>
+          <div id="hk-photo-preview-${item.id}" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;justify-content:center"></div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleHkDamage(itemId, checked) {
+  const cb   = document.getElementById('hk-check-' + itemId);
+  const body = document.getElementById('hk-body-' + itemId);
+  const tile = document.getElementById('hk-item-' + itemId);
+  const isDmg = checked !== undefined ? checked : !cb.checked;
+  if (checked === undefined) cb.checked = isDmg;
+  body.style.display = isDmg ? 'block' : 'none';
+  tile.style.borderColor = isDmg ? '#f87171' : 'var(--border)';
+  document.getElementById('hk-status-' + itemId).textContent = isDmg ? 'Hư hỏng' : 'Bình thường';
+  document.getElementById('hk-status-' + itemId).className = `badge ${isDmg ? 'badge-cancelled' : 'badge-confirmed'}`;
+  if (isDmg) syncHkItem(itemId);
+  else hkDamageItems = hkDamageItems.filter(d => d.id !== itemId);
+}
+
+function updateHkPrice(itemId) {
+  const item  = INSPECTION_ITEMS.find(i => i.id === itemId);
+  const level = document.getElementById('hk-level-' + itemId).value;
+  if (level === 'custom') return;
+  const rates = { minor: 0.25, moderate: 0.5, severe: 1, missing: 1 };
+  const price = Math.round(item.price * (rates[level] || 0.5));
+  document.getElementById('hk-price-' + itemId).value = price;
+  syncHkItem(itemId);
+}
+
+function syncHkItem(itemId) {
+  if (!document.getElementById('hk-check-' + itemId).checked) return;
+  const item  = INSPECTION_ITEMS.find(i => i.id === itemId);
+  const price = parseInt(document.getElementById('hk-price-' + itemId).value || 0);
+  const desc  = document.getElementById('hk-desc-' + itemId).value || item.name;
+  const photos = document.getElementById('hk-photo-preview-' + itemId)?.children?.length || 0;
+  hkDamageItems = hkDamageItems.filter(d => d.id !== itemId);
+  hkDamageItems.push({ id: itemId, name: item.name, desc, amount: price, photoCount: photos });
+}
+
+function previewHkPhotos(itemId, input) {
+  const preview = document.getElementById('hk-photo-preview-' + itemId);
+  preview.innerHTML = '';
+  Array.from(input.files).slice(0, 4).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.style.cssText = 'width:60px;height:60px;object-fit:cover;border-radius:6px;border:1.5px solid var(--border)';
+      img.title = file.name;
+      preview.appendChild(img);
+      syncHkItem(itemId);
+    };
+    reader.readAsDataURL(file);
+  });
+  toggleHkDamage(itemId, true);
+}
+
+document.getElementById('hk-done-btn').addEventListener('click', () => {
+  // Sync all checked items trước khi save
+  INSPECTION_ITEMS.forEach(item => {
+    if (document.getElementById('hk-check-' + item.id)?.checked) syncHkItem(item.id);
+  });
+
+  if (hkCurrentBookingId) {
+    // completeInspection() sẽ tự set room → 'dirty' (Đang dọn thực tế)
+    completeInspection(hkCurrentBookingId, hkDamageItems);
+    const dmgCount = hkDamageItems.length;
+    closeModal('housekeeping-modal');
+    showToast(
+      `Kiểm tra xong! ${dmgCount > 0 ? dmgCount + ' hư hỏng → đã ghi nhận.' : 'Không có hư hỏng.'} Phòng → Đang dọn. Booking → Chờ thu tiền.`,
+      dmgCount > 0 ? 'warning' : 'success',
+      4500
+    );
+  } else {
+    // Không có booking (dọn thông thường) → phòng thẳng về Trống
+    if (hkRoomKey) setStatus(hkRoomKey, 'empty');
+    closeModal('housekeeping-modal');
+    showToast('Phòng đã dọn xong → Trống.', 'success');
+  }
+  renderStats(); renderRooms();
+});
+
+/* ── Edit room types ── */
+function renderRoomTypesTable() {
+  document.getElementById('room-types-tbody').innerHTML = KSAN.ROOMS.map(r => `
+    <tr>
+      <td><code style="font-size:.72rem">${r.id}</code></td>
+      <td><strong>${r.name}</strong></td>
+      <td>${r.size}m²</td>
+      <td>${r.capacity} khách</td>
+      <td id="price-${r.id}" style="font-weight:600;color:var(--dark)">${formatCurrency(r.price)}</td>
+      <td>${r.totalRooms}</td>
+      <td><button class="btn btn-sm btn-outline" onclick="openEditSingleRoom('${r.id}')">
+        <img src="../Public/icon/note.png"> Sửa
+      </button></td>
+    </tr>`).join('');
+}
+
+function openEditSingleRoom(id) {
+  const r = KSAN.ROOMS.find(x => x.id === id);
+  if (!r) return;
+  document.getElementById('esr-id').value       = id;
+  document.getElementById('esr-name').value     = r.name;
+  document.getElementById('esr-size').value     = r.size;
+  document.getElementById('esr-capacity').value = r.capacity;
+  document.getElementById('esr-price').value    = r.price;
+  document.getElementById('esr-desc').value     = r.shortDesc || '';
+  openModal('edit-single-room-modal');
+}
+document.getElementById('esr-save-btn').addEventListener('click', () => {
+  const id  = document.getElementById('esr-id').value;
+  const idx = KSAN.ROOMS.findIndex(r => r.id === id);
+  if (idx < 0) return;
+  KSAN.ROOMS[idx].name      = document.getElementById('esr-name').value.trim();
+  KSAN.ROOMS[idx].size      = parseInt(document.getElementById('esr-size').value);
+  KSAN.ROOMS[idx].capacity  = parseInt(document.getElementById('esr-capacity').value);
+  KSAN.ROOMS[idx].price     = parseInt(document.getElementById('esr-price').value);
+  KSAN.ROOMS[idx].shortDesc = document.getElementById('esr-desc').value.trim();
+  closeModal('edit-single-room-modal');
+  renderRoomTypesTable();
+  showToast('Đã cập nhật thông tin loại phòng.', 'success');
+});
+
+document.querySelector('[onclick="openModal(\'edit-room-type-modal\')"]').addEventListener('click', () => {
+  renderRoomTypesTable();
+});
+
+function markRoomClean(roomNumber) {
+  if (!confirm(`Xác nhận phòng ${roomNumber} đã dọn xong và sẵn sàng đón khách?`)) return;
+  setStatus(roomNumber, 'empty');
+  showToast(`Phòng ${roomNumber} → Trống, sẵn sàng đón khách.`, 'success');
+  renderStats(); renderRooms();
+}
+
+renderStats();
+renderRooms();
+</script>
+</body>
+</html>

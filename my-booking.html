@@ -1,0 +1,629 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đặt phòng của tôi — KSAN Hotel</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .booking-card {
+      background:#fff; border-radius:var(--radius-lg);
+      border:1.5px solid var(--border); margin-bottom:16px;
+      overflow:hidden; transition:border-color .2s;
+    }
+    .booking-card:hover { border-color:var(--primary-light); }
+    .booking-card-top {
+      display:grid; grid-template-columns:110px 1fr auto;
+      gap:0;
+    }
+    .booking-card-img { height:100px; overflow:hidden; flex-shrink:0; }
+    .booking-card-img img { width:100%;height:100%;object-fit:cover; }
+    .booking-card-info { padding:14px 16px; }
+    .booking-card-actions { padding:14px 16px; display:flex; flex-direction:column;
+      gap:8px; align-items:flex-end; justify-content:space-between;
+      border-left:1px solid var(--border); min-width:160px; }
+    .booking-meta { display:flex;flex-wrap:wrap;gap:10px;font-size:.78rem;color:var(--text-light);margin-top:4px; }
+    .booking-meta span { display:flex;align-items:center;gap:4px; }
+    .booking-meta img  { height:13px;opacity:.6; }
+
+    .service-chip { display:inline-flex;align-items:center;gap:5px;
+      background:var(--primary-pale);color:var(--primary);
+      padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:600;margin:2px; }
+    .service-chip img { height:12px; }
+
+
+    .lookup-card { background:#fff;border-radius:var(--radius-lg);padding:20px;
+      border:1.5px solid var(--border);margin-bottom:20px; }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="container">
+    <div class="header-inner">
+      <a href="index.html" class="logo">
+        <img src="Public/logo KS.png" alt="KSAN Logo">
+      </a>
+      <nav class="nav" id="main-nav">
+        <a href="index.html">Trang chủ</a>
+        <a href="rooms.html">Phòng</a>
+        <a href="services.html">Dịch vụ</a>
+        <a href="about.html">Về chúng tôi</a>
+        <a href="travel-guide.html">Cẩm nang</a>
+        <a href="my-booking.html">Đặt phòng của tôi</a>      </nav>
+      <div class="header-actions" id="header-actions"></div>
+      <button class="mobile-toggle" id="mobile-toggle">☰</button>
+    </div>
+  </div>
+</header>
+
+<section class="page-hero">
+  <div class="container page-hero-content">
+    <h1>Đặt phòng của tôi</h1>
+    <div class="breadcrumb">
+      <a href="index.html">Trang chủ</a><span>›</span>
+      <span>Đặt phòng của tôi</span>
+    </div>
+  </div>
+</section>
+
+<section class="section-sm">
+  <div class="container">
+
+    <!-- Lookup (guest chưa đăng nhập) -->
+    <div id="lookup-area" class="lookup-card">
+      <div style="display:flex;align-items:flex-start;gap:14px">
+        <div style="width:40px;height:40px;background:var(--primary-pale);border-radius:10px;
+          display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <img src="Public/icon/search.png" style="width:22px;height:22px;object-fit:contain">
+        </div>
+        <div style="flex:1">
+          <h3 style="margin-bottom:4px;font-size:1rem">Tra cứu đặt phòng</h3>
+          <p style="color:var(--text-light);font-size:.85rem;margin-bottom:12px">
+            Nhập mã đặt phòng (BK...) hoặc email để xem thông tin.
+            Hoặc <a href="#" onclick="openModal('login-modal')">đăng nhập</a> để xem tất cả.
+          </p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <input type="text" class="form-control" id="lookup-input"
+              placeholder="VD: BK1749... hoặc email@example.com"
+              style="flex:1;min-width:220px">
+            <button class="btn btn-primary" id="lookup-btn">
+              <img src="Public/icon/search.png" style="height:16px;filter:invert(1)"> Tra cứu
+            </button>
+          </div>
+          <div id="lookup-result" style="margin-top:12px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs + content (khi đăng nhập) -->
+    <div id="user-booking-area">
+      <div class="tabs" id="booking-tabs">
+        <button class="tab-btn active" data-tab="tab-all">Tất cả</button>
+        <button class="tab-btn" data-tab="tab-upcoming">Sắp tới</button>
+        <button class="tab-btn" data-tab="tab-active">Đang lưu trú</button>
+        <button class="tab-btn" data-tab="tab-past">Đã trả phòng</button>
+        <button class="tab-btn" data-tab="tab-cancelled">Đã hủy</button>
+        <button class="tab-btn" data-tab="tab-services">Dịch vụ đã đặt</button>
+      </div>
+      <div id="tab-all"       class="tab-pane active"><div id="list-all"></div></div>
+      <div id="tab-upcoming"  class="tab-pane"><div id="list-upcoming"></div></div>
+      <div id="tab-active"    class="tab-pane"><div id="list-active"></div></div>
+      <div id="tab-past"      class="tab-pane"><div id="list-past"></div></div>
+      <div id="tab-cancelled" class="tab-pane"><div id="list-cancelled"></div></div>
+      <div id="tab-services"  class="tab-pane"><div id="list-services"></div></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ INVOICE MODAL ═══ -->
+<div class="modal-overlay" id="invoice-modal">
+  <div class="modal" style="max-width:620px">
+    <div class="modal-header">
+      <div style="display:flex;align-items:center;gap:10px">
+        <img src="Public/icon/invoice.png" style="height:22px">
+        <h3 style="margin:0">Hóa đơn chi tiết</h3>
+      </div>
+      <button class="modal-close" onclick="closeModal('invoice-modal')">×</button>
+    </div>
+    <div class="modal-body" id="invoice-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('invoice-modal')">Đóng</button>
+      <button class="btn btn-primary" onclick="window.print()">
+        <img src="Public/icon/printer.png" style="height:16px;filter:invert(1)"> In hóa đơn
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CANCEL MODAL ═══ -->
+<div class="modal-overlay" id="cancel-modal">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <h3>Hủy đặt phòng</h3>
+      <button class="modal-close" onclick="closeModal('cancel-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="cancel-info"></div>
+      <div class="form-group" style="margin-top:14px">
+        <label>Lý do hủy (không bắt buộc)</label>
+        <textarea class="form-control" id="cancel-reason" rows="3"
+          placeholder="Thay đổi kế hoạch, tìm được chỗ khác..."></textarea>
+      </div>
+      <div style="background:#fef9e7;padding:12px;border-radius:8px;font-size:.82rem;color:var(--warning)">
+        <img src="Public/icon/Policy.png" style="height:14px;vertical-align:middle;margin-right:4px">
+        <strong>Lưu ý:</strong> Hành động hủy không thể hoàn tác sau khi xác nhận.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('cancel-modal')">Giữ đặt phòng</button>
+      <button class="btn btn-danger" id="confirm-cancel-btn">Xác nhận hủy</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FEEDBACK MODAL ═══ -->
+<div class="modal-overlay" id="feedback-quick-modal">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <h3>Gửi đánh giá</h3>
+      <button class="modal-close" onclick="closeModal('feedback-quick-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="fq-booking-info" style="background:var(--bg);padding:12px;border-radius:8px;margin-bottom:16px;font-size:.85rem"></div>
+      <div class="form-group">
+        <label>Đánh giá tổng thể *</label>
+        <div class="star-rating" id="fq-stars">
+          <input type="radio" name="fq-rating" id="fq-s5" value="5"><label for="fq-s5">★</label>
+          <input type="radio" name="fq-rating" id="fq-s4" value="4"><label for="fq-s4">★</label>
+          <input type="radio" name="fq-rating" id="fq-s3" value="3"><label for="fq-s3">★</label>
+          <input type="radio" name="fq-rating" id="fq-s2" value="2"><label for="fq-s2">★</label>
+          <input type="radio" name="fq-rating" id="fq-s1" value="1"><label for="fq-s1">★</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Nội dung đánh giá</label>
+        <textarea class="form-control" id="fq-comment" rows="4"
+          placeholder="Chia sẻ trải nghiệm của bạn tại KSAN..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('feedback-quick-modal')">Bỏ qua</button>
+      <button class="btn btn-primary" id="fq-submit-btn">Gửi đánh giá</button>
+    </div>
+  </div>
+</div>
+
+<footer class="footer"></footer>
+
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script>
+initTabs('#booking-tabs');
+
+let cancelBookingId   = null;
+let feedbackBookingId = null;
+
+/* ────────────────────────────────
+   Render một booking card
+──────────────────────────────── */
+function renderBookingCard(b, compact) {
+  const room     = KSAN.ROOMS.find(r => r.id === b.roomId);
+  const stat     = KSAN.statusLabel(b.status);
+  const now      = new Date();
+  const cin      = new Date(b.checkIn);
+  const cout     = new Date(b.checkOut);
+
+  const canCancel   = b.status === 'confirmed';
+  const canFeedback = b.status === 'checked_out';
+  const isCancelled = b.status === 'cancelled';
+  const isActive    = b.status === 'checked_in';
+
+  /* service orders linked to this booking */
+  const svcOrders = KSAN.getBookingServiceOrders(b.id);
+
+  return `
+  <div class="booking-card" id="card-${b.id}">
+    <div class="booking-card-top">
+      <div class="booking-card-img">
+        <img src="${b.roomImage || (room ? room.image : 'Public/room1.jpg')}" alt="${b.roomName}">
+      </div>
+      <div class="booking-card-info">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+          <strong style="font-size:.95rem">${b.roomName}</strong>
+          <span class="badge ${stat.cls}">${stat.label}</span>
+          ${b.promoCode ? `<span class="badge badge-gold">
+            <img src="Public/icon/promo-code.png" style="height:11px"> ${b.promoCode}</span>` : ''}
+        </div>
+        <div class="booking-meta">
+          <span><img src="Public/icon/id-card.png"> ${b.id}</span>
+          <span><img src="Public/icon/calendar.png"> ${KSAN.formatDate(b.checkIn)} → ${KSAN.formatDate(b.checkOut)}</span>
+          <span><img src="Public/icon/night.png"> ${b.nights} đêm</span>
+          <span><img src="Public/icon/số lượng.png"> ${b.guests} khách</span>
+        </div>
+        <div style="margin-top:8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:.82rem">
+          <span>Tổng: <strong style="color:var(--primary)">${KSAN.formatCurrency(b.totalPrice)}</strong></span>
+          <span style="color:var(--text-light)">Đã cọc: ${KSAN.formatCurrency(b.deposit)}</span>
+          ${isActive ? `<span style="color:var(--success);font-weight:600">✓ Đang lưu trú</span>` : ''}
+        </div>
+        ${isCancelled && b.refund !== undefined ? `
+          <div style="margin-top:6px;font-size:.8rem">
+            ${b.penalty > 0
+              ? `<span style="color:var(--danger)">Phí hủy: ${KSAN.formatCurrency(b.penalty)}</span>
+                 <span style="color:var(--text-light);margin:0 6px">·</span>
+                 <span style="color:var(--success)">Hoàn tiền: ${KSAN.formatCurrency(b.refund)}</span>`
+              : `<span style="color:var(--success)"><img src="Public/icon/success.png" style="height:12px;vertical-align:middle;margin-right:4px"> Hoàn tiền đầy đủ: ${KSAN.formatCurrency(b.refund)}</span>`}
+          </div>` : ''}
+
+        ${svcOrders.length ? `
+          <div style="margin-top:8px">
+            ${svcOrders.map(o => `
+              <span class="service-chip">
+                <img src="${o.serviceIcon || 'Public/icon/spa.png'}"> ${o.serviceName}
+              </span>`).join('')}
+          </div>` : ''}
+      </div>
+      <div class="booking-card-actions">
+        <div style="text-align:right">
+          <div style="font-size:.72rem;color:var(--text-light)">Còn lại khi check-in</div>
+          <div style="font-size:1rem;font-weight:700;color:var(--secondary)">${KSAN.formatCurrency(b.totalPrice - b.deposit)}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;width:100%">
+          <button class="btn btn-outline btn-sm btn-full" onclick="showInvoice('${b.id}')">
+            <img src="Public/icon/invoice.png" style="height:14px"> Hóa đơn
+          </button>
+          ${canCancel ? `<button class="btn btn-outline btn-sm btn-full" onclick="openCancelModal('${b.id}')">Hủy phòng</button>` : ''}
+          ${isActive ? `
+            <a href="services.html?booking=${b.id}" class="btn btn-primary btn-sm btn-full">+ Đặt dịch vụ</a>` : ''}
+          ${canFeedback ? `<button class="btn btn-outline btn-sm btn-full" onclick="openFeedbackModal('${b.id}')"><img src="Public/icon/note.png" style="height:13px;vertical-align:middle;margin-right:4px;opacity:.75"> Đánh giá</button>` : ''}
+          ${!isCancelled ? `<a href="confirmation.html?id=${b.id}" class="btn btn-outline btn-sm btn-full">Chi tiết</a>` : ''}
+        </div>
+      </div>
+    </div>
+    ${b.specialReq ? `
+    <div style="padding:10px 16px;background:var(--bg);border-top:1px solid var(--border);font-size:.8rem;color:var(--text-light)">
+      <img src="Public/icon/note.png" style="height:13px;vertical-align:middle;margin-right:4px">
+      <strong>Yêu cầu đặc biệt:</strong> ${b.specialReq}
+    </div>` : ''}
+  </div>`;
+}
+
+/* ────────────────────────────────
+   Render danh sách + empty state
+──────────────────────────────── */
+function renderList(bookings, containerId) {
+  const el = document.getElementById(containerId);
+  if (!bookings.length) {
+    el.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <img src="Public/icon/bed.png" style="width:56px;opacity:.3">
+        </div>
+        <h3>Chưa có đặt phòng</h3>
+        <p>Hãy đặt phòng để bắt đầu trải nghiệm tại KSAN!</p>
+        <a href="rooms.html" class="btn btn-primary mt-16">Xem phòng ngay →</a>
+      </div>`;
+    return;
+  }
+  el.innerHTML = bookings.map(b => renderBookingCard(b)).join('');
+}
+
+/* ────────────────────────────────
+   Render services tab
+──────────────────────────────── */
+function renderServicesTab(customerId) {
+  const el = document.getElementById('list-services');
+  const orders = KSAN.getCustomerServiceOrders(customerId);
+  if (!orders.length) {
+    el.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <img src="Public/icon/spa.png" style="width:56px;opacity:.3">
+        </div>
+        <h3>Chưa có dịch vụ nào</h3>
+        <p>Khám phá các dịch vụ cao cấp của KSAN.</p>
+        <a href="services.html" class="btn btn-primary mt-16">Xem dịch vụ →</a>
+      </div>`;
+    return;
+  }
+  el.innerHTML = orders.map(o => {
+    const stat = KSAN.serviceOrderStatusLabel(o.status);
+    return `
+    <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:#fff;
+      border-radius:var(--radius-lg);border:1.5px solid var(--border);margin-bottom:12px;
+      transition:border-color .2s" onmouseover="this.style.borderColor='var(--primary-light)'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="width:48px;height:48px;border-radius:10px;background:var(--primary-pale);
+        display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <img src="${o.serviceIcon || 'Public/icon/spa.png'}" style="width:28px;height:28px;object-fit:contain">
+      </div>
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+          <strong style="font-size:.92rem">${o.serviceName}</strong>
+          <span class="badge ${stat.cls}">${stat.label}</span>
+        </div>
+        <div style="font-size:.78rem;color:var(--text-light);display:flex;gap:12px;flex-wrap:wrap">
+          <span><img src="Public/icon/id-card.png" style="height:12px"> ${o.id}</span>
+          <span><img src="Public/icon/calendar.png" style="height:12px"> ${KSAN.formatDate(o.date)} ${o.time}</span>
+          <span><img src="Public/icon/số lượng.png" style="height:12px;vertical-align:middle;opacity:.6"> ${o.quantity} người</span>
+          ${o.bookingId ? `<span><img src="Public/icon/reception.png" style="height:12px;vertical-align:middle;opacity:.6"> Booking: ${o.bookingId}</span>` : ''}
+          ${o.notes ? `<span><img src="Public/icon/note.png" style="height:12px;vertical-align:middle;opacity:.6"> ${o.notes}</span>` : ''}
+        </div>
+      </div>
+      <div style="text-align:right;min-width:100px">
+        <div style="font-weight:700;color:var(--primary)">${o.totalPrice > 0 ? KSAN.formatCurrency(o.totalPrice) : 'Miễn phí'}</div>
+        <div style="font-size:.72rem;color:var(--text-light);margin-bottom:6px">${KSAN.formatDate(o.createdAt)}</div>
+        ${o.status === 'pending' ? `
+          <button class="btn btn-danger btn-sm" onclick="cancelSvcOrder('${o.id}')">Hủy</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ────────────────────────────────
+   Load all bookings
+──────────────────────────────── */
+function loadBookings() {
+  const user = KSAN.getCurrentUser();
+  if (!user) return;
+
+  document.getElementById('lookup-area').style.display = 'none';
+  document.getElementById('user-booking-area').style.display = 'block';
+
+  const all       = KSAN.getCustomerBookings(user.id);
+  const now       = new Date();
+  const upcoming  = all.filter(b => b.status === 'confirmed' && new Date(b.checkIn) > now);
+  const active    = all.filter(b => b.status === 'checked_in');
+  const past      = all.filter(b => b.status === 'checked_out');
+  const cancelled = all.filter(b => b.status === 'cancelled' || b.status === 'no_show');
+
+  renderList(all,       'list-all');
+  renderList(upcoming,  'list-upcoming');
+  renderList(active,    'list-active');
+  renderList(past,      'list-past');
+  renderList(cancelled, 'list-cancelled');
+  renderServicesTab(user.id);
+}
+
+/* ────────────────────────────────
+   Hóa đơn
+──────────────────────────────── */
+function showInvoice(id) {
+  const b    = KSAN.getBookingById(id);
+  const room = KSAN.ROOMS.find(r => r.id === b.roomId);
+  const svcs = KSAN.getBookingServiceOrders(id).filter(o => o.status !== 'cancelled');
+  const svcTotal = svcs.reduce((s, o) => s + o.totalPrice, 0);
+  const grandTotal = b.totalPrice + svcTotal;
+
+  document.getElementById('invoice-body').innerHTML = `
+    <div style="text-align:center;padding:16px 0 12px">
+      <img src="Public/logo KS.png" style="height:50px;margin:0 auto 8px">
+      <div style="font-size:.75rem;color:var(--text-light)">123 Nguyễn Huệ, Q.1, TP.HCM · (028) 1234 5678</div>
+      <div style="font-weight:700;font-size:.95rem;text-transform:uppercase;letter-spacing:1px;margin-top:6px">Hóa đơn lưu trú</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;background:var(--bg);padding:12px;border-radius:10px;margin-bottom:14px;font-size:.82rem">
+      <div><span style="color:var(--text-light)">Mã đặt phòng:</span><br><strong>${b.id}</strong></div>
+      <div><span style="color:var(--text-light)">Ngày xuất:</span><br><strong>${KSAN.formatDate(new Date().toISOString())}</strong></div>
+      <div><span style="color:var(--text-light)">Khách hàng:</span><br><strong>${b.guestName}</strong></div>
+      <div><span style="color:var(--text-light)">Liên hệ:</span><br><strong>${b.guestPhone}</strong></div>
+    </div>
+
+    <table style="width:100%;border-collapse:collapse;font-size:.83rem;margin-bottom:14px">
+      <thead>
+        <tr style="background:var(--primary);color:#fff">
+          <th style="padding:9px 12px;text-align:left;border-radius:8px 0 0 0">Khoản mục</th>
+          <th style="padding:9px 12px;text-align:center">SL</th>
+          <th style="padding:9px 12px;text-align:right;border-radius:0 8px 0 0">Thành tiền</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:9px 12px">${b.roomName} — ${KSAN.formatCurrency(room ? room.price : 0)}/đêm</td>
+          <td style="padding:9px 12px;text-align:center">${b.nights} đêm</td>
+          <td style="padding:9px 12px;text-align:right">${KSAN.formatCurrency(b.basePrice)}</td>
+        </tr>
+        ${b.discount > 0 ? `
+        <tr style="border-bottom:1px solid var(--border);color:var(--success)">
+          <td style="padding:9px 12px">Giảm giá (${b.promoCode})</td>
+          <td style="padding:9px 12px;text-align:center">—</td>
+          <td style="padding:9px 12px;text-align:right">−${KSAN.formatCurrency(b.discount)}</td>
+        </tr>` : ''}
+        ${svcs.map(o => `
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:9px 12px">${o.serviceName} (${KSAN.formatDate(o.date)} ${o.time})</td>
+          <td style="padding:9px 12px;text-align:center">${o.quantity}</td>
+          <td style="padding:9px 12px;text-align:right">${o.totalPrice > 0 ? KSAN.formatCurrency(o.totalPrice) : 'Miễn phí'}</td>
+        </tr>`).join('')}
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:9px 12px;color:var(--text-light)">Thuế VAT (10%)</td>
+          <td style="padding:9px 12px;text-align:center">—</td>
+          <td style="padding:9px 12px;text-align:right;color:var(--text-light)">${KSAN.formatCurrency(Math.round(grandTotal * 0.1))}</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr style="background:var(--primary-pale)">
+          <td style="padding:11px 12px;font-weight:700;border-radius:0 0 0 8px" colspan="2">TỔNG (bao gồm VAT)</td>
+          <td style="padding:11px 12px;text-align:right;font-weight:700;color:var(--primary);font-size:1rem;border-radius:0 0 8px 0">
+            ${KSAN.formatCurrency(grandTotal + Math.round(grandTotal * 0.1))}
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div style="background:#e8f8ee;padding:12px;border-radius:8px">
+        <div style="font-size:.72rem;font-weight:700;color:var(--success);text-transform:uppercase;margin-bottom:4px">
+          <img src="Public/icon/check.png" style="height:12px"> Đã thanh toán (cọc)
+        </div>
+        <div style="font-size:1.1rem;font-weight:700">${KSAN.formatCurrency(b.deposit)}</div>
+      </div>
+      <div style="background:#fef9e7;padding:12px;border-radius:8px">
+        <div style="font-size:.72rem;font-weight:700;color:var(--warning);text-transform:uppercase;margin-bottom:4px">
+          <img src="Public/icon/deposit.png" style="height:12px"> Còn lại khi check-in
+        </div>
+        <div style="font-size:1.1rem;font-weight:700">${KSAN.formatCurrency(b.totalPrice - b.deposit)}</div>
+      </div>
+    </div>`;
+
+  openModal('invoice-modal');
+}
+
+/* ────────────────────────────────
+   Hủy phòng
+──────────────────────────────── */
+function openCancelModal(id) {
+  cancelBookingId = id;
+  const b   = KSAN.getBookingById(id);
+  const now = new Date();
+  const cin = new Date(b.checkIn);
+  const diffH = (cin - now) / 36e5;
+
+  let penaltyPct = 0;
+  if (diffH < 0) penaltyPct = 100;
+  else if (diffH < 24) penaltyPct = 100;
+  else if (diffH < 48) penaltyPct = 30;
+
+  const penalty = Math.round(b.deposit * penaltyPct / 100);
+  const refund  = b.deposit - penalty;
+
+  document.getElementById('cancel-info').innerHTML = `
+    <div style="background:var(--bg);padding:14px;border-radius:10px;margin-bottom:12px;font-size:.88rem">
+      <strong>${b.roomName}</strong>
+      <div style="color:var(--text-light);margin-top:4px">
+        <img src="Public/icon/calendar.png" style="height:13px;vertical-align:middle">
+        ${KSAN.formatDate(b.checkIn)} → ${KSAN.formatDate(b.checkOut)} · ${b.nights} đêm
+      </div>
+      <div style="color:var(--text-light);margin-top:2px">
+        <img src="Public/icon/deposit.png" style="height:13px;vertical-align:middle">
+        Tiền cọc đã thanh toán: <strong>${KSAN.formatCurrency(b.deposit)}</strong>
+      </div>
+    </div>
+    ${penaltyPct === 0
+      ? `<div class="alert alert-success">
+          <img src="Public/icon/check.png" style="height:14px;vertical-align:middle">
+          <strong>Hủy miễn phí!</strong> Hoàn lại toàn bộ: <strong>${KSAN.formatCurrency(refund)}</strong>
+         </div>`
+      : penaltyPct === 30
+        ? `<div class="alert alert-warning">
+            <img src="Public/icon/crisis.png" style="height:14px;vertical-align:middle;margin-right:4px"> Hủy trong 24–48h trước nhận phòng.<br>
+            Phí hủy: <strong>${KSAN.formatCurrency(penalty)} (30%)</strong> · Hoàn lại: <strong>${KSAN.formatCurrency(refund)}</strong>
+           </div>`
+        : `<div class="alert alert-danger">
+            <img src="Public/icon/crisis.png" style="height:14px;vertical-align:middle">
+            Hủy trong vòng 24h — <strong>Mất toàn bộ tiền cọc ${KSAN.formatCurrency(penalty)}</strong>
+           </div>`}`;
+
+  openModal('cancel-modal');
+}
+
+document.getElementById('confirm-cancel-btn').addEventListener('click', () => {
+  if (!cancelBookingId) return;
+  const res = KSAN.cancelBooking(cancelBookingId);
+  closeModal('cancel-modal');
+
+  if (res.ok) {
+    const msg = res.refund > 0
+      ? `Đã hủy phòng. Hoàn tiền ${KSAN.formatCurrency(res.refund)} trong 3–5 ngày làm việc.`
+      : `Đã hủy phòng. Tiền cọc không được hoàn do hủy trễ.`;
+    showToast(msg, res.refund > 0 ? 'success' : 'warning', 5000);
+    loadBookings();   /* reload ngay lập tức */
+  } else {
+    showToast(res.msg, 'error');
+  }
+  cancelBookingId = null;
+});
+
+/* ────────────────────────────────
+   Feedback
+──────────────────────────────── */
+function openFeedbackModal(id) {
+  feedbackBookingId = id;
+  const b = KSAN.getBookingById(id);
+  /* reset radio */
+  document.querySelectorAll('input[name="fq-rating"]').forEach(r => r.checked = false);
+  document.getElementById('fq-comment').value = '';
+  document.getElementById('fq-booking-info').innerHTML = `
+    <strong>${b.roomName}</strong> &nbsp;·&nbsp;
+    ${KSAN.formatDate(b.checkIn)} → ${KSAN.formatDate(b.checkOut)}`;
+  openModal('feedback-quick-modal');
+}
+
+document.getElementById('fq-submit-btn').addEventListener('click', () => {
+  const rating  = document.querySelector('input[name="fq-rating"]:checked');
+  const comment = document.getElementById('fq-comment').value.trim();
+  if (!rating)  { showToast('Vui lòng chọn số sao.', 'warning'); return; }
+
+  const b = KSAN.getBookingById(feedbackBookingId);
+  const rv = parseInt(rating.value);
+  KSAN.saveFeedback({
+    bookingId: feedbackBookingId,
+    guestName: b ? b.guestName : '',
+    roomName:  b ? b.roomName  : '',
+    rating: rv, comment,
+    type: rv >= 4 ? 'praise' : rv === 3 ? 'suggestion' : 'complaint'
+  });
+  closeModal('feedback-quick-modal');
+  showToast('Cảm ơn bạn đã gửi đánh giá! 🙏 Bạn sẽ nhận mã ưu đãi qua email.', 'success', 4500);
+  feedbackBookingId = null;
+});
+
+/* ────────────────────────────────
+   Hủy đơn dịch vụ
+──────────────────────────────── */
+function cancelSvcOrder(id) {
+  if (!confirm('Xác nhận hủy dịch vụ này?')) return;
+  KSAN.cancelServiceOrder(id);
+  showToast('Đã hủy đơn dịch vụ.', 'info');
+  const user = KSAN.getCurrentUser();
+  if (user) renderServicesTab(user.id);
+}
+
+/* ────────────────────────────────
+   Lookup (khách không đăng nhập)
+──────────────────────────────── */
+document.getElementById('lookup-btn').addEventListener('click', () => {
+  const val = document.getElementById('lookup-input').value.trim();
+  if (!val) { showToast('Vui lòng nhập mã đặt phòng hoặc email.', 'warning'); return; }
+
+  const el = document.getElementById('lookup-result');
+  let bookings = [];
+
+  if (val.toUpperCase().startsWith('BK')) {
+    const b = KSAN.getBookingById(val.toUpperCase());
+    if (b) bookings = [b];
+  } else {
+    bookings = KSAN.getBookings().filter(b =>
+      b.guestEmail.toLowerCase() === val.toLowerCase() ||
+      b.guestPhone === val);
+  }
+
+  if (!bookings.length) {
+    el.innerHTML = `<div class="alert alert-warning">
+      <img src="Public/icon/info.png" style="height:14px;vertical-align:middle">
+      Không tìm thấy đặt phòng với thông tin "<strong>${val}</strong>".
+      Kiểm tra lại mã hoặc email đã dùng khi đặt.
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = `<div class="alert alert-success">Tìm thấy ${bookings.length} đặt phòng:</div>` +
+    bookings.map(b => renderBookingCard(b)).join('');
+});
+
+/* ────────────────────────────────
+   Init
+──────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  const user = KSAN.getCurrentUser();
+  if (user) {
+    loadBookings();
+  } else {
+    document.getElementById('user-booking-area').style.display = 'none';
+  }
+});
+</script>
+<script src="js/footer.js"></script>
+</body>
+</html>
+
+
