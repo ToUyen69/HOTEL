@@ -1,5 +1,5 @@
-/* ============================================================
-   KSAN — Standard Footer (inject vào tất cả trang khách hàng)
+﻿/* ============================================================
+   The Forest — Standard Footer (inject vào tất cả trang khách hàng)
    ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
   const footer = document.querySelector('footer.footer');
@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <!-- Google Maps -->
     <div class="footer-map">
       <iframe
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.4577565082064!2d106.6957803!3d10.7769453!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f40a3b49e59%3A0xa1bd14e483a602db!2zTmd1eeG7hW4gSHXhu4MgV2Fsa2luZyBTdHJlZXQ!5e0!3m2!1svi!2svn!4v1700000000000"
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3900.8!2d108.4449!3d11.9401!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31757a5a0e20b6f3%3A0xd5da4832e6a8cd8d!2zxJDDoCBM4bqhdA!5e0!3m2!1svi!2svn!4v1700000000000"
         width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"
         referrerpolicy="no-referrer-when-downgrade">
       </iframe>
@@ -27,9 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
           <!-- Col 1: Brand -->
           <div>
-            <img src="${base}Public/logo KS.png" alt="KSAN" style="height:52px;margin-bottom:14px">
+            <img src="${base}Public/logo KS.png" alt="The Forest" style="height:52px;margin-bottom:14px">
             <p style="font-size:.84rem;line-height:1.9;color:rgba(255,255,255,.7);margin-bottom:16px">
-              Khách sạn thông minh KSAN — nơi công nghệ và sự ấm áp hòa quyện tạo nên những kỳ nghỉ đáng nhớ.
+              The Forest — Khu nghỉ dưỡng núi rừng Đà Lạt. Nơi bạn chữa lành, hòa mình vào thiên nhiên và tìm lại bình yên.
             </p>
             <div class="social-links">
               <a href="#" class="social-link" title="Facebook">
@@ -78,19 +78,19 @@ document.addEventListener('DOMContentLoaded', () => {
               <span class="footer-contact-icon">
                 <img src="${base}Public/icon/placeholder.png" style="height:14px;filter:invert(1);opacity:.75">
               </span>
-              <span>123 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh</span>
+              <span>Km 4 Đường Trần Hưng Đạo, Đà Lạt, Lâm Đồng</span>
             </div>
             <div class="footer-contact-item">
               <span class="footer-contact-icon">
                 <img src="${base}Public/icon/call.png" style="height:14px;filter:invert(1);opacity:.75">
               </span>
-              <span>(028) 1234 5678</span>
+              <span>(0263) 3822 888</span>
             </div>
             <div class="footer-contact-item">
               <span class="footer-contact-icon">
                 <img src="${base}Public/icon/info.png" style="height:14px;filter:invert(1);opacity:.75">
               </span>
-              <span>info@ksan.vn</span>
+              <span>hello@theforest.vn</span>
             </div>
             <div class="footer-contact-item">
               <span class="footer-contact-icon">
@@ -123,13 +123,15 @@ document.addEventListener('DOMContentLoaded', () => {
     <!-- Footer bottom -->
     <div class="footer-bottom">
       <div class="container" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
-        <span>© 2025 KSAN Hotel. Hệ thống quản lý khách sạn thông minh.</span>
+        <span>© 2025 The Forest. Khu nghỉ dưỡng thiên nhiên Đà Lạt.</span>
         <div style="display:flex;gap:20px;font-size:.78rem">
           <a href="#" style="color:rgba(255,255,255,.5)">Chính sách bảo mật</a>
           <a href="#" style="color:rgba(255,255,255,.5)">Điều khoản sử dụng</a>
-          <a href="${base}admin/index.html" style="color:rgba(255,255,255,.3)">Admin</a>
+          <a href="${base}admin/index.html" style="color:rgba(255,255,255,.3)">Admin — The Forest</a>
         </div>
       </div>
     </div>
   `;
 });
+
+

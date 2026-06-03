@@ -1,10 +1,10 @@
-/* ============================================================
-   KSAN Admin — Shared JS (1 tài khoản demo)
+﻿/* ============================================================
+   The Forest Admin — Shared JS (1 tài khoản demo)
    ============================================================ */
 
 /* ── Một tài khoản demo duy nhất ── */
 const ADMIN_ACCOUNT = {
-  id: 'A001', name: 'Nguyễn Thị Lan', role: 'admin',
+  id: 'A001', name: 'Nguyễn Thị Lan', role: 'Admin',
   roleLabel: 'Quản trị viên', password: 'admin123'
 };
 
@@ -13,15 +13,15 @@ const AdminAuth = {
   login(password) {
     if (password !== ADMIN_ACCOUNT.password && password !== '123456')
       return { ok: false, msg: 'Sai mật khẩu.' };
-    sessionStorage.setItem('ksan_admin', JSON.stringify(ADMIN_ACCOUNT));
+    sessionStorage.setItem('ksan_Admin', JSON.stringify(ADMIN_ACCOUNT));
     return { ok: true, account: ADMIN_ACCOUNT };
   },
   logout() {
-    sessionStorage.removeItem('ksan_admin');
+    sessionStorage.removeItem('ksan_Admin');
     location.href = 'index.html';
   },
   current() {
-    try { return JSON.parse(sessionStorage.getItem('ksan_admin')); } catch { return null; }
+    try { return JSON.parse(sessionStorage.getItem('ksan_Admin')); } catch { return null; }
   },
   require() {
     const acc = this.current();
@@ -77,12 +77,9 @@ function renderSidebar(activePage) {
   const sidebar = document.getElementById('sidebar');
   if (!sidebar) return;
   sidebar.innerHTML = `
-    <div class="sidebar-logo">
-      <img src="../Public/logo KS.png" alt="KSAN">
-      <div>
-        <div class="sidebar-logo-text">KSAN</div>
-        <div class="sidebar-logo-sub">Admin Panel</div>
-      </div>
+    <!-- Logo chỉ có ảnh, không có text -->
+    <div class="sidebar-logo" style="justify-content:center;padding:18px 16px">
+      <img src="../Public/logo KS.png" alt="The Forest" style="height:54px;margin:0 auto">
     </div>
     <div class="sidebar-section">Quản lý</div>
     <nav class="sidebar-nav">
@@ -98,26 +95,90 @@ function renderSidebar(activePage) {
       <a href="customers.html" class="${activePage==='customers'?'active':''}">
         <img src="../Public/icon/user.png"> Khách hàng
       </a>
-      <div class="sidebar-section">Hệ thống</div>
-      <a href="../index.html">
-        <img src="../Public/icon/home.png"> Trang khách hàng
+      <a href="customers.html?tab=feedback" class="${activePage==='feedback'?'active':''}">
+        <img src="../Public/icon/notification.png"> Phản hồi
       </a>
     </nav>
-    <div class="sidebar-user">
-      <div class="sidebar-avatar">${acc.name[0]}</div>
-      <div>
-        <div class="sidebar-user-name">${acc.name}</div>
-        <div class="sidebar-user-role">${acc.roleLabel}</div>
+    <!-- User profile — nhấn để mở popup -->
+    <div style="position:relative">
+      <div class="sidebar-user" id="sidebar-profile-btn"
+        onclick="toggleProfilePopup()"
+        style="cursor:pointer;transition:background .2s"
+        onmouseover="this.style.background='rgba(255,255,255,.06)'"
+        onmouseout="this.style.background=''">
+        <div class="sidebar-avatar">${acc.name[0]}</div>
+        <div style="flex:1;min-width:0">
+          <div class="sidebar-user-name">${acc.name}</div>
+          <div class="sidebar-user-role">${acc.roleLabel}</div>
+        </div>
+        <span style="color:rgba(255,255,255,.4);font-size:.7rem">▴</span>
       </div>
-      <button class="sidebar-logout" onclick="AdminAuth.logout()" title="Đăng xuất">
-        <img src="../Public/icon/cross.png">
-      </button>
+      <!-- Profile popup (mở lên phía trên) -->
+      <div id="sidebar-profile-popup" style="display:none;position:absolute;bottom:calc(100% + 8px);
+        left:10px;right:10px;background:#fff;border-radius:12px;
+        box-shadow:0 -4px 30px rgba(0,0,0,.2);overflow:hidden;z-index:500;
+        animation:popupUp .2s cubic-bezier(.22,1,.36,1) both">
+        <!-- Hotel info header -->
+        <div style="padding:14px 16px;background:var(--dark);display:flex;align-items:center;gap:10px">
+          <img src="../Public/logo KS.png" style="height:38px;border-radius:6px">
+          <div>
+            <div style="font-weight:700;color:var(--cream);font-size:.88rem;font-family:'Playfair Display',serif">The Forest</div>
+            <div style="font-size:.68rem;color:rgba(255,255,255,.5);letter-spacing:.5px">Khu nghỉ dưỡng Đà Lạt</div>
+          </div>
+        </div>
+        <!-- User info -->
+        <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--medium);
+            display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:.9rem;flex-shrink:0">
+            ${acc.name[0]}
+          </div>
+          <div>
+            <div style="font-weight:700;font-size:.85rem;color:var(--text)">${acc.name}</div>
+            <div style="font-size:.72rem;color:var(--text-sm)">${acc.roleLabel}</div>
+          </div>
+        </div>
+        <!-- Đăng xuất -->
+        <div style="padding:8px 10px">
+          <button onclick="AdminAuth.logout()"
+            style="display:flex;align-items:center;justify-content:center;gap:8px;
+              width:100%;padding:10px 16px;border-radius:8px;
+              font-size:.85rem;font-weight:600;color:#dc2626;
+              background:#fef2f2;border:1.5px solid #fecaca;cursor:pointer;
+              transition:all .2s"
+            onmouseover="this.style.background='#fee2e2';this.style.borderColor='#f87171'"
+            onmouseout="this.style.background='#fef2f2';this.style.borderColor='#fecaca'">
+            <img src="../Public/icon/cross.png" style="width:15px;height:15px;opacity:.7">
+            Đăng xuất
+          </button>
+        </div>
+      </div>
     </div>`;
 }
 
+/* ── Profile popup toggle ── */
+function toggleProfilePopup() {
+  const popup = document.getElementById('sidebar-profile-popup');
+  const arrow = document.querySelector('#sidebar-profile-btn span');
+  if (!popup) return;
+  const isOpen = popup.style.display !== 'none';
+  popup.style.display = isOpen ? 'none' : 'block';
+  if (arrow) arrow.textContent = isOpen ? '▴' : '▾';
+}
+
+/* Đóng khi click ra ngoài */
+document.addEventListener('click', e => {
+  const btn   = document.getElementById('sidebar-profile-btn');
+  const popup = document.getElementById('sidebar-profile-popup');
+  if (popup && btn && !btn.contains(e.target) && !popup.contains(e.target)) {
+    popup.style.display = 'none';
+    const arrow = btn.querySelector('span');
+    if (arrow) arrow.textContent = '▴';
+  }
+});
+
 /* ── Clock ── */
 function startClock() {
-  const el = document.getElementById('admin-time');
+  const el = document.getElementById('Admin-time');
   if (!el) return;
   const update = () => {
     el.textContent = new Date().toLocaleString('vi-VN', {
@@ -384,3 +445,4 @@ function getBookingServices(bookingId) {
     o.bookingId === bookingId && o.status !== 'cancelled'
   );
 }
+

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
 /* ============================================================
    KSAN Admin — Styles
@@ -399,3 +399,11 @@ select.form-control {
   .form-row2, .form-row3 { grid-template-columns: 1fr; }
   .admin-content { padding: 14px; }
 }
+
+/* ── Sidebar profile popup ── */
+@keyframes popupUp {
+  from { opacity:0; transform:translateY(8px) scale(.97); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+#sidebar-profile-popup a:hover,
+#sidebar-profile-popup button:hover { background: var(--cream2) !important; }

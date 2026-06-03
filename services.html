@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dịch vụ & Tiện ích — KSAN Hotel</title>
+  <title>Dịch vụ & Tiện ích — The Forest</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
     .svc-card {
@@ -48,7 +48,7 @@
   <div class="container">
     <div class="header-inner">
       <a href="index.html" class="logo">
-        <img src="Public/logo KS.png" alt="KSAN Logo">
+        <img src="Public/logo KS.png" alt="The Forest Logo">
       </a>
       <nav class="nav" id="main-nav">
         <a href="index.html">Trang chủ</a>
@@ -235,7 +235,6 @@
 
       <!-- Booking form -->
       <h4 style="margin-bottom:14px">
-        <img src="Public/icon/calendar.png" style="height:16px;vertical-align:middle;margin-right:6px">
         Thông tin đặt dịch vụ
       </h4>
 
@@ -278,12 +277,15 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Gắn với đặt phòng (nếu có)</label>
+          <label>Phòng đang lưu trú *</label>
           <select class="form-control" id="svc-booking-link">
-            <option value="">-- Không gắn --</option>
+            <option value="">-- Đang tải... --</option>
           </select>
+          <div class="form-hint">Dịch vụ sẽ được gắn vào hóa đơn của phòng này.</div>
         </div>
       </div>
+      <!-- Alert booking -->
+      <div id="svc-booking-alert" class="alert alert-warning" style="display:none;font-size:.83rem;margin-top:-10px;margin-bottom:4px"></div>
 
       <div class="form-group">
         <label>Ghi chú đặc biệt</label>
@@ -303,35 +305,11 @@
         </div>
       </div>
 
-      <!-- Payment method (for paid services) -->
-      <div id="svc-payment-section" style="margin-top:16px;display:none">
-        <h4 style="margin-bottom:12px">Phương thức thanh toán</h4>
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <label class="payment-icon-row" id="pay-bank-row">
-            <input type="radio" name="svc-pay" value="bank" style="accent-color:var(--primary)">
-            <img src="Public/icon/bank.png" style="height:24px;object-fit:contain">
-            <div>
-              <div style="font-weight:700;font-size:.88rem">Chuyển khoản ngân hàng</div>
-              <div style="font-size:.75rem;color:var(--text-light)">Thanh toán tại quầy hoặc chuyển khoản</div>
-            </div>
-          </label>
-          <label class="payment-icon-row" id="pay-momo-row">
-            <input type="radio" name="svc-pay" value="momo" style="accent-color:var(--primary)">
-            <img src="Public/icon/Logo-MoMo-Square-768x768.webp" style="height:28px;border-radius:4px">
-            <div>
-              <div style="font-weight:700;font-size:.88rem">MoMo</div>
-              <div style="font-size:.75rem;color:var(--text-light)">Ví điện tử MoMo</div>
-            </div>
-          </label>
-          <label class="payment-icon-row" id="pay-zalo-row">
-            <input type="radio" name="svc-pay" value="zalopay" style="accent-color:var(--primary)">
-            <img src="Public/icon/zalo pay.png" style="height:28px;object-fit:contain">
-            <div>
-              <div style="font-weight:700;font-size:.88rem">ZaloPay</div>
-              <div style="font-size:.75rem;color:var(--text-light)">Thanh toán qua ZaloPay</div>
-            </div>
-          </label>
-        </div>
+      <!-- Thông báo thanh toán cuối -->
+      <div style="margin-top:12px;background:#f0fdf4;border:1.5px solid var(--border);
+        border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;font-size:.82rem">
+        <img src="Public/icon/info.png" style="height:16px;opacity:.6;flex-shrink:0">
+        <span style="color:var(--text-light)">Chi phí dịch vụ sẽ được <strong>cộng vào hóa đơn cuối</strong> khi trả phòng — không cần thanh toán ngay.</span>
       </div>
 
     </div>
@@ -516,35 +494,87 @@ function openServiceModal(id) {
     </div>` : ''}`;
 
   /* time slots */
-  document.getElementById('svc-time-slots').innerHTML = s.timeSlots.map(t => `
-    <div class="time-slot" onclick="selectTime('${t}', this)">${t}</div>`).join('');
+  document.getElementById('svc-time-slots').innerHTML = s.timeSlots.map(t =>
+    `<div class="time-slot" onclick="selectTime('${t}', this)">${t}</div>`
+  ).join('');
   document.getElementById('svc-time-selected').value = '';
 
-  /* prefill from user */
-  const user = KSAN.getCurrentUser();
-  if (user) {
-    document.getElementById('svc-name').value  = user.name;
-    document.getElementById('svc-phone').value = user.phone;
-    document.getElementById('svc-email').value = user.email;
+  /* Khi đổi ngày → lọc lại giờ đã qua */
+  document.getElementById('svc-date').onchange = renderTimeSlots;
+  renderTimeSlots();
 
-    /* fill booking link options */
-    const sel = document.getElementById('svc-booking-link');
-    sel.innerHTML = '<option value="">-- Không gắn --</option>';
-    KSAN.getCustomerBookings(user.id)
-      .filter(b => b.status === 'confirmed' || b.status === 'checked_in')
-      .forEach(b => {
-        const opt = document.createElement('option');
-        opt.value = b.id;
-        opt.textContent = `${b.id} — ${b.roomName} (${KSAN.formatDate(b.checkIn)})`;
-        sel.appendChild(opt);
-      });
+  /* prefill + kiểm tra booking active */
+  const user = KSAN.getCurrentUser();
+  const confirmBtn = document.getElementById('svc-confirm-btn');
+  const sel = document.getElementById('svc-booking-link');
+  const bookingAlert = document.getElementById('svc-booking-alert');
+
+  if (!user) {
+    /* Chưa đăng nhập */
+    sel.innerHTML = '<option value="">-- Vui lòng đăng nhập --</option>';
+    sel.disabled = true;
+    confirmBtn.disabled = true;
+    bookingAlert.style.display = 'block';
+    bookingAlert.innerHTML = `Vui lòng <a href="#" onclick="closeModal('service-modal');openModal('login-modal')">đăng nhập</a>
+      để đặt dịch vụ.`;
+    updateSvcPrice();
+    openModal('service-modal');
+    return;
   }
 
-  /* show/hide payment */
-  document.getElementById('svc-payment-section').style.display = s.price > 0 ? 'block' : 'none';
+  const activeBookings = KSAN.getCustomerBookings(user.id)
+    .filter(b => b.status === 'confirmed' || b.status === 'checked_in');
+
+  if (activeBookings.length === 0) {
+    /* Không có phòng active */
+    sel.innerHTML = '<option value="">-- Không có đặt phòng nào --</option>';
+    sel.disabled = true;
+    confirmBtn.disabled = true;
+    bookingAlert.style.display = 'block';
+    bookingAlert.innerHTML = `Bạn cần có <strong>đặt phòng đang hoạt động</strong> để sử dụng dịch vụ.
+      <a href="rooms.html" style="font-weight:700">Đặt phòng ngay →</a>`;
+  } else {
+    /* Có phòng → điền dropdown, bắt buộc chọn */
+    sel.disabled = false;
+    confirmBtn.disabled = false;
+    bookingAlert.style.display = 'none';
+    sel.innerHTML = '<option value="">-- Chọn phòng đang lưu trú --</option>';
+    activeBookings.forEach(b => {
+      const opt = document.createElement('option');
+      opt.value = b.id;
+      const statusLabel = b.status === 'checked_in' ? 'Đang lưu trú' : 'Sắp nhận phòng';
+      opt.textContent = `${b.roomName} (${KSAN.formatDate(b.checkIn)}) — ${statusLabel}`;
+      sel.appendChild(opt);
+    });
+    /* Nếu chỉ 1 phòng → tự chọn */
+    if (activeBookings.length === 1) sel.value = activeBookings[0].id;
+  }
+
+  document.getElementById('svc-name').value  = user.name;
+  document.getElementById('svc-phone').value = user.phone;
+  document.getElementById('svc-email').value = user.email;
 
   updateSvcPrice();
   openModal('service-modal');
+}
+
+/* Lọc time slots theo ngày đã chọn */
+function renderTimeSlots() {
+  if (!currentService) return;
+  const selDate = document.getElementById('svc-date').value;
+  const now     = new Date();
+  const slots   = document.getElementById('svc-time-slots');
+  if (!slots) return;
+  slots.innerHTML = currentService.timeSlots.map(t => {
+    const [h, m] = t.split(':').map(Number);
+    const isPast = selDate === todayStr() &&
+      (h < now.getHours() || (h === now.getHours() && m <= now.getMinutes()));
+    if (isPast) {
+      return `<div class="time-slot disabled" style="opacity:.35;cursor:not-allowed;text-decoration:line-through">${t}</div>`;
+    }
+    return `<div class="time-slot" onclick="selectTime('${t}',this)">${t}</div>`;
+  }).join('');
+  document.getElementById('svc-time-selected').value = '';
 }
 
 function selectTime(t, el) {
@@ -582,12 +612,24 @@ document.getElementById('svc-confirm-btn').addEventListener('click', () => {
   const date  = document.getElementById('svc-date').value;
   const time  = document.getElementById('svc-time-selected').value;
 
+  const bookingId = document.getElementById('svc-booking-link').value;
+  if (!bookingId) {
+    showToast('Vui lòng chọn phòng đang lưu trú để gắn dịch vụ.', 'warning');
+    document.getElementById('svc-booking-link').focus();
+    return;
+  }
   if (!name || !phone || !email) { showToast('Vui lòng điền đầy đủ thông tin liên hệ.', 'warning'); return; }
   if (!date) { showToast('Vui lòng chọn ngày sử dụng.', 'warning'); return; }
+  if (date < todayStr()) { showToast('Ngày sử dụng phải từ hôm nay trở đi.', 'warning'); return; }
   if (!time) { showToast('Vui lòng chọn khung giờ.', 'warning'); return; }
-  if (currentService.price > 0 && !document.querySelector('input[name="svc-pay"]:checked')) {
-    showToast('Vui lòng chọn phương thức thanh toán.', 'warning'); return;
+  if (date === todayStr()) {
+    const [h, m] = time.split(':').map(Number);
+    const now = new Date();
+    if (h < now.getHours() || (h === now.getHours() && m <= now.getMinutes())) {
+      showToast('Khung giờ này đã qua. Vui lòng chọn giờ trong tương lai.', 'warning'); return;
+    }
   }
+  /* Không cần chọn thanh toán — cộng vào bill cuối khi check-out */
 
   const user = KSAN.getCurrentUser();
   const qty  = parseInt(document.getElementById('svc-qty').value || 1);
@@ -603,7 +645,7 @@ document.getElementById('svc-confirm-btn').addEventListener('click', () => {
     date, time, quantity: qty,
     unitPrice:   currentService.price,
     notes:       document.getElementById('svc-notes').value.trim(),
-    paymentMethod: (document.querySelector('input[name="svc-pay"]:checked') || {}).value || 'counter'
+    paymentMethod: 'checkout'   /* Thanh toán khi check-out */
   });
 
   closeModal('service-modal');
@@ -644,10 +686,10 @@ function loadMyOrders() {
           <span class="badge ${stat.cls}">${stat.label}</span>
         </div>
         <div style="font-size:.78rem;color:var(--text-light);display:flex;gap:12px;flex-wrap:wrap">
-          <span><img src="Public/icon/id-card.png" style="height:12px;vertical-align:middle;opacity:.6"> ${o.id}</span>
-          <span><img src="Public/icon/calendar.png" style="height:12px;vertical-align:middle;opacity:.6"> ${KSAN.formatDate(o.date)} ${o.time}</span>
-          <span><img src="Public/icon/số lượng.png" style="height:12px;vertical-align:middle;opacity:.6"> ${o.quantity} người</span>
-          ${o.bookingId ? `<span><img src="Public/icon/reception.png" style="height:12px;vertical-align:middle;opacity:.6"> Gắn với: ${o.bookingId}</span>` : ''}
+          <span>${o.id}</span>
+          <span>${KSAN.formatDate(o.date)} ${o.time}</span>
+          <span>${o.quantity} người</span>
+          ${o.bookingId ? `<span>Gắn với: ${o.bookingId}</span>` : ''}
         </div>
       </div>
       <div style="text-align:right">
@@ -671,5 +713,7 @@ loadMyOrders();
 <script src="js/footer.js"></script>
 </body>
 </html>
+
+
 
 

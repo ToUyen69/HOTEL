@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tài khoản — KSAN Hotel</title>
+  <title>Tài khoản — The Forest</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -12,7 +12,7 @@
   <div class="container">
     <div class="header-inner">
       <a href="index.html" class="logo">
-        <img src="Public/logo KS.png" alt="KSAN Logo">
+        <img src="Public/logo KS.png" alt="The Forest Logo">
       </a>
       <nav class="nav" id="main-nav">
         <a href="index.html">Trang chủ</a>
@@ -84,16 +84,16 @@
           <div class="card">
             <div class="card-body" style="padding:12px">
               <a href="my-booking.html" style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:8px;color:var(--text);font-size:.88rem;transition:background .2s" onmouseover="this.style.background='var(--primary-pale)'" onmouseout="this.style.background=''">
-                <img src="Public/icon/invoice.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> Đặt phòng của tôi
+                Đặt phòng của tôi
               </a>
               <a href="rooms.html" style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:8px;color:var(--text);font-size:.88rem;transition:background .2s" onmouseover="this.style.background='var(--primary-pale)'" onmouseout="this.style.background=''">
-                <img src="Public/icon/bed.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> Đặt phòng mới
+                Đặt phòng mới
               </a>
               <a href="feedback.html" style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:8px;color:var(--text);font-size:.88rem;transition:background .2s" onmouseover="this.style.background='var(--primary-pale)'" onmouseout="this.style.background=''">
-                <img src="Public/icon/note.png" style="height:16px;vertical-align:middle;opacity:.75"> Gửi phản hồi
+                Gửi phản hồi
               </a>
               <button onclick="doLogout()" style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:8px;color:var(--danger);font-size:.88rem;width:100%;background:none;border:none;cursor:pointer;transition:background .2s;text-align:left" onmouseover="this.style.background='#fdecea'" onmouseout="this.style.background=''">
-                <img src="Public/icon/cross.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> Đăng xuất
+                Đăng xuất
               </button>
             </div>
           </div>
@@ -114,7 +114,7 @@
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
                   <h3 style="margin:0">Thông tin cá nhân</h3>
                   <button class="btn btn-outline btn-sm" id="edit-toggle-btn">
-                    <img src="Public/icon/note.png" style="height:14px;vertical-align:middle;margin-right:4px"> Chỉnh sửa
+                    Chỉnh sửa
                   </button>
                 </div>
 
@@ -214,11 +214,9 @@
                 <h4 style="margin-bottom:12px">Cách tích điểm</h4>
                 <div style="display:flex;flex-direction:column;gap:8px;font-size:.85rem">
                   <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg);border-radius:8px">
-                    <img src="Public/icon/bed.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px">
-                    <div><strong>Đặt phòng hoàn tất</strong> — 1 điểm / 100,000đ thanh toán</div>
+                    <div><strong>Đặt phòng hoàn tất</strong> — 10 điểm / 100,000đ thanh toán</div>
                   </div>
                   <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg);border-radius:8px">
-                    <img src="Public/icon/calendar.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px">
                     <div><strong>Sinh nhật</strong> — Nhận mã ưu đãi đặc biệt tự động</div>
                   </div>
                   <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg);border-radius:8px">
@@ -366,7 +364,7 @@ function renderHistory() {
   const bookings = KSAN.getCustomerBookings(currentUser.id);
   const el = document.getElementById('history-list');
   if (!bookings.length) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><img src="Public/icon/invoice.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"></div><h3>Chưa có lịch sử</h3><p>Hãy đặt phòng để bắt đầu hành trình!</p><a href="rooms.html" class="btn btn-primary mt-16">Đặt phòng ngay</a></div>`;
+    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon"></div><h3>Chưa có lịch sử</h3><p>Hãy đặt phòng để bắt đầu hành trình!</p><a href="rooms.html" class="btn btn-primary mt-16">Đặt phòng ngay</a></div>`;
     return;
   }
   el.innerHTML = bookings.map(b => {
@@ -446,7 +444,7 @@ function initPasswordChange() {
 
     KSAN.updateCustomer(currentUser.id, { password: nw });
     currentUser = KSAN.getCurrentUser();
-    al.innerHTML='<div class="alert alert-success"><img src="Public/icon/success.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> Đổi mật khẩu thành công!</div>';
+    al.innerHTML='<div class="alert alert-success">Đổi mật khẩu thành công!</div>';
     document.getElementById('pw-current').value = '';
     document.getElementById('pw-new').value = '';
     document.getElementById('pw-confirm').value = '';
@@ -458,6 +456,8 @@ loadAccount();
 <script src="js/footer.js"></script>
 </body>
 </html>
+
+
 
 
 

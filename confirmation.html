@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Xác nhận đặt phòng — KSAN Hotel</title>
+  <title>Xác nhận đặt phòng — The Forest</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -12,7 +12,7 @@
   <div class="container">
     <div class="header-inner">
       <a href="index.html" class="logo">
-        <img src="Public/logo KS.png" alt="KSAN Logo">
+        <img src="Public/logo KS.png" alt="The Forest Logo">
       </a>
       <nav class="nav" id="main-nav">
         <a href="index.html">Trang chủ</a>
@@ -67,10 +67,10 @@ function render() {
       <div class="confirm-icon"><img src="Public/icon/success.png" style="width:40px;height:40px;filter:invert(1)"></div>
       <h2 style="margin-bottom:8px">Đặt phòng thành công!</h2>
       <p style="color:var(--text-light);margin-bottom:16px">
-        Cảm ơn bạn đã tin tưởng KSAN Hotel. Xác nhận đã được gửi đến email <strong>${b.guestEmail}</strong>.
+        Cảm ơn bạn đã tin tưởng The Forest. Xác nhận đã được gửi đến email <strong>${b.guestEmail}</strong>.
       </p>
       <div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap">
-        <span class="badge badge-green" style="font-size:.9rem;padding:6px 16px"><img src="Public/icon/success.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> Đã xác nhận</span>
+        <span class="badge badge-green" style="font-size:.9rem;padding:6px 16px">Đã xác nhận</span>
         <span style="color:var(--text-light);font-size:.85rem">Mã đặt phòng:</span>
         <code style="background:var(--primary-pale);color:var(--primary);padding:6px 14px;border-radius:8px;font-size:1rem;font-weight:700;letter-spacing:1px">${b.id}</code>
       </div>
@@ -90,30 +90,30 @@ function render() {
           <div class="booking-detail-grid">
             <div class="detail-item">
               <label>Nhận phòng</label>
-              <span><img src="Public/icon/calendar.png" style="height:16px;vertical-align:middle;opacity:.75;margin-right:4px"> ${KSAN.formatDate(b.checkIn)} — 14:00</span>
+              <span>${KSAN.formatDate(b.checkIn)} — 14:00</span>
             </div>
             <div class="detail-item">
               <label>Trả phòng</label>
-              <span><img src="Public/icon/calendar.png" style="height:16px;vertical-align:middle;opacity:.75;margin-right:4px"> ${KSAN.formatDate(b.checkOut)} — 12:00</span>
+              <span>${KSAN.formatDate(b.checkOut)} — 12:00</span>
             </div>
             <div class="detail-item">
               <label>Số đêm</label>
-              <span><img src="Public/icon/night.png" style="height:16px;vertical-align:middle;opacity:.75;margin-right:4px"> ${nights} đêm</span>
+              <span>${nights} đêm</span>
             </div>
             <div class="detail-item">
               <label>Số khách</label>
-              <span><img src="Public/icon/số lượng.png" style="height:16px;vertical-align:middle;opacity:.75;margin-right:4px"> ${b.guests} khách</span>
+              <span>${b.guests} khách</span>
             </div>
             <div class="detail-item">
               <label>Khách hàng</label>
-              <span><img src="Public/icon/số lượng.png" style="height:16px;vertical-align:middle;opacity:.75;margin-right:4px"> ${b.guestName}</span>
+              <span>${b.guestName}</span>
             </div>
             <div class="detail-item">
               <label>Số điện thoại</label>
-              <span><img src="Public/icon/call.png" style="height:16px;vertical-align:middle;opacity:.75;margin-right:4px"> ${b.guestPhone}</span>
+              <span>${b.guestPhone}</span>
             </div>
           </div>
-          ${b.specialReq ? `<div style="margin-top:10px;font-size:.82rem;color:var(--text-light)"><img src="Public/icon/note.png" style="height:16px;vertical-align:middle;opacity:.75;margin-right:4px"> Yêu cầu đặc biệt: ${b.specialReq}</div>` : ''}
+          ${b.specialReq ? `<div style="margin-top:10px;font-size:.82rem;color:var(--text-light)">Yêu cầu đặc biệt: ${b.specialReq}</div>` : ''}
         </div>
       </div>
     </div>
@@ -121,7 +121,7 @@ function render() {
     <!-- Invoice Summary -->
     <div class="card" style="margin-bottom:20px">
       <div class="card-body">
-        <h4 style="margin-bottom:16px"><img src="Public/icon/deposit.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> Chi tiết thanh toán</h4>
+        <h4 style="margin-bottom:16px">Chi tiết thanh toán</h4>
         <div class="summary-line">
           <span>Giá phòng (${nights} đêm × ${KSAN.formatCurrency(room ? room.price : 0)})</span>
           <span>${KSAN.formatCurrency(b.basePrice)}</span>
@@ -151,7 +151,7 @@ function render() {
     <!-- Policy -->
     <div class="card" style="margin-bottom:24px">
       <div class="card-body">
-        <h4 style="margin-bottom:14px"><img src="Public/icon/invoice.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> Chính sách hủy phòng của bạn</h4>
+        <h4 style="margin-bottom:14px">Chính sách hủy phòng của bạn</h4>
         <div style="display:flex;flex-direction:column;gap:8px;font-size:.85rem">
           <div style="display:flex;align-items:center;gap:10px;padding:8px;background:var(--primary-pale);border-radius:8px">
             <span style="color:var(--success);font-weight:700">✓</span>
@@ -172,7 +172,7 @@ function render() {
     <!-- Actions -->
     <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
       <a href="my-booking.html" class="btn btn-primary btn-lg"><img src="Public/icon/invoice.png" style="height:14px;vertical-align:middle;filter:invert(1);margin-right:4px"> Xem đặt phòng của tôi</a>
-      <a href="index.html" class="btn btn-outline btn-lg"><img src="Public/icon/home.png" style="height:16px;vertical-align:middle;margin-right:4px;opacity:.75"> Về trang chủ</a>
+      <a href="index.html" class="btn btn-outline btn-lg">Về trang chủ</a>
       <button class="btn btn-outline" onclick="window.print()"><img src="Public/icon/printer.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> In xác nhận</button>
     </div>`;
 }
@@ -182,6 +182,9 @@ render();
 <script src="js/footer.js"></script>
 </body>
 </html>
+
+
+
 
 
 

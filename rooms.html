@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Phòng — KSAN Hotel</title>
+  <title>Phòng — The Forest</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -12,7 +12,7 @@
   <div class="container">
     <div class="header-inner">
       <a href="index.html" class="logo">
-        <img src="Public/logo KS.png" alt="KSAN Logo">
+        <img src="Public/logo KS.png" alt="The Forest Logo">
       </a>
       <nav class="nav" id="main-nav">
         <a href="index.html">Trang chủ</a>
@@ -40,7 +40,7 @@
 </section>
 
 <!-- Search Filter Bar -->
-<div style="background:#fff;border-bottom:1px solid var(--border);padding:18px 0;position:sticky;top:80px;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.05)">
+<div style="background:#fff;border-bottom:1px solid var(--border);padding:18px 0;position:sticky;top:100px;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.05)">
   <div class="container">
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:12px;align-items:end">
       <div class="form-group" style="margin:0">
@@ -220,10 +220,10 @@ function renderRooms() {
           ${remainingBadge(remaining)}
         </div>
         <div style="display:flex;gap:16px;font-size:.82rem;color:var(--text-light);margin-bottom:12px;flex-wrap:wrap">
-          <span><img src="Public/icon/room.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> ${r.size}m²</span>
-          <span><img src="Public/icon/số lượng.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> Tối đa ${r.capacity} khách</span>
-          <span><img src="Public/icon/bed.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> ${r.beds}</span>
-          <span><img src="Public/icon/view.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> ${r.view}</span>
+          <span>${r.size}m²</span>
+          <span>Tối đa ${r.capacity} khách</span>
+          <span>${r.beds}</span>
+          <span>${r.view}</span>
         </div>
         <p style="font-size:.88rem;color:var(--text-light);margin-bottom:14px;line-height:1.7">${r.description}</p>
         <div style="display:flex;flex-wrap:wrap;gap:6px">
@@ -309,6 +309,10 @@ renderRooms();
 <script src="js/footer.js"></script>
 </body>
 </html>
+
+
+
+
 
 
 

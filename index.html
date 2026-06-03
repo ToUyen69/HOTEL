@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KSAN — Khách Sạn Thông Minh</title>
+  <title>The Forest — Nghỉ dưỡng thiên nhiên</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -13,7 +13,7 @@
   <div class="container">
     <div class="header-inner">
       <a href="index.html" class="logo">
-        <img src="Public/logo KS.png" alt="KSAN Logo">
+        <img src="Public/logo KS.png" alt="The Forest Logo">
       </a>
       <nav class="nav" id="main-nav">
         <a href="index.html">Trang chủ</a>
@@ -33,9 +33,9 @@
   <div class="hero-bg"></div>
   <div class="hero-overlay"></div>
   <div class="hero-content container">
-    <div class="hero-badge">✦ Nghỉ dưỡng cao cấp ✦</div>
-    <h1>Nơi nghỉ dưỡng<br>ấm áp & đẳng cấp</h1>
-    <p>Khám phá không gian nghỉ ngơi sang trọng với dịch vụ cá nhân hóa, mang đến cho bạn kỳ nghỉ hoàn hảo.</p>
+    <div class="hero-badge">✦ Rừng núi Đà Lạt ✦</div>
+    <h1>Tìm lại bình yên<br>giữa lòng rừng núi</h1>
+    <p>Đắm chìm trong không khí trong lành của rừng thông Đà Lạt, nơi mỗi kỳ nghỉ là hành trình chữa lành tâm hồn.</p>
     <div class="hero-stats">
       <div class="hero-stat"><div class="hero-stat-num">14+</div><div class="hero-stat-lbl">Phòng cao cấp</div></div>
       <div class="hero-stat"><div class="hero-stat-num">4</div><div class="hero-stat-lbl">Loại phòng</div></div>
@@ -113,10 +113,9 @@
     </div>
     <div style="display:flex;flex-direction:column;justify-content:center;padding:60px 40px 60px 20px">
       <div class="badge badge-gold mb-16" style="display:inline-block">Về chúng tôi</div>
-      <h2 style="margin-bottom:16px">Trải nghiệm nghỉ dưỡng<br>đẳng cấp 5 sao</h2>
+      <h2 style="margin-bottom:16px">Chữa lành giữa thiên nhiên<br>rừng núi Đà Lạt</h2>
       <p style="color:var(--text-light);line-height:1.9;margin-bottom:20px">
-        KSAN tự hào mang đến không gian nghỉ dưỡng tuyệt vời kết hợp giữa kiến trúc hiện đại và dịch vụ cá nhân hóa thông minh.
-        Mỗi kỳ lưu trú tại đây là một trải nghiệm độc đáo, được thiết kế riêng cho bạn.
+        The Forest tọa lạc giữa cánh rừng thông Đà Lạt, nơi bạn có thể thực sự nghỉ ngơi và phục hồi năng lượng. Không gian kiến trúc hài hòa với thiên nhiên, dịch vụ ân cần từ trái tim.
       </p>
       <ul style="list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px">
         <li style="display:flex;align-items:center;gap:10px;font-size:.9rem">
@@ -157,8 +156,8 @@
 <div class="promo-banner">
   <div class="container text-center">
     <p style="font-size:.8rem;letter-spacing:2px;text-transform:uppercase;opacity:.7;margin-bottom:8px">Ưu đãi đặc biệt</p>
-    <h2 style="margin-bottom:8px">Giảm 25% cho kỳ nghỉ mùa hè</h2>
-    <p style="opacity:.8;margin-bottom:0">Áp dụng từ tối thiểu 2 đêm lưu trú. Hãy sử dụng mã bên dưới khi đặt phòng.</p>
+    <h2 style="margin-bottom:8px">Gói chữa lành cuối tuần — Giảm 25%</h2>
+    <p style="opacity:.8;margin-bottom:0">Đặt từ 2 đêm trở lên cho trải nghiệm chữa lành trọn vẹn. Sử dụng mã bên dưới.</p>
     <div class="promo-code-box" style="justify-content:center">
       <code>SUMMER25</code>
       <button class="copy-btn" onclick="copyText('SUMMER25', this)">Sao chép</button>
@@ -172,7 +171,7 @@
   <div class="container">
     <div class="section-header">
       <h2>Khách hàng nói gì?</h2>
-      <p>Những trải nghiệm thực tế từ khách lưu trú tại KSAN.</p>
+      <p>Những trải nghiệm thực tế từ khách lưu trú tại The Forest.</p>
       <div class="divider-gold"></div>
     </div>
     <div class="grid-3" id="testimonials-grid"></div>
@@ -236,9 +235,9 @@ function renderRooms() {
       <div class="room-card-body">
         <h3>${r.name}</h3>
         <div class="room-card-meta">
-          <span><img src="Public/icon/room.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> ${r.size}m²</span>
-          <span><img src="Public/icon/số lượng.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> ${r.capacity} khách</span>
-          <span><img src="Public/icon/bed.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> ${r.beds}</span>
+          <span>${r.size}m²</span>
+          <span>${r.capacity} khách</span>
+          <span>${r.beds}</span>
         </div>
         <p style="font-size:.85rem;color:var(--text-light);margin-bottom:12px">${r.shortDesc}</p>
         <div class="room-card-amenities">
@@ -306,7 +305,7 @@ function renderAmenityIcons() {
 function renderTestimonials() {
   const reviews = [
     { name:'Minh Tuấn', rating:5, text:'Dịch vụ tuyệt vời, nhân viên nhiệt tình và chuyên nghiệp. Phòng sạch sẽ, view đẹp. Chắc chắn sẽ quay lại lần sau!', stay:'Phòng Deluxe · 3 đêm' },
-    { name:'Thu Hà', rating:5, text:'Lần đầu nghỉ ở KSAN nhưng thực sự ấn tượng. Quy trình đặt phòng online rất dễ dàng, check-in nhanh gọn. Tuyệt vời!', stay:'Phòng Suite · 2 đêm' },
+    { name:'Thu Hà', rating:5, text:'Lần đầu nghỉ ở The Forest nhưng thực sự ấn tượng. Quy trình đặt phòng online rất dễ dàng, check-in nhanh gọn. Tuyệt vời!', stay:'Phòng Suite · 2 đêm' },
     { name:'Gia Huy', rating:4, text:'Tiện nghi đầy đủ, nhà hàng ngon. Hồ bơi rộng và sạch. Chỉ tiếc là giờ check-out hơi sớm. Nhưng nhìn chung rất hài lòng.', stay:'Phòng Family · 4 đêm' }
   ];
   const g = document.getElementById('testimonials-grid');
@@ -355,6 +354,8 @@ renderTestimonials();
 <script src="js/footer.js"></script>
 </body>
 </html>
+
+
 
 
 

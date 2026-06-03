@@ -1,5 +1,5 @@
-/* ============================================================
-   KSAN Hotel — Data Layer (localStorage)
+﻿/* ============================================================
+   The Forest — Data Layer (localStorage)
    ============================================================ */
 
 const KSAN = {
@@ -125,7 +125,7 @@ const KSAN = {
   },
 
   addPoints(customerId, amount) {
-    const points = Math.floor(amount / 100000);  // 1 điểm / 100k
+    const points = Math.floor(amount / 100000) * 10;  // 10 điểm / 100k
     const customer = this.getCustomers().find(c => c.id === customerId);
     if (!customer) return;
     const newPoints = (customer.points || 0) + points;
@@ -232,10 +232,111 @@ const KSAN = {
 
   /* ── Feedback API ────────────────────────────────── */
   getFeedbacks()      { return this._get('feedbacks') || [] },
-  saveFeedback(data)  {
+  getFeedbackById(id) { return this.getFeedbacks().find(f => f.id === id); },
+  getFeedbacksByEmail(email) {
+    return this.getFeedbacks()
+      .filter(f => f.guestEmail?.toLowerCase() === email?.toLowerCase())
+      .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+  },
+
+  saveFeedback(data) {
     const list = this.getFeedbacks();
-    list.push({ id: 'FB' + Date.now(), ...data, createdAt: new Date().toISOString() });
+    const fb = { id: 'FB' + Date.now(), ...data,
+      status: 'pending', resolved: false,
+      createdAt: new Date().toISOString() };
+    list.push(fb);
     this._set('feedbacks', list);
+    return fb;
+  },
+
+  /* Admin phản hồi feedback + tuỳ chọn kèm voucher */
+  replyFeedback(feedbackId, { reply, adminName, voucherConfig }) {
+    const list = this.getFeedbacks();
+    const idx  = list.findIndex(f => f.id === feedbackId);
+    if (idx < 0) return { ok: false, msg: 'Không tìm thấy phản hồi.' };
+
+    let voucherCode = null;
+    if (voucherConfig) {
+      voucherCode = this.generateVoucherCode();
+      /* Lưu voucher vào custom promos để khách dùng khi đặt phòng */
+      const promos = JSON.parse(localStorage.getItem('ksan_custom_promos') || '[]');
+      promos.push({
+        code:        voucherCode,
+        discount:    voucherConfig.discount,
+        type:        voucherConfig.type,
+        description: voucherConfig.description || `Voucher từ The Forest`,
+        exclusive:   true,
+        minNights:   1,
+        forEmail:    list[idx].guestEmail,
+        expiry:      new Date(Date.now() + 30*24*60*60*1000).toISOString(),
+        used:        false
+      });
+      localStorage.setItem('ksan_custom_promos', JSON.stringify(promos));
+    }
+
+    list[idx] = {
+      ...list[idx],
+      status:         'replied',
+      resolved:       true,
+      adminReply:     reply,
+      replyAt:        new Date().toISOString(),
+      replyBy:        adminName,
+      voucherCode,
+      voucherDiscount: voucherConfig?.discount  || null,
+      voucherType:     voucherConfig?.type       || null,
+      voucherExpiry:   voucherCode
+        ? new Date(Date.now() + 30*24*60*60*1000).toISOString()
+        : null,
+    };
+    this._set('feedbacks', list);
+
+    /* Đẩy thông báo cho khách hàng nếu có tài khoản */
+    const customer = this.getCustomers().find(c =>
+      c.email?.toLowerCase() === list[idx].guestEmail?.toLowerCase());
+    if (customer) {
+      const notifKey = 'ksan_notifs_' + customer.id;
+      const notifs = JSON.parse(localStorage.getItem(notifKey) || '[]');
+      notifs.unshift({
+        id:      'reply-' + feedbackId,
+        type:    'info',
+        urgent:  false,
+        title:   voucherCode ? 'Phản hồi từ The Forest + Voucher!' : 'Khách sạn đã phản hồi đánh giá',
+        message: voucherCode
+          ? `Cảm ơn bạn đã chia sẻ. ${reply.slice(0,80)}... Kèm voucher <strong>${voucherCode}</strong>.`
+          : `${reply.slice(0, 100)}${reply.length > 100 ? '...' : ''}`,
+        link:    'feedback.html',
+        read:    false,
+        time:    new Date().toISOString().split('T')[0]
+      });
+      localStorage.setItem(notifKey, JSON.stringify(notifs.slice(0, 30)));
+    }
+
+    return { ok: true, feedback: list[idx], voucherCode };
+  },
+
+  /* Tạo mã voucher ngẫu nhiên */
+  generateVoucherCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = 'VCH-';
+    for (let i = 0; i < 8; i++)
+      code += chars[Math.floor(Math.random() * chars.length)];
+    return code;
+  },
+
+  /* Validate promo — bao gồm cả custom voucher từ feedback */
+  validatePromo(code, nights) {
+    const allPromos = [
+      ...this.PROMOTIONS,
+      ...JSON.parse(localStorage.getItem('ksan_custom_promos') || '[]')
+    ];
+    const p = allPromos.find(x => x.code === code.toUpperCase());
+    if (!p) return { ok: false, msg: 'Mã khuyến mãi không hợp lệ.' };
+    if (nights < p.minNights)
+      return { ok: false, msg: `Mã này yêu cầu tối thiểu ${p.minNights} đêm.` };
+    if (p.used) return { ok: false, msg: 'Mã này đã được sử dụng.' };
+    if (p.expiry && new Date(p.expiry) < new Date())
+      return { ok: false, msg: 'Mã đã hết hạn sử dụng.' };
+    return { ok: true, promo: p };
   },
 
   /* ── Utils ───────────────────────────────────────── */
@@ -347,3 +448,4 @@ const KSAN = {
     return map[s] || { label: s, cls: 'badge-gray' };
   }
 };
+

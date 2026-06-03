@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Phản hồi — KSAN Hotel</title>
+  <title>Phản hồi — The Forest</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -12,7 +12,7 @@
   <div class="container">
     <div class="header-inner">
       <a href="index.html" class="logo">
-        <img src="Public/logo KS.png" alt="KSAN Logo">
+        <img src="Public/logo KS.png" alt="The Forest Logo">
       </a>
       <nav class="nav" id="main-nav">
         <a href="index.html">Trang chủ</a>
@@ -168,7 +168,7 @@
           </div>
 
           <div class="form-group">
-            <label>Bạn có muốn quay lại lưu trú tại KSAN?</label>
+            <label>Bạn có muốn quay lại lưu trú tại The Forest?</label>
             <div style="display:flex;gap:16px;margin-top:8px">
               <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.9rem">
                 <input type="radio" name="return" value="yes" style="accent-color:var(--primary)"> Có, chắc chắn sẽ quay lại
@@ -188,6 +188,19 @@
         </div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- Lịch sử phản hồi + admin reply -->
+<section class="section-sm" id="my-feedbacks-section" style="display:none;padding-top:0">
+  <div class="container" style="max-width:760px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <h2 style="font-size:1.2rem">
+        <img src="Public/icon/note.png" style="height:20px;vertical-align:middle;margin-right:8px;opacity:.7">
+        Phản hồi đã gửi
+      </h2>
+    </div>
+    <div id="my-feedbacks-list"></div>
   </div>
 </section>
 
@@ -223,13 +236,13 @@ function selectType(type) {
   banner.classList.remove('d-none');
   if (type === 'praise') {
     banner.className = 'alert alert-success';
-    banner.innerHTML = '<img src="Public/icon/success.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> <strong>Khen ngợi</strong> — Cảm ơn bạn muốn chia sẻ trải nghiệm tích cực! Bạn sẽ nhận mã ưu đãi sau khi gửi.';
+    banner.innerHTML = '<strong>Khen ngợi</strong> — Cảm ơn bạn muốn chia sẻ trải nghiệm tích cực! Bạn sẽ nhận mã ưu đãi sau khi gửi.';
   } else if (type === 'suggestion') {
     banner.className = 'alert alert-info';
-    banner.innerHTML = '<img src="Public/icon/info.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> <strong>Góp ý</strong> — Mọi ý kiến đều được ban quản lý xem xét để cải thiện dịch vụ. Bạn sẽ nhận mã cảm ơn.';
+    banner.innerHTML = '<strong>Góp ý</strong> — Mọi ý kiến đều được ban quản lý xem xét để cải thiện dịch vụ. Bạn sẽ nhận mã cảm ơn.';
   } else {
     banner.className = 'alert alert-warning';
-    banner.innerHTML = '<img src="Public/icon/crisis.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> <strong>Khiếu nại</strong> — Chúng tôi rất tiếc về trải nghiệm này. Đội ngũ sẽ liên hệ xử lý trong vòng 24 giờ. Bạn sẽ nhận mã bồi thường.';
+    banner.innerHTML = '<strong>Khiếu nại</strong> — Chúng tôi rất tiếc về trải nghiệm này. Đội ngũ sẽ liên hệ xử lý trong vòng 24 giờ. Bạn sẽ nhận mã bồi thường.';
   }
 }
 
@@ -264,24 +277,101 @@ document.getElementById('submit-feedback-btn').addEventListener('click', () => {
   document.getElementById('form-state').classList.add('d-none');
   document.getElementById('success-state').classList.remove('d-none');
 
-  /* Give voucher */
-  const vouchers = {
-    praise:     { code: 'THANKYOU15', desc: 'Giảm 15% cho lần đặt phòng tiếp theo' },
-    suggestion: { code: 'FEEDBACK10', desc: 'Giảm 10% — Cảm ơn bạn đã góp ý!' },
-    complaint:  { code: 'SORRY20',   desc: 'Xin lỗi vì sự bất tiện — Giảm 20% lần sau' }
-  };
-  const v = vouchers[type];
-  if (v) {
-    const el = document.getElementById('voucher-reward');
-    el.style.display = 'block';
-    document.getElementById('reward-code').textContent = v.code;
-    document.getElementById('reward-desc').textContent = v.desc;
+  /* Không tặng voucher tĩnh nữa — admin sẽ reply và gửi voucher tuỳ chỉnh */
+  document.getElementById('voucher-reward').style.display = 'none';
+});
+
+/* ── Lịch sử phản hồi + admin reply ── */
+function loadMyFeedbacks() {
+  const user = KSAN.getCurrentUser();
+  const email = user?.email || document.getElementById('fb-email')?.value?.trim();
+  if (!email) return;
+
+  const myFbs = KSAN.getFeedbacksByEmail(email);
+  if (!myFbs.length) return;
+
+  const section = document.getElementById('my-feedbacks-section');
+  if (!section) return;
+  section.style.display = 'block';
+
+  const typeLabel = { praise:'Khen ngợi', suggestion:'Góp ý', complaint:'Khiếu nại' };
+  const typeColor = { praise:'var(--success)', suggestion:'var(--info)', complaint:'var(--danger)' };
+
+  document.getElementById('my-feedbacks-list').innerHTML = myFbs.map(f => `
+    <div style="border:1.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:14px">
+      <!-- Feedback của khách -->
+      <div style="padding:14px 16px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="background:${typeColor[f.type]}18;color:${typeColor[f.type]};
+              padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:700">${typeLabel[f.type]||f.type}</span>
+            <span style="color:var(--warning);font-size:.9rem">${'★'.repeat(f.rating||0)}${'☆'.repeat(5-(f.rating||0))}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            ${f.status==='replied'
+              ? '<span style="background:#e6f4ea;color:var(--success);padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:700">Đã phản hồi</span>'
+              : '<span style="background:#fef9e7;color:var(--warning);padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:700">Chờ phản hồi</span>'}
+            <span style="font-size:.72rem;color:var(--text-light)">${KSAN.formatDate(f.createdAt)}</span>
+          </div>
+        </div>
+        <div style="font-size:.88rem;color:var(--text);line-height:1.7">${f.comment||''}</div>
+      </div>
+
+      <!-- Phản hồi từ admin -->
+      ${f.adminReply ? `
+      <div style="padding:14px 16px;background:var(--primary-pale);border-top:1px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <div style="width:30px;height:30px;border-radius:50%;background:var(--primary);
+            display:flex;align-items:center;justify-content:center;color:#fff;font-size:.72rem;font-weight:700;flex-shrink:0">TF</div>
+          <div>
+            <div style="font-weight:700;font-size:.82rem;color:var(--secondary)">The Forest — ${f.replyBy||'Đội ngũ'}</div>
+            <div style="font-size:.7rem;color:var(--text-light)">${KSAN.formatDate(f.replyAt)}</div>
+          </div>
+        </div>
+        <div style="font-size:.87rem;color:var(--text);line-height:1.7;margin-bottom:${f.voucherCode?'12px':'0'}">${f.adminReply}</div>
+        ${f.voucherCode ? `
+        <div style="background:#fff;border:2px dashed var(--primary);border-radius:10px;
+          padding:12px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+          <img src="Public/icon/promo-code.png" style="height:24px">
+          <div style="flex:1">
+            <div style="font-size:.72rem;color:var(--text-light);margin-bottom:2px">Voucher ưu đãi từ The Forest</div>
+            <div style="font-weight:700;font-size:1.1rem;color:var(--primary);letter-spacing:2px">${f.voucherCode}</div>
+            <div style="font-size:.75rem;color:var(--text-light)">
+              ${f.voucherType==='percent'?f.voucherDiscount+'% giảm giá':'Giảm '+KSAN.formatCurrency(f.voucherDiscount)}
+              · HSD: ${KSAN.formatDate(f.voucherExpiry)}
+            </div>
+          </div>
+          <button onclick="copyText('${f.voucherCode}',this)" style="padding:7px 16px;border-radius:8px;
+            background:var(--primary);color:#fff;border:none;cursor:pointer;font-size:.78rem;font-weight:600;white-space:nowrap">
+            Sao chép
+          </button>
+        </div>` : ''}
+      </div>` : `
+      <div style="padding:12px 16px;background:#fafaf8;border-top:1px solid var(--border);
+        font-size:.78rem;color:var(--text-light);display:flex;align-items:center;gap:6px">
+        <img src="Public/icon/info.png" style="height:13px;opacity:.5">
+        Đội ngũ The Forest sẽ phản hồi trong vòng 24 giờ làm việc.
+      </div>`}
+    </div>`).join('');
+}
+
+/* Prefill nếu đã đăng nhập */
+document.addEventListener('DOMContentLoaded', () => {
+  const user = KSAN.getCurrentUser();
+  if (user) {
+    const nameEl  = document.getElementById('fb-name');
+    const emailEl = document.getElementById('fb-email');
+    if (nameEl && !nameEl.value)  nameEl.value  = user.name;
+    if (emailEl && !emailEl.value) emailEl.value = user.email;
+    loadMyFeedbacks();
   }
 });
 </script>
 <script src="js/footer.js"></script>
 </body>
 </html>
+
+
 
 
 

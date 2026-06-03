@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quản lý khách hàng — KSAN Admin</title>
-  <link rel="stylesheet" href="css/admin.css">
+  <title>Admin — The Forest</title>
+  <link rel="stylesheet" href="css/Admin.css">
   <style>
     .tier-badge-large {
       display: inline-flex; align-items: center; gap: 6px;
@@ -114,6 +114,14 @@
               <option value="praise">Khen ngợi</option>
             </select>
           </div>
+          <div class="filter-group-sm">
+            <label>Trạng thái</label>
+            <select class="form-control" id="f-feedback-status" onchange="renderFeedbacks()">
+              <option value="">Tất cả</option>
+              <option value="pending">Chờ phản hồi</option>
+              <option value="replied">Đã phản hồi</option>
+            </select>
+          </div>
         </div>
         <div id="feedback-list"></div>
       </div>
@@ -157,7 +165,7 @@
                 <h4 style="font-size:.84rem;margin-bottom:12px;color:var(--dark)">Quy tắc tích điểm</h4>
                 <div class="form-group">
                   <label>Điểm per 100,000đ chi tiêu</label>
-                  <input type="number" class="form-control" id="loyalty-rate" value="1" min="1">
+                  <input type="number" class="form-control" id="loyalty-rate" value="10" min="1">
                 </div>
                 <div class="form-group">
                   <label>Ngưỡng nâng hạng Gold (điểm)</label>
@@ -331,11 +339,97 @@
   </div>
 </div>
 
+<!-- ═══ REPLY FEEDBACK MODAL ═══ -->
+<div class="modal-overlay" id="reply-modal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <h3><img src="../Public/icon/note.png">Phản hồi khách hàng</h3>
+      <button class="modal-close" onclick="closeModal('reply-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="reply-feedback-id">
+      <div id="reply-fb-info" class="alert alert-info" style="font-size:.84rem;margin-bottom:14px"></div>
+      <div class="form-group">
+        <label>Nội dung phản hồi *</label>
+        <textarea class="form-control" id="reply-text" rows="5"
+          placeholder="Kính gửi Quý khách, Cảm ơn bạn đã dành thời gian chia sẻ..."></textarea>
+      </div>
+      <!-- Voucher toggle -->
+      <div style="margin-bottom:14px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.85rem;font-weight:700">
+          <input type="checkbox" id="reply-voucher-toggle" style="accent-color:var(--dark);width:16px;height:16px"
+            onchange="toggleVoucherSection()">
+          Kèm voucher ưu đãi cho khách
+        </label>
+      </div>
+      <!-- Voucher config (ẩn mặc định) -->
+      <div id="voucher-section" style="display:none;background:var(--cream2);padding:16px;border-radius:10px;margin-bottom:14px;border:1.5px solid var(--border)">
+        <div style="font-size:.78rem;font-weight:700;color:var(--dark);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">
+          <img src="../Public/icon/promo-code.png" style="height:14px;vertical-align:middle;margin-right:4px">
+          Cấu hình voucher
+        </div>
+        <div class="form-row2">
+          <div class="form-group">
+            <label>Loại ưu đãi</label>
+            <select class="form-control" id="voucher-type" onchange="updateVoucherPreview()">
+              <option value="percent">Giảm % tiền phòng</option>
+              <option value="fixed">Giảm số tiền cố định</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Mức giảm</label>
+            <select class="form-control" id="voucher-value" onchange="updateVoucherPreview()">
+              <option value="10">10%</option>
+              <option value="15">15%</option>
+              <option value="20" selected>20%</option>
+              <option value="25">25%</option>
+              <option value="30">30%</option>
+              <option value="50">50%</option>
+              <option value="100000">100,000đ</option>
+              <option value="200000">200,000đ</option>
+              <option value="500000">500,000đ</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Mô tả voucher</label>
+          <input type="text" class="form-control" id="voucher-desc"
+            placeholder="VD: Ưu đãi bồi thường — The Forest xin lỗi về sự bất tiện">
+        </div>
+        <!-- Preview -->
+        <div id="voucher-preview" style="background:#fff;border:1.5px dashed var(--medium);
+          border-radius:8px;padding:12px;display:flex;align-items:center;gap:12px">
+          <img src="../Public/icon/promo-code.png" style="height:22px">
+          <div>
+            <div style="font-size:.72rem;color:var(--text-sm)">Mã voucher (tự động tạo)</div>
+            <div style="font-weight:700;font-size:1rem;color:var(--dark);letter-spacing:2px">VCH-XXXXXXXX</div>
+            <div id="voucher-preview-desc" style="font-size:.72rem;color:var(--medium)">20% giảm giá · Hiệu lực 30 ngày</div>
+          </div>
+        </div>
+      </div>
+      <div class="alert alert-info" style="font-size:.8rem">
+        <img src="../Public/icon/info.png" style="height:13px;vertical-align:middle;margin-right:4px">
+        Khách hàng sẽ nhận <strong>thông báo</strong> ngay khi bạn gửi phản hồi này.
+        Voucher có thể dùng ngay tại trang đặt phòng.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('reply-modal')">Hủy</button>
+      <button class="btn btn-primary" id="reply-send-btn">
+        <img src="../Public/icon/check.png"> Gửi phản hồi
+      </button>
+    </div>
+  </div>
+</div>
+
 <script src="../js/data.js"></script>
-<script src="js/admin.js"></script>
+<script src="js/Admin.js"></script>
 <script>
 const acc = AdminAuth.require();
-renderSidebar('customers');
+/* Nếu URL có ?tab=feedback → sidebar highlight 'feedback', mặc định 'customers' */
+const _urlTab = new URLSearchParams(location.search).get('tab');
+const _sidebarPage = _urlTab === 'feedback' ? 'feedback' : 'customers';
+renderSidebar(_sidebarPage);
 startClock();
 document.getElementById('role-badge').textContent = acc.roleLabel;
 
@@ -555,42 +649,71 @@ document.getElementById('cd-save-membership-btn').addEventListener('click', () =
 /* ── Feedback ── */
 let currentComplaintId = null;
 function renderFeedbacks() {
-  const type = document.getElementById('f-feedback-type').value;
-  const feedbacks = KSAN.getFeedbacks()
-    .filter(f => !type || f.type === type)
+  const type   = document.getElementById('f-feedback-type').value;
+  const status = document.getElementById('f-feedback-status')?.value || '';
+  const all    = KSAN.getFeedbacks()
+    .filter(f => (!type || f.type === type) && (!status || f.status === status))
     .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-  const container = document.getElementById('feedback-list');
-  if (!feedbacks.length) {
-    container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-sm)">
-      <img src="../Public/icon/info.png" style="height:32px;opacity:.3;margin:0 auto 10px">
-      Không có phản hồi nào.
-    </div>`; return;
+  const el = document.getElementById('feedback-list');
+  if (!all.length) {
+    el.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-sm)">
+      <img src="../Public/icon/info.png" style="height:32px;opacity:.3;margin:0 auto 10px">Không có phản hồi nào.</div>`; return;
   }
-  const typeLabel = { praise:'Khen ngợi', suggestion:'Góp ý', complaint:'Khiếu nại' };
-  const typeBadge = { praise:'badge-confirmed', suggestion:'badge-checkin', complaint:'badge-cancelled' };
-  container.innerHTML = feedbacks.map(f => `
-    <div class="feedback-card ${f.type}">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
+  const typeLabel  = { praise:'Khen ngợi', suggestion:'Góp ý', complaint:'Khiếu nại' };
+  const typeBadge  = { praise:'badge-confirmed', suggestion:'badge-checkin', complaint:'badge-cancelled' };
+  const statusInfo = { pending:['badge-noshow','Chờ phản hồi'], replied:['badge-confirmed','Đã phản hồi'] };
+  el.innerHTML = all.map(f => {
+    const [sCls, sLbl] = statusInfo[f.status] || statusInfo.pending;
+    return `
+    <div style="border:1.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:14px;
+      ${f.type==='complaint'&&f.status==='pending'?'border-color:#fca5a5':''}">
+      <!-- Header -->
+      <div style="padding:12px 16px;background:var(--cream2);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
         <div style="flex:1">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
             <strong style="font-size:.88rem">${f.guestName || 'Ẩn danh'}</strong>
-            <span class="badge ${typeBadge[f.type] || 'badge-pending'}">${typeLabel[f.type] || f.type}</span>
-            ${f.resolved ? `<span class="badge badge-confirmed">Đã xử lý</span>` : (f.type==='complaint' ? `<span class="badge badge-cancelled">Chờ xử lý</span>` : '')}
+            <span class="badge ${typeBadge[f.type]||'badge-pending'}">${typeLabel[f.type]||f.type}</span>
+            <span class="badge ${sCls}">${sLbl}</span>
+            ${f.type==='complaint'&&f.status==='pending'?'<span class="badge badge-noshow">Cần xử lý</span>':''}
           </div>
-          <div class="star-row">${'★'.repeat(f.rating||0)}${'☆'.repeat(5-(f.rating||0))}</div>
-          <div style="font-size:.83rem;color:var(--text);margin-top:6px;line-height:1.6">${f.comment || '(Không có nội dung)'}</div>
-          ${f.roomName ? `<div style="font-size:.72rem;color:var(--text-sm);margin-top:4px">Phòng: ${f.roomName} · Booking: ${f.bookingId||'—'}</div>` : ''}
+          <div style="display:flex;gap:4px;margin-bottom:4px">${'★'.repeat(f.rating||0)}${'☆'.repeat(5-(f.rating||0))}</div>
+          <div style="font-size:.78rem;color:var(--text-sm)">${f.guestEmail||''} · ${formatDate(f.createdAt)}</div>
         </div>
-        <div style="text-align:right;flex-shrink:0">
-          <div style="font-size:.72rem;color:var(--text-sm)">${formatDateTime(f.createdAt)}</div>
-          ${f.type==='complaint' && !f.resolved
-            ? `<button class="btn btn-danger btn-xs mt-8" onclick="openComplaint('${f.id}')">
-                <img src="../Public/icon/note.png"> Xử lý
-               </button>`
-            : ''}
-        </div>
+        ${f.status==='pending'?`<button class="btn btn-primary btn-sm" onclick="openReplyModal('${f.id}')">
+          Phản hồi${f.type==='complaint'?' & Xử lý':''}</button>`:
+          `<button class="btn btn-cream btn-sm" onclick="openReplyModal('${f.id}')">Sửa phản hồi</button>`}
       </div>
-    </div>`).join('');
+      <!-- Nội dung khách -->
+      <div style="padding:12px 16px;border-bottom:${f.adminReply?'1px solid var(--border)':'none'}">
+        <div style="font-size:.84rem;color:var(--text);line-height:1.6">${f.comment||'(Không có nội dung)'}</div>
+        ${f.roomName?`<div style="font-size:.72rem;color:var(--text-sm);margin-top:4px">Phòng: ${f.roomName} · Booking: ${f.bookingId||'—'}</div>`:''}
+      </div>
+      <!-- Phản hồi của admin nếu đã reply -->
+      ${f.adminReply?`
+      <div style="padding:12px 16px;background:#f0fdf4">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--dark);
+            display:flex;align-items:center;justify-content:center;color:var(--cream);font-size:.75rem;font-weight:700">
+            TF
+          </div>
+          <div>
+            <div style="font-size:.78rem;font-weight:700;color:var(--dark)">The Forest — ${f.replyBy||'Admin'}</div>
+            <div style="font-size:.7rem;color:var(--text-sm)">${formatDateTime(f.replyAt)}</div>
+          </div>
+        </div>
+        <div style="font-size:.84rem;color:var(--text);line-height:1.6">${f.adminReply}</div>
+        ${f.voucherCode?`
+        <div style="margin-top:10px;background:var(--cream);border:1.5px dashed var(--medium);
+          border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:12px">
+          <img src="../Public/icon/promo-code.png" style="height:18px">
+          <div>
+            <div style="font-size:.72rem;color:var(--text-sm)">Voucher kèm theo</div>
+            <div style="font-weight:700;font-size:.95rem;color:var(--dark);letter-spacing:1px">${f.voucherCode}</div>
+            <div style="font-size:.72rem;color:var(--medium)">${f.voucherType==='percent'?f.voucherDiscount+'% giảm giá':'Giảm '+KSAN.formatCurrency(f.voucherDiscount)} · HSD: ${formatDate(f.voucherExpiry)}</div>
+          </div>
+        </div>`:''}</div>`:``}
+    </div>`;
+  }).join('');
 }
 
 function openComplaint(id) {
@@ -628,10 +751,81 @@ function renderLoyaltyCounts() {
 /* ── Search on enter ── */
 document.getElementById('f-customer-search').addEventListener('keydown', e => { if(e.key==='Enter') renderCustomers(); });
 
+/* ── Reply Feedback ── */
+let currentFeedbackId = null;
+
+function openReplyModal(id) {
+  currentFeedbackId = id;
+  const f = KSAN.getFeedbackById(id);
+  if (!f) return;
+  document.getElementById('reply-feedback-id').value = id;
+  document.getElementById('reply-fb-info').innerHTML =
+    `<strong>${f.guestName}</strong> · ${f.type==='complaint'?'Khiếu nại':f.type==='suggestion'?'Góp ý':'Khen ngợi'} ·
+    ${'★'.repeat(f.rating||0)}<br>
+    <em style="color:var(--text-sm)">"${(f.comment||'').slice(0,120)}${f.comment?.length>120?'...':''}"</em>`;
+  document.getElementById('reply-text').value = f.adminReply || '';
+  document.getElementById('reply-voucher-toggle').checked = !!f.voucherCode;
+  document.getElementById('voucher-section').style.display = f.voucherCode ? 'block' : 'none';
+  updateVoucherPreview();
+  openModal('reply-modal');
+}
+
+function toggleVoucherSection() {
+  const show = document.getElementById('reply-voucher-toggle').checked;
+  document.getElementById('voucher-section').style.display = show ? 'block' : 'none';
+}
+
+function updateVoucherPreview() {
+  const type  = document.getElementById('voucher-type').value;
+  const value = document.getElementById('voucher-value').value;
+  const desc  = document.getElementById('voucher-preview-desc');
+  if (!desc) return;
+  const label = type === 'percent'
+    ? value + '% giảm giá'
+    : 'Giảm ' + KSAN.formatCurrency(parseInt(value));
+  desc.textContent = label + ' · Hiệu lực 30 ngày';
+}
+
+document.getElementById('reply-send-btn').addEventListener('click', () => {
+  const id    = document.getElementById('reply-feedback-id').value;
+  const reply = document.getElementById('reply-text').value.trim();
+  if (!reply) { showToast('Vui lòng nhập nội dung phản hồi.', 'warning'); return; }
+
+  const withVoucher = document.getElementById('reply-voucher-toggle').checked;
+  const voucherConfig = withVoucher ? {
+    type:        document.getElementById('voucher-type').value,
+    discount:    parseInt(document.getElementById('voucher-value').value),
+    description: document.getElementById('voucher-desc').value || undefined
+  } : null;
+
+  const acc = AdminAuth.current();
+  const res = KSAN.replyFeedback(id, {
+    reply,
+    adminName: acc?.name || 'Admin',
+    voucherConfig
+  });
+
+  if (!res.ok) { showToast(res.msg || 'Lỗi gửi phản hồi.', 'error'); return; }
+
+  closeModal('reply-modal');
+  const msg = res.voucherCode
+    ? `Đã gửi phản hồi + Voucher <strong>${res.voucherCode}</strong> cho khách.`
+    : 'Đã gửi phản hồi cho khách.';
+  showToast(msg, 'success', 4000);
+  renderFeedbacks();
+  renderStats();
+});
+
 /* ── Init ── */
 renderStats();
 renderCustomers();
 renderLoyaltyCounts();
+
+/* Tự chuyển tab nếu URL có ?tab=feedback */
+if (_urlTab === 'feedback') {
+  switchTab('feedback');
+}
 </script>
 </body>
 </html>
+
