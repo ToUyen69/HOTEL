@@ -502,7 +502,6 @@ function openServiceModal(id) {
 
   /* Khi đổi ngày → lọc lại giờ đã qua */
   document.getElementById('svc-date').onchange = renderTimeSlots;
-  renderTimeSlots();
 
   /* prefill + kiểm tra booking active */
   const user = KSAN.getCurrentUser();
@@ -523,19 +522,18 @@ function openServiceModal(id) {
     return;
   }
 
+  /* Chỉ cho phép đặt dịch vụ khi đã check-in */
   const activeBookings = KSAN.getCustomerBookings(user.id)
-    .filter(b => b.status === 'confirmed' || b.status === 'checked_in');
+    .filter(b => b.status === 'checked_in');
 
   if (activeBookings.length === 0) {
-    /* Không có phòng active */
-    sel.innerHTML = '<option value="">-- Không có đặt phòng nào --</option>';
+    sel.innerHTML = '<option value="">-- Chưa check-in --</option>';
     sel.disabled = true;
     confirmBtn.disabled = true;
     bookingAlert.style.display = 'block';
-    bookingAlert.innerHTML = `Bạn cần có <strong>đặt phòng đang hoạt động</strong> để sử dụng dịch vụ.
-      <a href="rooms.html" style="font-weight:700">Đặt phòng ngay →</a>`;
+    bookingAlert.innerHTML = `Bạn cần <strong>check-in</strong> trước khi sử dụng dịch vụ.
+      Vui lòng liên hệ lễ tân để làm thủ tục nhận phòng.`;
   } else {
-    /* Có phòng → điền dropdown, bắt buộc chọn */
     sel.disabled = false;
     confirmBtn.disabled = false;
     bookingAlert.style.display = 'none';
@@ -543,12 +541,16 @@ function openServiceModal(id) {
     activeBookings.forEach(b => {
       const opt = document.createElement('option');
       opt.value = b.id;
-      const statusLabel = b.status === 'checked_in' ? 'Đang lưu trú' : 'Sắp nhận phòng';
-      opt.textContent = `${b.roomName} (${KSAN.formatDate(b.checkIn)}) — ${statusLabel}`;
+      opt.dataset.checkIn  = b.checkIn;
+      opt.dataset.checkOut = b.checkOut;
+      opt.textContent = `${b.roomName} — ${KSAN.formatDate(b.checkIn)} → ${KSAN.formatDate(b.checkOut)}`;
       sel.appendChild(opt);
     });
     /* Nếu chỉ 1 phòng → tự chọn */
     if (activeBookings.length === 1) sel.value = activeBookings[0].id;
+    /* Cập nhật giới hạn ngày theo phòng được chọn */
+    updateDateRange();
+    sel.onchange = updateDateRange;
   }
 
   document.getElementById('svc-name').value  = user.name;
@@ -557,6 +559,29 @@ function openServiceModal(id) {
 
   updateSvcPrice();
   openModal('service-modal');
+}
+
+/* Cập nhật min/max ngày theo booking đang chọn */
+function updateDateRange() {
+  const sel = document.getElementById('svc-booking-link');
+  const dateInput = document.getElementById('svc-date');
+  const opt = sel.options[sel.selectedIndex];
+  if (!opt || !opt.dataset.checkIn) {
+    dateInput.min = todayStr();
+    dateInput.max = '';
+    dateInput.value = todayStr();
+  } else {
+    const ci = opt.dataset.checkIn;   // YYYY-MM-DD
+    const co = opt.dataset.checkOut;  // YYYY-MM-DD
+    /* Ngày min = max(checkIn, hôm nay) */
+    const minDate = ci > todayStr() ? ci : todayStr();
+    dateInput.min   = minDate;
+    dateInput.max   = co;
+    /* Đặt lại value nếu ngoài range */
+    if (!dateInput.value || dateInput.value < minDate || dateInput.value > co)
+      dateInput.value = minDate;
+  }
+  renderTimeSlots();
 }
 
 /* Lọc time slots theo ngày đã chọn */
@@ -622,6 +647,14 @@ document.getElementById('svc-confirm-btn').addEventListener('click', () => {
   if (!name || !phone || !email) { showToast('Vui lòng điền đầy đủ thông tin liên hệ.', 'warning'); return; }
   if (!date) { showToast('Vui lòng chọn ngày sử dụng.', 'warning'); return; }
   if (date < todayStr()) { showToast('Ngày sử dụng phải từ hôm nay trở đi.', 'warning'); return; }
+  /* Kiểm tra ngày nằm trong thời gian lưu trú */
+  const selOpt = document.getElementById('svc-booking-link').options[document.getElementById('svc-booking-link').selectedIndex];
+  if (selOpt && selOpt.dataset.checkIn) {
+    const ci = selOpt.dataset.checkIn, co = selOpt.dataset.checkOut;
+    if (date < ci || date > co) {
+      showToast(`Ngày sử dụng phải trong thời gian lưu trú (${KSAN.formatDate(ci)} – ${KSAN.formatDate(co)}).`, 'warning'); return;
+    }
+  }
   if (!time) { showToast('Vui lòng chọn khung giờ.', 'warning'); return; }
   if (date === todayStr()) {
     const [h, m] = time.split(':').map(Number);
