@@ -7,8 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
   footer.id = 'contact';
 
   /* Phát hiện depth (cho pages ở root vs sub-folder) */
-  const isRoot = !location.pathname.includes('/admin/');
-  const base   = isRoot ? '' : '../';
+  const inAdmin = location.pathname.includes('/admin/');
+  const inPages = location.pathname.includes('/pages/');
+  const base    = (inAdmin || inPages) ? '../' : '';
 
   footer.innerHTML = `
     <!-- Google Maps -->

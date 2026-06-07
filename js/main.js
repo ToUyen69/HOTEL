@@ -2,6 +2,9 @@
    The Forest — Global UI helpers
    ============================================================ */
 
+/* Phát hiện depth giống footer.js */
+const _BASE = (location.pathname.includes('/pages/') || location.pathname.includes('/admin/')) ? '../' : '';
+
 /* ── Toast ─────────────────────────────────────────────── */
 function showToast(msg, type = 'info', duration = 3500) {
   let container = document.getElementById('toast-container');
@@ -11,10 +14,10 @@ function showToast(msg, type = 'info', duration = 3500) {
     document.body.appendChild(container);
   }
   const iconSrc = {
-    success: 'Public/icon/success.png',
-    error:   'Public/icon/crisis.png',
-    warning: 'Public/icon/crisis.png',
-    info:    'Public/icon/info.png'
+    success: _BASE+'Public/icon/success.png',
+    error:   _BASE+'Public/icon/crisis.png',
+    warning: _BASE+'Public/icon/crisis.png',
+    info:    _BASE+'Public/icon/info.png'
   };
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
@@ -76,9 +79,9 @@ function renderAuthHeader() {
 
   /* Icon hạng thành viên — dùng ảnh thật */
   const tierIconMap = {
-    Silver:   'Public/icon/silver-badge.png',
-    Gold:     'Public/icon/gold.png',
-    Platinum: 'Public/icon/platinum.png',
+    Silver:   _BASE+'Public/icon/silver-badge.png',
+    Gold:     _BASE+'Public/icon/gold.png',
+    Platinum: _BASE+'Public/icon/platinum.png',
   };
   const tierImgSrc = tierIconMap[user?.tier] || tierIconMap.Silver;
 
@@ -91,7 +94,7 @@ function renderAuthHeader() {
           style="background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);
             border-radius:50%;width:38px;height:38px;cursor:pointer;display:flex;
             align-items:center;justify-content:center;transition:all .2s;position:relative">
-          <img src="Public/icon/notification.png" style="width:18px;height:18px;filter:invert(1);opacity:.9">
+          <img src="${_BASE}Public/icon/notification.png" style="width:18px;height:18px;filter:invert(1);opacity:.9">
           ${unread > 0 ? `<span style="position:absolute;top:-4px;right:-4px;background:#ef4444;
             color:#fff;font-size:.6rem;font-weight:700;width:17px;height:17px;border-radius:50%;
             display:flex;align-items:center;justify-content:center;border:2px solid var(--secondary)"
@@ -317,7 +320,7 @@ function injectTierModal() {
 
   const TIERS = [
     {
-      id: 'Silver', icon: 'Public/icon/silver-badge.png', color: '#78716c',
+      id: 'Silver', icon: _BASE+'Public/icon/silver-badge.png', color: '#78716c',
       bg: '#f5f5f4', points: '0 – 199',
       perks: [
         'Ưu tiên đặt phòng online 24/7',
@@ -327,7 +330,7 @@ function injectTierModal() {
       ]
     },
     {
-      id: 'Gold', icon: 'Public/icon/gold.png', color: '#d97706',
+      id: 'Gold', icon: _BASE+'Public/icon/gold.png', color: '#d97706',
       bg: '#fffbeb', points: '200 – 499',
       perks: [
         'Giảm 10% toàn bộ tiền phòng',
@@ -338,7 +341,7 @@ function injectTierModal() {
       ]
     },
     {
-      id: 'Platinum', icon: 'Public/icon/platinum.png', color: '#1B4332',
+      id: 'Platinum', icon: _BASE+'Public/icon/platinum.png', color: '#1B4332',
       bg: '#f0fdf4', points: '500+',
       perks: [
         'Giảm 20% toàn bộ dịch vụ & phòng',
@@ -396,17 +399,17 @@ function renderTierModal() {
 
   const TIERS_DATA = [
     {
-      id:'Silver', icon:'Public/icon/silver-badge.png', color:'#78716c',
+      id:'Silver', icon:_BASE+'Public/icon/silver-badge.png', color:'#78716c',
       bg:'#f5f5f4', border:'#d6d3d1', points:'0 – 199',
       perks:['Ưu tiên đặt phòng 24/7','Check-in nhanh','Tích 10 điểm / 100,000đ','Voucher chào mừng']
     },
     {
-      id:'Gold', icon:'Public/icon/gold.png', color:'#d97706',
+      id:'Gold', icon:_BASE+'Public/icon/gold.png', color:'#d97706',
       bg:'#fffbeb', border:'#fde68a', points:'200 – 499',
       perks:['Giảm 10% tiền phòng','Late check-out 14:00 miễn phí','Tất cả ưu đãi Silver','Quà tặng sinh nhật','Ưu tiên nâng hạng phòng']
     },
     {
-      id:'Platinum', icon:'Public/icon/platinum.png', color:'#1B4332',
+      id:'Platinum', icon:_BASE+'Public/icon/platinum.png', color:'#1B4332',
       bg:'#f0fdf4', border:'#86efac', points:'500+',
       perks:['Giảm 20% toàn bộ dịch vụ','Nâng hạng phòng tự động','Dịch vụ butler cá nhân','Tất cả ưu đãi Gold','Early check-in 10:00','Lounge access & minibar','Đưa đón sân bay miễn phí']
     }
@@ -476,7 +479,7 @@ function renderTierModal() {
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
               ${t.perks.map(p => `
                 <div style="display:flex;align-items:flex-start;gap:5px;font-size:.78rem;color:#555;padding:2px 0">
-                  <img src="Public/icon/check.png" style="height:11px;margin-top:2px;flex-shrink:0;filter:${isCurrent?'none':'grayscale(1) opacity(.4)'}">
+                  <img src="${_BASE}Public/icon/check.png" style="height:11px;margin-top:2px;flex-shrink:0;filter:${isCurrent?'none':'grayscale(1) opacity(.4)'}">
                   <span style="${!isCurrent?'opacity:.55':''}">${p}</span>
                 </div>`).join('')}
             </div>
@@ -491,14 +494,14 @@ function renderTierModal() {
 ════════════════════════════════ */
 
 const NOTIF_TYPES = {
-  checkin:  { icon:'Public/icon/calendar.png',  color:'#2563eb', label:'Check-in' },
-  checkout: { icon:'Public/icon/invoice.png',   color:'#7c3aed', label:'Check-out' },
-  payment:  { icon:'Public/icon/deposit.png',   color:'#d97706', label:'Thanh toán' },
-  booking:  { icon:'Public/icon/check.png',     color:'#16a34a', label:'Đặt phòng' },
-  service:  { icon:'Public/icon/spa.png',       color:'#0891b2', label:'Dịch vụ' },
-  points:   { icon:'Public/icon/gold.png',      color:'#ca8a04', label:'Điểm thưởng' },
-  promo:    { icon:'Public/icon/promo-code.png',color:'#dc2626', label:'Khuyến mãi' },
-  info:     { icon:'Public/icon/info.png',      color:'#6b7280', label:'Thông tin' },
+  checkin:  { icon:_BASE+'Public/icon/calendar.png',  color:'#2563eb', label:'Check-in' },
+  checkout: { icon:_BASE+'Public/icon/invoice.png',   color:'#7c3aed', label:'Check-out' },
+  payment:  { icon:_BASE+'Public/icon/deposit.png',   color:'#d97706', label:'Thanh toán' },
+  booking:  { icon:_BASE+'Public/icon/check.png',     color:'#16a34a', label:'Đặt phòng' },
+  service:  { icon:_BASE+'Public/icon/spa.png',       color:'#0891b2', label:'Dịch vụ' },
+  points:   { icon:_BASE+'Public/icon/gold.png',      color:'#ca8a04', label:'Điểm thưởng' },
+  promo:    { icon:_BASE+'Public/icon/promo-code.png',color:'#dc2626', label:'Khuyến mãi' },
+  info:     { icon:_BASE+'Public/icon/info.png',      color:'#6b7280', label:'Thông tin' },
 };
 
 /* Lấy thông báo đã lưu trong localStorage */
@@ -663,7 +666,7 @@ function renderNotifPanel(user) {
     <div style="max-height:360px;overflow-y:auto">
       ${all.length === 0 ? `
         <div style="padding:32px 16px;text-align:center;color:var(--text-light)">
-          <img src="Public/icon/info.png" style="height:28px;opacity:.3;display:block;margin:0 auto 10px">
+          <img src="${_BASE}Public/icon/info.png" style="height:28px;opacity:.3;display:block;margin:0 auto 10px">
           Không có thông báo nào
         </div>` :
         all.map(n => {

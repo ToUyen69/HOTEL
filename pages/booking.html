@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Đặt phòng — The Forest</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
 
@@ -12,7 +12,7 @@
   <div class="container">
     <div class="header-inner">
       <a href="index.html" class="logo">
-        <img src="Public/logo KS.png" alt="The Forest Logo">
+        <img src="../Public/logo KS.png" alt="The Forest Logo">
       </a>
       <nav class="nav" id="main-nav">
         <a href="index.html">Trang chủ</a>
@@ -131,7 +131,7 @@
 
               <!-- Promo -->
               <div style="background:var(--primary-pale);padding:16px;border-radius:10px;margin-top:8px">
-                <h4 style="margin-bottom:12px;font-size:.9rem;display:flex;align-items:center;gap:6px"><img src="Public/icon/promo-code.png" style="height:18px"> Mã khuyến mãi</h4>
+                <h4 style="margin-bottom:12px;font-size:.9rem;display:flex;align-items:center;gap:6px"><img src="../Public/icon/promo-code.png" style="height:18px"> Mã khuyến mãi</h4>
                 <div style="display:flex;gap:10px">
                   <input type="text" class="form-control" id="promo-input" placeholder="Nhập mã khuyến mãi (VD: SUMMER25)" style="text-transform:uppercase">
                   <button class="btn btn-outline" id="promo-btn" style="white-space:nowrap">Áp dụng</button>
@@ -167,7 +167,7 @@
               <div id="payment-methods" style="display:flex;flex-direction:column;gap:10px">
                 <label class="payment-option" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color .2s">
                   <input type="radio" name="payment" value="bank" style="accent-color:var(--primary)">
-                  <img src="Public/icon/bank.png" style="height:28px;object-fit:contain">
+                  <img src="../Public/icon/bank.png" style="height:28px;object-fit:contain">
                   <div>
                     <div style="font-weight:700;font-size:.9rem">Chuyển khoản ngân hàng</div>
                     <div style="font-size:.78rem;color:var(--text-light)">Visa, Mastercard, thẻ ATM nội địa</div>
@@ -175,7 +175,7 @@
                 </label>
                 <label class="payment-option" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color .2s">
                   <input type="radio" name="payment" value="momo" style="accent-color:var(--primary)">
-                  <img src="Public/icon/Logo-MoMo-Square-768x768.webp" style="height:28px;border-radius:4px">
+                  <img src="../Public/icon/Logo-MoMo-Square-768x768.webp" style="height:28px;border-radius:4px">
                   <div>
                     <div style="font-weight:700;font-size:.9rem">Ví MoMo</div>
                     <div style="font-size:.78rem;color:var(--text-light)">Thanh toán nhanh qua ứng dụng MoMo</div>
@@ -183,7 +183,7 @@
                 </label>
                 <label class="payment-option" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color .2s">
                   <input type="radio" name="payment" value="zalopay" style="accent-color:var(--primary)">
-                  <img src="Public/icon/zalo pay.png" style="height:28px;object-fit:contain">
+                  <img src="../Public/icon/zalo pay.png" style="height:28px;object-fit:contain">
                   <div>
                     <div style="font-weight:700;font-size:.9rem">ZaloPay / VNPay</div>
                     <div style="font-size:.78rem;color:var(--text-light)">Ví điện tử phổ biến tại Việt Nam</div>
@@ -212,7 +212,7 @@
           <div style="display:flex;justify-content:space-between;margin-top:16px">
             <button class="btn btn-outline" onclick="goToStep(1)">← Quay lại</button>
             <button class="btn btn-primary btn-lg" id="step2-pay">
-              <img src="Public/icon/deposit.png" style="height:14px;vertical-align:middle;filter:invert(1);margin-right:4px"> Xác nhận thanh toán
+              <img src="../Public/icon/deposit.png" style="height:14px;vertical-align:middle;filter:invert(1);margin-right:4px"> Xác nhận thanh toán
             </button>
           </div>
         </div>
@@ -233,7 +233,7 @@
       <div>
         <div class="card booking-summary-card">
           <div class="summary-room-img">
-            <img src="Public/room1.jpg" alt="Room" id="summary-img">
+            <img src="../Public/room3.jpg" alt="Room" id="summary-img">
           </div>
           <div class="card-body">
             <h4 id="summary-room-name" style="margin-bottom:4px">—</h4>
@@ -294,8 +294,8 @@
   </div>
 </section>
 
-<script src="js/data.js"></script>
-<script src="js/main.js"></script>
+<script src="../js/data.js"></script>
+<script src="../js/main.js"></script>
 <script>
 const params = new URLSearchParams(location.search);
 let state = {
@@ -477,14 +477,14 @@ function renderPaymentDetail(method) {
   } else if (method === 'momo') {
     area.innerHTML = `
       <div style="background:#f8f8f8;padding:16px;border-radius:10px;text-align:center;font-size:.85rem">
-        <img src="Public/icon/Logo-MoMo-Square-768x768.webp" style="height:48px;border-radius:8px;margin:0 auto 8px">
+        <img src="../Public/icon/Logo-MoMo-Square-768x768.webp" style="height:48px;border-radius:8px;margin:0 auto 8px">
         <div style="font-weight:700">MoMo — Demo</div>
         <div style="color:var(--text-light);margin-top:4px">Quét QR hoặc nhập SĐT 0901234567 (Demo)</div>
       </div>`;
   } else {
     area.innerHTML = `
       <div style="background:#f8f8f8;padding:16px;border-radius:10px;text-align:center;font-size:.85rem">
-        <img src="Public/icon/zalo pay.png" style="height:48px;object-fit:contain;margin:0 auto 8px">
+        <img src="../Public/icon/zalo pay.png" style="height:48px;object-fit:contain;margin:0 auto 8px">
         <div style="font-weight:700">ZaloPay / VNPay — Demo</div>
         <div style="color:var(--text-light);margin-top:4px">Chuyển hướng đến cổng thanh toán (Demo)</div>
       </div>`;
@@ -545,7 +545,7 @@ function processBooking() {
 
 initForm();
 </script>
-<script src="js/footer.js"></script>
+<script src="../js/footer.js"></script>
 </body>
 </html>
 

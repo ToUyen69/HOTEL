@@ -407,7 +407,7 @@ function renderTypeBreakdown() {
     const total  = ROOM_INV.filter(i=>i.typeId===r.id).length;
     const pct    = total > 0 ? Math.round(active/total*100) : 0;
     return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
-      <img src="../${r.image}" style="width:44px;height:36px;object-fit:cover;border-radius:5px;flex-shrink:0">
+      <img src="${r.image}" style="width:44px;height:36px;object-fit:cover;border-radius:5px;flex-shrink:0">
       <div style="flex:1;min-width:0">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <strong style="font-size:.82rem">${r.type}</strong>

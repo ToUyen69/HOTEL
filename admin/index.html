@@ -1,77 +1,291 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin — The Forest</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Forest — Admin</title>
   <link rel="stylesheet" href="css/admin.css">
   <style>
-    body { display:flex; align-items:center; justify-content:center; min-height:100vh;
-      background: linear-gradient(135deg, #1B4332 0%, #346739 60%, #79AE6F 100%); }
-    .login-wrap { width:400px; max-width:calc(100vw - 32px); }
-    .login-card { background:#fff; border-radius:16px; padding:40px; box-shadow:0 20px 60px rgba(0,0,0,.25); }
-    .login-logo { text-align:center; margin-bottom:32px; }
-    .login-logo img { height:72px; margin:0 auto 12px; }
-    .login-logo h2 { color:#346739; font-family:Georgia,serif; font-size:1.5rem; margin-bottom:3px; }
-    .login-logo p  { color:#888; font-size:.78rem; letter-spacing:1px; text-transform:uppercase; }
-    .demo-hint {
-      background:#F2EDC2; border:1px solid #9FCB98; border-radius:8px;
-      padding:12px 16px; font-size:.8rem; color:#346739; margin-bottom:18px;
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      background: #123524;
     }
-    .demo-hint strong { display:block; margin-bottom:4px; }
+
+    /* ── Left: Background image ── */
+    .login-bg {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      min-height: 100vh;
+    }
+    .login-bg img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: brightness(.75);
+    }
+    .login-bg-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(
+        135deg,
+        rgba(18,53,36,.55) 0%,
+        rgba(18,53,36,.2) 50%,
+        rgba(0,0,0,.35) 100%
+      );
+    }
+    .login-bg-content {
+      position: absolute;
+      bottom: 48px; left: 48px; right: 48px;
+      color: #fff;
+    }
+    .login-bg-content .tag {
+      display: inline-block;
+      background: rgba(255,255,255,.15);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,.25);
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: .72rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #EFE3C2;
+      margin-bottom: 14px;
+    }
+    .login-bg-content h2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(1.6rem, 2.5vw, 2.4rem);
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.3;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 12px rgba(0,0,0,.3);
+    }
+    .login-bg-content p {
+      font-size: .88rem;
+      color: rgba(255,255,255,.75);
+      line-height: 1.7;
+      max-width: 380px;
+    }
+
+    /* ── Right: Login form ── */
+    .login-panel {
+      width: 420px;
+      min-width: 420px;
+      min-height: 100vh;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 48px 44px;
+      position: relative;
+    }
+
+    /* Logo */
+    .login-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+    .login-logo img { height: 52px; }
+    .login-logo-text {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #123524;
+      line-height: 1.2;
+    }
+    .login-logo-sub {
+      font-size: .68rem;
+      color: #5A6A5A;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+
+    /* Heading */
+    .login-heading {
+      margin-bottom: 28px;
+    }
+    .login-heading h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.6rem;
+      color: #123524;
+      margin-bottom: 6px;
+    }
+    .login-heading p {
+      font-size: .84rem;
+      color: #5A6A5A;
+    }
+
+    /* Form */
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block;
+      font-size: .72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: #1E2A1E;
+      margin-bottom: 7px;
+    }
+    .form-control {
+      width: 100%; padding: 12px 14px;
+      border: 1.5px solid #C5D9B0;
+      border-radius: 10px;
+      font-size: .9rem;
+      color: #1E2A1E;
+      background: #fff;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .form-control:focus {
+      border-color: #3E7B27;
+      box-shadow: 0 0 0 3px rgba(62,123,39,.1);
+    }
+    .form-control::placeholder { color: #aaa; }
+
+    /* Hint */
+    .demo-hint {
+      background: #F5F1E8;
+      border: 1px solid #C5D9B0;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: .8rem;
+      color: #3E7B27;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .demo-hint::before {
+      content: '💡';
+      font-size: .85rem;
+      flex-shrink: 0;
+    }
+
+    /* Button */
+    .btn-login {
+      width: 100%;
+      padding: 13px;
+      background: #123524;
+      color: #EFE3C2;
+      border: none;
+      border-radius: 10px;
+      font-size: .95rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: .3px;
+      transition: all .2s;
+      margin-top: 4px;
+    }
+    .btn-login:hover {
+      background: #0f2b1e;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(18,53,36,.25);
+    }
+    .btn-login:active { transform: translateY(0); }
+
+    /* Alert */
+    #login-alert .alert-danger {
+      background: #fce4ec;
+      border: 1px solid #f48fb1;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: .83rem;
+      color: #880e4f;
+      margin-bottom: 16px;
+    }
+
+    /* Footer */
+    .login-footer {
+      position: absolute;
+      bottom: 24px; left: 44px; right: 44px;
+      font-size: .72rem;
+      color: #9ca3af;
+      text-align: center;
+    }
+    .login-footer a { color: #3E7B27; font-weight: 600; }
+
+    /* Responsive */
+    @media (max-width: 800px) {
+      .login-bg { display: none; }
+      .login-panel {
+        width: 100%; min-width: unset;
+        padding: 40px 28px;
+      }
+    }
   </style>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-<div class="login-wrap">
-  <div class="login-card">
-    <div class="login-logo">
-      <img src="../Public/logo KS.png" alt="The Forest">
-      <h2>The Forest</h2>
-      <p>Hệ thống quản lý khu nghỉ dưỡng</p>
-    </div>
 
-    <div id="login-alert"></div>
+<!-- Left: Scenic background -->
+<div class="login-bg">
+  <img src="../Public/datlat2.jpg" alt="Đà Lạt">
+  <div class="login-bg-overlay"></div>
+  <div class="login-bg-content">
+    <div class="tag">The Forest Resort · Đà Lạt</div>
+    <h2>Hệ thống quản lý<br>khu nghỉ dưỡng</h2>
+    <p>Quản lý đặt phòng, dịch vụ và trải nghiệm khách hàng trong một nền tảng thống nhất.</p>
+  </div>
+</div>
 
-    <div class="demo-hint">
-      <strong><img src="../Public/icon/info.png" style="height:13px;vertical-align:middle;margin-right:4px"> Tài khoản demo:</strong>
-      Mật khẩu: <strong>admin123</strong> (hoặc <strong>123456</strong>)
-    </div>
+<!-- Right: Login panel -->
+<div class="login-panel">
+  <div class="login-logo">
+    <img src="../Public/logo KS.png" alt="The Forest">
+  </div>
 
-    <div class="form-group">
-      <label>Mật khẩu đăng nhập</label>
-      <input type="password" class="form-control" id="login-pw"
-        placeholder="Nhập mật khẩu..." style="font-size:1rem;padding:12px 14px">
-    </div>
+  <div class="login-heading">
+    <h1>Chào mừng trở lại</h1>
+    <p>Đăng nhập để quản lý khu nghỉ dưỡng</p>
+  </div>
 
-    <button class="btn btn-primary btn-full" id="login-btn" style="font-size:.95rem;padding:13px">
-      <img src="../Public/icon/check.png"> Đăng nhập vào hệ thống
-    </button>
+  <div id="login-alert"></div>
 
-    <div style="text-align:center;margin-top:20px">
-      <a href="../index.html" style="font-size:.8rem;color:#79AE6F;display:inline-flex;align-items:center;gap:4px">
-        <img src="../Public/icon/home.png" style="height:13px"> Quay lại trang khách hàng
-      </a>
-    </div>
+  <div class="demo-hint">
+    Tài khoản demo — mật khẩu: <strong>admin123</strong>
+  </div>
+
+  <div class="form-group">
+    <label>Mật khẩu đăng nhập</label>
+    <input type="password" class="form-control" id="login-pw"
+      placeholder="Nhập mật khẩu...">
+  </div>
+
+  <button class="btn-login" id="login-btn">Đăng nhập</button>
+
+  <div class="login-footer">
+    <a href="../pages/index.html">← Quay lại trang khách hàng</a>
   </div>
 </div>
 
 <script src="js/admin.js"></script>
+<script src="../js/data.js"></script>
 <script>
+/* Đã đăng nhập → vào thẳng dashboard */
+if (AdminAuth.current()) location.replace('dashboard.html');
+
 document.getElementById('login-btn').addEventListener('click', () => {
   const pw  = document.getElementById('login-pw').value;
   const res = AdminAuth.login(pw);
   if (!res.ok) {
     document.getElementById('login-alert').innerHTML =
-      `<div class="alert alert-danger" style="margin-bottom:14px">${res.msg}</div>`;
+      `<div class="alert-danger">${res.msg}</div>`;
     return;
   }
   location.href = 'dashboard.html';
 });
+
 document.getElementById('login-pw').addEventListener('keydown', e => {
   if (e.key === 'Enter') document.getElementById('login-btn').click();
 });
 </script>
 </body>
 </html>
-
-
-

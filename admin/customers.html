@@ -584,7 +584,7 @@ function openCustomerDetail(id) {
   document.getElementById('cd-booking-history').innerHTML = cBookings.length
     ? cBookings.map(b => `
       <div style="display:flex;gap:12px;align-items:center;padding:10px;background:var(--cream2);border-radius:8px;margin-bottom:8px;font-size:.82rem">
-        <img src="../${b.roomImage || 'Public/room1.jpg'}" style="width:60px;height:48px;object-fit:cover;border-radius:6px;flex-shrink:0">
+        <img src="${(img => img.startsWith('Public/') ? '../' + img : img)(b.roomImage || '../Public/room1.jpg')}" style="width:60px;height:48px;object-fit:cover;border-radius:6px;flex-shrink:0">
         <div style="flex:1">
           <div style="font-weight:600">${b.roomName}</div>
           <div style="color:var(--text-sm)">${formatDate(b.checkIn)} → ${formatDate(b.checkOut)} · ${b.nights} đêm</div>

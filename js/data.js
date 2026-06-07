@@ -8,7 +8,7 @@ const KSAN = {
   ROOMS: [
     {
       id: 'R001', type: 'Standard', name: 'Phòng Standard',
-      image: 'Public/room1.jpg', size: 25, capacity: 2,
+      image: '../Public/room3.jpg', size: 25, capacity: 2,
       price: 800000, totalRooms: 5,
       shortDesc: 'Không gian ấm cúng, đầy đủ tiện nghi cơ bản cho kỳ nghỉ thoải mái.',
       description: 'Phòng Standard mang đến không gian nghỉ ngơi tiện nghi với đầy đủ thiết bị hiện đại. Phù hợp cho cặp đôi hoặc du khách đi một mình muốn trải nghiệm dịch vụ chất lượng với chi phí hợp lý.',
@@ -17,7 +17,7 @@ const KSAN = {
     },
     {
       id: 'R002', type: 'Deluxe', name: 'Phòng Deluxe',
-      image: 'Public/room2.jpg', size: 35, capacity: 2,
+      image: '../Public/room2.jpg', size: 35, capacity: 2,
       price: 1200000, totalRooms: 4,
       shortDesc: 'Nội thất sang trọng với tầm nhìn đẹp, nâng tầm trải nghiệm nghỉ dưỡng.',
       description: 'Phòng Deluxe được thiết kế tinh tế với nội thất cao cấp, mang lại không gian nghỉ ngơi thư giãn tuyệt vời. Tầm nhìn ra thành phố hoặc khu vườn tạo nên bầu không khí yên bình.',
@@ -26,7 +26,7 @@ const KSAN = {
     },
     {
       id: 'R003', type: 'Suite', name: 'Phòng Suite',
-      image: 'Public/room3.jpg', size: 55, capacity: 4,
+      image: '../Public/room1.jpg', size: 55, capacity: 4,
       price: 2500000, totalRooms: 2,
       shortDesc: 'Đỉnh cao sang trọng với phòng khách riêng và dịch vụ butler cá nhân.',
       description: 'Suite là lựa chọn hoàn hảo cho những ai tìm kiếm sự xa hoa và đẳng cấp. Với phòng khách riêng biệt, bồn tắm Jacuzzi và dịch vụ butler 24/7, đây là trải nghiệm nghỉ dưỡng không thể quên.',
@@ -35,7 +35,7 @@ const KSAN = {
     },
     {
       id: 'R004', type: 'Family', name: 'Phòng Family',
-      image: 'Public/room4.jpg', size: 45, capacity: 4,
+      image: '../Public/room4.jpg', size: 45, capacity: 4,
       price: 1800000, totalRooms: 3,
       shortDesc: 'Không gian rộng rãi, lý tưởng cho gia đình với trẻ nhỏ.',
       description: 'Phòng Family được thiết kế đặc biệt cho các gia đình, với không gian rộng rãi và các tiện nghi dành riêng cho trẻ em. Hai phòng ngủ liên thông đảm bảo sự riêng tư tối đa cho mọi thành viên.',
@@ -52,12 +52,12 @@ const KSAN = {
   ],
 
   SERVICES: [
-    { id: 'SPA',     name: 'Spa & Làm đẹp',    icon: '💆',  price: 350000,  unit: '/lần',   image: 'Public/spa.jpg'       },
-    { id: 'POOL',    name: 'Hồ bơi',           icon: '🏊',  price: 0,       unit: 'miễn phí',image: 'Public/hồ bơi.jpg'   },
-    { id: 'YOGA',    name: 'Yoga & Thể dục',   icon: '🧘',  price: 150000,  unit: '/buổi',  image: 'Public/yoga.jpg'      },
-    { id: 'SAUNA',   name: 'Xông hơi',         icon: '♨️',  price: 200000,  unit: '/lần',   image: 'Public/xông hơi.jpg'  },
-    { id: 'CAFE',    name: 'Nhà hàng & Cafe',  icon: '☕',  price: 0,       unit: 'phục vụ',image: 'Public/cafe.jpg'      },
-    { id: 'TRANSFER',name: 'Đưa đón sân bay',  icon: '🚗',  price: 250000,  unit: '/chiều', image: 'Public/xe đưa đón.png'}
+    { id: 'SPA',     name: 'Spa & Làm đẹp',    icon: '💆',  price: 350000,  unit: '/lần',   image: '../Public/spa.jpg'       },
+    { id: 'POOL',    name: 'Hồ bơi',           icon: '🏊',  price: 0,       unit: 'miễn phí',image: '../Public/hồ bơi.jpg'   },
+    { id: 'YOGA',    name: 'Yoga & Thể dục',   icon: '🧘',  price: 150000,  unit: '/buổi',  image: '../Public/yoga.jpg'      },
+    { id: 'SAUNA',   name: 'Xông hơi',         icon: '♨️',  price: 200000,  unit: '/lần',   image: '../Public/xông hơi.jpg'  },
+    { id: 'CAFE',    name: 'Nhà hàng & Cafe',  icon: '☕',  price: 0,       unit: 'phục vụ',image: '../Public/cafe.jpg'      },
+    { id: 'TRANSFER',name: 'Đưa đón sân bay',  icon: '🚗',  price: 250000,  unit: '/chiều', image: '../Public/xe đưa đón.png'}
   ],
 
   CANCEL_POLICY: {

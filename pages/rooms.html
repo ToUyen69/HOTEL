@@ -4,7 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Phòng — The Forest</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .page-hero::after { background-image: url('../Public/datlat2.jpg'); opacity: .38; mix-blend-mode: normal; }
+  </style>
 </head>
 <body>
 
@@ -12,7 +15,7 @@
   <div class="container">
     <div class="header-inner">
       <a href="index.html" class="logo">
-        <img src="Public/logo KS.png" alt="The Forest Logo">
+        <img src="../Public/logo KS.png" alt="The Forest Logo">
       </a>
       <nav class="nav" id="main-nav">
         <a href="index.html">Trang chủ</a>
@@ -100,8 +103,8 @@
 
 <footer class="footer"></footer>
 
-<script src="js/data.js"></script>
-<script src="js/main.js"></script>
+<script src="../js/data.js"></script>
+<script src="../js/main.js"></script>
 <script>
 /* parse URL params */
 const params = new URLSearchParams(location.search);
@@ -157,13 +160,13 @@ function getRemainingCount(room, checkIn, checkOut) {
 /* Badge số phòng còn lại */
 function remainingBadge(remaining) {
   if (remaining >= 4) return `<span style="font-size:.75rem;color:var(--success);font-weight:700">
-    <img src="Public/icon/check.png" style="height:11px;vertical-align:middle;margin-right:2px"> ${remaining} phòng còn trống</span>`;
+    <img src="../Public/icon/check.png" style="height:11px;vertical-align:middle;margin-right:2px"> ${remaining} phòng còn trống</span>`;
   if (remaining === 3) return `<span style="font-size:.75rem;color:var(--primary);font-weight:700">
-    <img src="Public/icon/check.png" style="height:11px;vertical-align:middle;margin-right:2px"> Còn ${remaining} phòng</span>`;
+    <img src="../Public/icon/check.png" style="height:11px;vertical-align:middle;margin-right:2px"> Còn ${remaining} phòng</span>`;
   if (remaining === 2) return `<span style="font-size:.75rem;color:var(--warning);font-weight:700">
-    <img src="Public/icon/crisis.png" style="height:11px;vertical-align:middle;margin-right:2px"> Chỉ còn ${remaining} phòng</span>`;
+    <img src="../Public/icon/crisis.png" style="height:11px;vertical-align:middle;margin-right:2px"> Chỉ còn ${remaining} phòng</span>`;
   return `<span style="font-size:.75rem;color:var(--danger);font-weight:700;animation:pulse 1s infinite">
-    <img src="Public/icon/crisis.png" style="height:11px;vertical-align:middle;margin-right:2px"> Chỉ còn 1 phòng cuối!</span>`;
+    <img src="../Public/icon/crisis.png" style="height:11px;vertical-align:middle;margin-right:2px"> Chỉ còn 1 phòng cuối!</span>`;
 }
 
 function renderRooms() {
@@ -183,7 +186,7 @@ function renderRooms() {
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       ${KSAN.PROMOTIONS.slice(0,2).map(p =>
-        `<span class="badge badge-gold" style="cursor:pointer" title="${p.description}"><img src="Public/icon/promo-code.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> ${p.code}</span>`
+        `<span class="badge badge-gold" style="cursor:pointer" title="${p.description}"><img src="../Public/icon/promo-code.png" style="height:14px;vertical-align:middle;opacity:.75;margin-right:4px"> ${p.code}</span>`
       ).join('')}
     </div>`;
 
@@ -191,7 +194,7 @@ function renderRooms() {
   if (!filtered.length) {
     list.innerHTML = `
       <div class="empty-state">
-        <div class="empty-state-icon"><img src="Public/icon/reception.png" style="height:24px;vertical-align:middle;opacity:.75"></div>
+        <div class="empty-state-icon"><img src="../Public/icon/reception.png" style="height:24px;vertical-align:middle;opacity:.75"></div>
         <h3>Không có phòng phù hợp</h3>
         <p>Hãy thử điều chỉnh ngày hoặc số lượng khách.</p>
       </div>`;
@@ -238,7 +241,7 @@ function renderRooms() {
           <div style="font-size:.8rem;color:var(--text-light);margin-top:4px">Tổng ${nights} đêm:</div>
           <div style="font-size:1rem;font-weight:700;color:var(--secondary)">${KSAN.formatCurrency(base)}</div>
           <div style="margin-top:8px;padding:6px 10px;background:${remaining<=1?'#fdecea':remaining<=2?'#fef9e7':'var(--primary-pale)'};border-radius:8px;font-size:.75rem;font-weight:700;color:${remaining<=1?'var(--danger)':remaining<=2?'var(--warning)':'var(--primary)'}">
-            <img src="Public/icon/${remaining<=2?'crisis':'check'}.png" style="height:11px;vertical-align:middle;margin-right:3px">
+            <img src="../Public/icon/${remaining<=2?'crisis':'check'}.png" style="height:11px;vertical-align:middle;margin-right:3px">
             Còn ${remaining}/${r.totalRooms} phòng
           </div>
         </div>
@@ -306,7 +309,7 @@ function showRoomDetail(roomId) {
 
 renderRooms();
 </script>
-<script src="js/footer.js"></script>
+<script src="../js/footer.js"></script>
 </body>
 </html>
 

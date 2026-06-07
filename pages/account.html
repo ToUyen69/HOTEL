@@ -4,7 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tài khoản — The Forest</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .page-hero::after { background-image: url('../Public/canh.jpg'); opacity: .38; mix-blend-mode: normal; }
+  </style>
 </head>
 <body>
 
@@ -12,7 +15,7 @@
   <div class="container">
     <div class="header-inner">
       <a href="index.html" class="logo">
-        <img src="Public/logo KS.png" alt="The Forest Logo">
+        <img src="../Public/logo KS.png" alt="The Forest Logo">
       </a>
       <nav class="nav" id="main-nav">
         <a href="index.html">Trang chủ</a>
@@ -41,7 +44,7 @@
   <div class="container">
     <!-- Not logged in -->
     <div id="guest-view" class="d-none" style="text-align:center;padding:60px 20px">
-      <div style="margin-bottom:16px"><img src="Public/icon/id-card.png" style="height:56px;vertical-align:middle;opacity:.75"></div>
+      <div style="margin-bottom:16px"><img src="../Public/icon/id-card.png" style="height:56px;vertical-align:middle;opacity:.75"></div>
       <h2 style="margin-bottom:10px">Đăng nhập để xem tài khoản</h2>
       <p style="color:var(--text-light);max-width:400px;margin:0 auto 28px">
         Đăng nhập để quản lý hồ sơ, xem điểm tích lũy và theo dõi hạng thành viên của bạn.
@@ -192,19 +195,19 @@
                 <!-- Tier table -->
                 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px">
                   <div id="tier-silver" style="padding:18px;border-radius:12px;text-align:center;border:2px solid var(--border)">
-                    <div><img src="Public/icon/silver-badge.png" style="height:28px;vertical-align:middle"></div>
+                    <div><img src="../Public/icon/silver-badge.png" style="height:28px;vertical-align:middle"></div>
                     <div style="font-weight:700;margin:6px 0 2px">Silver</div>
                     <div style="font-size:.75rem;color:var(--text-light)">0 – 199 điểm</div>
                     <div style="margin-top:10px;font-size:.78rem;color:var(--text-light)">Ưu tiên đặt phòng · Check-in nhanh</div>
                   </div>
                   <div id="tier-gold" style="padding:18px;border-radius:12px;text-align:center;border:2px solid var(--accent)">
-                    <div><img src="Public/icon/gold.png" style="height:28px;vertical-align:middle"></div>
+                    <div><img src="../Public/icon/gold.png" style="height:28px;vertical-align:middle"></div>
                     <div style="font-weight:700;margin:6px 0 2px">Gold</div>
                     <div style="font-size:.75rem;color:var(--text-light)">200 – 499 điểm</div>
                     <div style="margin-top:10px;font-size:.78rem;color:var(--text-light)">Giảm 10% · Late check-out · Quà sinh nhật</div>
                   </div>
                   <div id="tier-platinum" style="padding:18px;border-radius:12px;text-align:center;background:var(--secondary);color:#fff;border:2px solid var(--secondary)">
-                    <div><img src="Public/icon/platinum.png" style="height:28px;vertical-align:middle"></div>
+                    <div><img src="../Public/icon/platinum.png" style="height:28px;vertical-align:middle"></div>
                     <div style="font-weight:700;margin:6px 0 2px;color:var(--accent)">Platinum</div>
                     <div style="font-size:.75rem;color:rgba(255,255,255,.6)">500+ điểm</div>
                     <div style="margin-top:10px;font-size:.78rem;color:rgba(255,255,255,.6)">Giảm 20% · Butler · Nâng hạng phòng</div>
@@ -221,7 +224,7 @@
                   </div>
                   <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg);border-radius:8px">
                     <div style="width:36px;height:36px;background:var(--primary-pale);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                      <img src="Public/icon/note.png" style="width:20px;height:20px;object-fit:contain">
+                      <img src="../Public/icon/note.png" style="width:20px;height:20px;object-fit:contain">
                     </div>
                     <div><strong>Gửi đánh giá</strong> — Nhận voucher giảm giá cho lần sau</div>
                   </div>
@@ -258,8 +261,8 @@
 
 <footer class="footer"></footer>
 
-<script src="js/data.js"></script>
-<script src="js/main.js"></script>
+<script src="../js/data.js"></script>
+<script src="../js/main.js"></script>
 <script>
 let currentUser = null;
 
@@ -315,7 +318,7 @@ function renderTierProgress() {
 
   document.getElementById('tier-progress').innerHTML = tier === 'Platinum' ? `
     <div style="text-align:center;padding:16px">
-      <div style="margin-bottom:8px"><img src="Public/icon/platinum.png" style="height:28px;vertical-align:middle"></div>
+      <div style="margin-bottom:8px"><img src="../Public/icon/platinum.png" style="height:28px;vertical-align:middle"></div>
       <div style="font-weight:700;color:var(--primary)">Bạn đang ở hạng cao nhất!</div>
       <div style="font-size:.82rem;color:var(--text-light);margin-top:4px">Tận hưởng mọi đặc quyền Platinum.</div>
     </div>` : `
@@ -453,7 +456,7 @@ function initPasswordChange() {
 
 loadAccount();
 </script>
-<script src="js/footer.js"></script>
+<script src="../js/footer.js"></script>
 </body>
 </html>
 

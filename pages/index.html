@@ -1,0 +1,361 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Forest — Nghỉ dưỡng thiên nhiên</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="header">
+  <div class="container">
+    <div class="header-inner">
+      <a href="index.html" class="logo">
+        <img src="../Public/logo KS.png" alt="The Forest Logo">
+      </a>
+      <nav class="nav" id="main-nav">
+        <a href="index.html">Trang chủ</a>
+        <a href="rooms.html">Phòng</a>
+        <a href="services.html">Dịch vụ</a>
+        <a href="about.html">Về chúng tôi</a>
+        <a href="travel-guide.html">Cẩm nang</a>
+        <a href="my-booking.html">Đặt phòng của tôi</a>      </nav>
+      <div class="header-actions" id="header-actions"></div>
+      <button class="mobile-toggle" id="mobile-toggle">☰</button>
+    </div>
+  </div>
+</header>
+
+<!-- ── HERO ── -->
+<section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content container">
+    <div class="hero-badge">✦ Rừng núi Đà Lạt ✦</div>
+    <h1>Tìm lại bình yên<br>giữa lòng rừng núi</h1>
+    <p>Đắm chìm trong không khí trong lành của rừng thông Đà Lạt, nơi mỗi kỳ nghỉ là hành trình chữa lành tâm hồn.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hero-stat-num">14+</div><div class="hero-stat-lbl">Phòng cao cấp</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">4</div><div class="hero-stat-lbl">Loại phòng</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">6+</div><div class="hero-stat-lbl">Dịch vụ tiện ích</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">4.9★</div><div class="hero-stat-lbl">Đánh giá</div></div>
+    </div>
+  </div>
+
+  <!-- Booking Widget -->
+  <div class="container" style="padding-bottom:40px">
+    <div class="booking-widget">
+      <h3><img src="../Public/icon/search.png" style="height:20px;vertical-align:middle;opacity:.75;margin-right:4px"> Tìm kiếm phòng</h3>
+      <div class="booking-widget-grid">
+        <div class="form-group">
+          <label>Nhận phòng</label>
+          <input type="date" class="form-control" id="w-checkin" min="">
+        </div>
+        <div class="form-group">
+          <label>Trả phòng</label>
+          <input type="date" class="form-control" id="w-checkout" min="">
+        </div>
+        <div class="form-group">
+          <label>Số khách</label>
+          <select class="form-control" id="w-guests">
+            <option value="1">1 khách</option>
+            <option value="2" selected>2 khách</option>
+            <option value="3">3 khách</option>
+            <option value="4">4 khách</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Loại phòng</label>
+          <select class="form-control" id="w-type">
+            <option value="">Tất cả loại phòng</option>
+            <option value="Standard">Standard</option>
+            <option value="Deluxe">Deluxe</option>
+            <option value="Suite">Suite</option>
+            <option value="Family">Family</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <button class="btn btn-primary btn-full" id="search-btn">
+            <img src="../Public/icon/search.png" style="height:16px;filter:invert(1);vertical-align:middle;margin-right:4px"> Tìm phòng
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ROOMS SECTION ── -->
+<section class="section" id="rooms">
+  <div class="container">
+    <div class="section-header">
+      <h2>Các loại phòng</h2>
+      <p>Từ phòng tiêu chuẩn tiện nghi đến suite sang trọng, chúng tôi có lựa chọn phù hợp cho mọi nhu cầu.</p>
+      <div class="divider-gold"></div>
+    </div>
+    <div class="grid-4" id="rooms-grid"></div>
+    <div class="text-center mt-32">
+      <a href="rooms.html" class="btn btn-outline btn-lg">Xem tất cả phòng →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── ABOUT / GALLERY ── -->
+<section class="section" style="background:#fff;padding:0">
+  <div style="display:grid;grid-template-columns:1fr 1fr">
+    <div class="gallery-grid" style="padding:40px 20px 40px 40px">
+      <div class="gallery-item"><img src="../Public/1.jpg" alt=""></div>
+      <div class="gallery-item"><img src="../Public/2.jpg" alt=""></div>
+      <div class="gallery-item"><img src="../Public/3.jpg" alt=""></div>
+      <div class="gallery-item"><img src="../Public/4.jpg" alt=""></div>
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:center;padding:60px 40px 60px 20px">
+      <div class="badge badge-gold mb-16" style="display:inline-block">Về chúng tôi</div>
+      <h2 style="margin-bottom:16px">Chữa lành giữa thiên nhiên<br>rừng núi Đà Lạt</h2>
+      <p style="color:var(--text-light);line-height:1.9;margin-bottom:20px">
+        The Forest tọa lạc giữa cánh rừng thông Đà Lạt, nơi bạn có thể thực sự nghỉ ngơi và phục hồi năng lượng. Không gian kiến trúc hài hòa với thiên nhiên, dịch vụ ân cần từ trái tim.
+      </p>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px">
+        <li style="display:flex;align-items:center;gap:10px;font-size:.9rem">
+          <span style="color:var(--success);font-weight:700">✓</span> Hệ thống đặt phòng thông minh 24/7
+        </li>
+        <li style="display:flex;align-items:center;gap:10px;font-size:.9rem">
+          <span style="color:var(--success);font-weight:700">✓</span> Dịch vụ cá nhân hóa theo hồ sơ khách
+        </li>
+        <li style="display:flex;align-items:center;gap:10px;font-size:.9rem">
+          <span style="color:var(--success);font-weight:700">✓</span> Chương trình tích điểm Silver – Gold – Platinum
+        </li>
+        <li style="display:flex;align-items:center;gap:10px;font-size:.9rem">
+          <span style="color:var(--success);font-weight:700">✓</span> Chính sách hủy phòng linh hoạt, minh bạch
+        </li>
+      </ul>
+      <a href="rooms.html" class="btn btn-primary" style="align-self:flex-start">Khám phá ngay →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── SERVICES ── -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <h2>Tiện ích & Dịch vụ</h2>
+      <p>Đa dạng dịch vụ cao cấp, đáp ứng mọi nhu cầu trong suốt kỳ lưu trú của bạn.</p>
+      <div class="divider-gold"></div>
+    </div>
+    <div class="grid-3 mb-32" id="services-img-grid"></div>
+    <div class="grid-4" id="amenity-icons-grid"></div>
+    <div class="text-center mt-32">
+      <a href="services.html" class="btn btn-outline">Xem chi tiết dịch vụ →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── PROMO BANNER ── -->
+<div class="promo-banner">
+  <div class="container text-center">
+    <p style="font-size:.8rem;letter-spacing:2px;text-transform:uppercase;opacity:.7;margin-bottom:8px">Ưu đãi đặc biệt</p>
+    <h2 style="margin-bottom:8px">Gói chữa lành cuối tuần — Giảm 25%</h2>
+    <p style="opacity:.8;margin-bottom:0">Đặt từ 2 đêm trở lên cho trải nghiệm chữa lành trọn vẹn. Sử dụng mã bên dưới.</p>
+    <div class="promo-code-box" style="justify-content:center">
+      <code>SUMMER25</code>
+      <button class="copy-btn" onclick="copyText('SUMMER25', this)">Sao chép</button>
+    </div>
+    <a href="rooms.html" class="btn btn-primary btn-lg">Đặt phòng ngay</a>
+  </div>
+</div>
+
+<!-- ── TESTIMONIALS ── -->
+<section class="section" style="background:#fff">
+  <div class="container">
+    <div class="section-header">
+      <h2>Khách hàng nói gì?</h2>
+      <p>Những trải nghiệm thực tế từ khách lưu trú tại The Forest.</p>
+      <div class="divider-gold"></div>
+    </div>
+    <div class="grid-3" id="testimonials-grid"></div>
+  </div>
+</section>
+
+<!-- ── LOYALTY TEASER ── -->
+<section class="section" style="background:var(--primary-pale)">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center">
+      <div>
+        <div class="badge badge-gold mb-16" style="display:inline-block">Chương trình thành viên</div>
+        <h2 style="margin-bottom:16px">Tích điểm — Nâng hạng<br>Nhận ưu đãi đặc quyền</h2>
+        <p style="color:var(--text-light);margin-bottom:24px;line-height:1.9">
+          Mỗi lần đặt phòng, bạn tích lũy điểm để nâng lên hạng Silver → Gold → Platinum.
+          Thành viên cao cấp được hưởng ưu tiên check-in, giảm giá độc quyền và nhiều đặc quyền khác.
+        </p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px">
+          <div style="background:#fff;padding:14px 20px;border-radius:10px;text-align:center;min-width:100px">
+            <div style="font-size:1.5rem"><img src="../Public/icon/silver-badge.png" style="height:24px;vertical-align:middle;opacity:.75"></div>
+            <div style="font-weight:700;font-size:.85rem;color:var(--secondary)">Silver</div>
+            <div style="font-size:.75rem;color:var(--text-light)">Mặc định</div>
+          </div>
+          <div style="background:#fff;padding:14px 20px;border-radius:10px;text-align:center;min-width:100px;border:2px solid var(--accent)">
+            <div style="font-size:1.5rem"><img src="../Public/icon/gold.png" style="height:24px;vertical-align:middle;opacity:.75"></div>
+            <div style="font-weight:700;font-size:.85rem;color:var(--secondary)">Gold</div>
+            <div style="font-size:.75rem;color:var(--text-light)">200+ điểm</div>
+          </div>
+          <div style="background:var(--secondary);padding:14px 20px;border-radius:10px;text-align:center;min-width:100px">
+            <div style="font-size:1.5rem"><img src="../Public/icon/platinum.png" style="height:24px;vertical-align:middle;opacity:.75"></div>
+            <div style="font-weight:700;font-size:.85rem;color:var(--accent)">Platinum</div>
+            <div style="font-size:.75rem;color:rgba(255,255,255,.6)">500+ điểm</div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('register-modal')">Đăng ký ngay</button>
+      </div>
+      <div>
+        <img src="../Public/ghe_ngoi.jpg" alt="Lounge" style="border-radius:var(--radius-lg);width:100%;height:360px;object-fit:cover;box-shadow:var(--shadow-lg)">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer class="footer"></footer>
+
+<script src="../js/data.js"></script>
+<script src="../js/main.js"></script>
+<script>
+/* ── Render rooms ── */
+function renderRooms() {
+  const grid = document.getElementById('rooms-grid');
+  grid.innerHTML = KSAN.ROOMS.map(r => `
+    <div class="card room-card" onclick="location.href='rooms.html?room=${r.id}'">
+      <div class="room-card-img">
+        <img src="${r.image}" alt="${r.name}" loading="lazy">
+        <div class="room-card-badge">
+          <span class="badge badge-gold">${r.type}</span>
+        </div>
+      </div>
+      <div class="room-card-body">
+        <h3>${r.name}</h3>
+        <div class="room-card-meta">
+          <span>${r.size}m²</span>
+          <span>${r.capacity} khách</span>
+          <span>${r.beds}</span>
+        </div>
+        <p style="font-size:.85rem;color:var(--text-light);margin-bottom:12px">${r.shortDesc}</p>
+        <div class="room-card-amenities">
+          ${r.amenities.slice(0,3).map(a => `<span class="amenity-tag">${a}</span>`).join('')}
+          ${r.amenities.length > 3 ? `<span class="amenity-tag">+${r.amenities.length-3} khác</span>` : ''}
+        </div>
+        <div class="room-card-footer">
+          <div class="room-price">
+            <span class="room-price-amount">${KSAN.formatCurrency(r.price)}</span>
+            <span class="room-price-unit">/ đêm</span>
+            <div style="font-size:.72rem;margin-top:3px;color:var(--primary);font-weight:600">
+              ${(() => {
+                const occ = KSAN.getBookings().filter(b =>
+                  ['confirmed','checked_in','cleaning','checkout_pending'].includes(b.status) && b.roomId===r.id
+                ).length;
+                const rem = Math.max(0, r.totalRooms - occ);
+                return rem <= 1 ? `<span style="color:var(--danger)">Chỉ còn 1 phòng!</span>`
+                     : rem <= 2 ? `<span style="color:var(--warning)">Còn ${rem} phòng</span>`
+                     : `Còn ${rem} phòng`;
+              })()}
+            </div>
+          </div>
+          <a href="booking.html?room=${r.id}" class="btn btn-primary btn-sm" onclick="event.stopPropagation()">Đặt ngay</a>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+/* ── Render services images ── */
+function renderServicesImg() {
+  const g = document.getElementById('services-img-grid');
+  const featured = KSAN.SERVICES.slice(0, 3);
+  g.innerHTML = featured.map(s => `
+    <div class="service-hero-card" onclick="location.href='services.html'">
+      <img src="${s.image}" alt="${s.name}" loading="lazy">
+      <div class="service-card-overlay">
+        <h3 style="margin:0 0 4px">${s.name}</h3>
+        <p style="font-size:.82rem;margin:0;opacity:.85">${s.price > 0 ? 'Từ ' + KSAN.formatCurrency(s.price) + ' ' + s.unit : 'Miễn phí cho khách'}</p>
+      </div>
+    </div>`).join('');
+}
+
+/* ── Render amenity icons ── */
+function renderAmenityIcons() {
+  const g = document.getElementById('amenity-icons-grid');
+  const icons = [
+    { icon:'<img src="../Public/icon/car.png" style="height:20px;vertical-align:middle;opacity:.75">', name:'Đưa đón sân bay',   desc:'Phục vụ 24/7' },
+    { icon:'<img src="../Public/icon/breakfast.png" style="height:20px;vertical-align:middle;opacity:.75">', name:'Bữa sáng',          desc:'Buffet đa dạng' },
+    { icon:'<img src="../Public/icon/wifi.png" style="height:20px;vertical-align:middle;opacity:.75">', name:'WiFi tốc độ cao',   desc:'Miễn phí toàn khu' },
+    { icon:'<img src="../Public/icon/laundry.png" style="height:20px;vertical-align:middle;opacity:.75">', name:'Giặt là',           desc:'Giao phòng trong ngày' },
+    { icon:'<img src="../Public/icon/parking-area.png" style="height:20px;vertical-align:middle;opacity:.75">', name:'Bãi đỗ xe',         desc:'Miễn phí cho khách' },
+    { icon:'<img src="../Public/icon/pool.png" style="height:20px;vertical-align:middle;opacity:.75">', name:'Hồ bơi',            desc:'Mở cửa 6h–22h' },
+    { icon:'<img src="../Public/icon/spa.png" style="height:20px;vertical-align:middle;opacity:.75">', name:'Spa',               desc:'Đặt trước qua app' },
+    { icon:'<img src="../Public/icon/reception.png" style="height:20px;vertical-align:middle;opacity:.75">', name:'Lễ tân 24/7',       desc:'Hỗ trợ mọi lúc' },
+  ];
+  g.innerHTML = icons.map(i => `
+    <div class="amenity-card">
+      <div class="amenity-icon">${i.icon}</div>
+      <h4 style="margin-bottom:6px;font-size:.95rem">${i.name}</h4>
+      <p style="font-size:.8rem;margin:0">${i.desc}</p>
+    </div>`).join('');
+}
+
+/* ── Testimonials ── */
+function renderTestimonials() {
+  const reviews = [
+    { name:'Minh Tuấn', rating:5, text:'Dịch vụ tuyệt vời, nhân viên nhiệt tình và chuyên nghiệp. Phòng sạch sẽ, view đẹp. Chắc chắn sẽ quay lại lần sau!', stay:'Phòng Deluxe · 3 đêm' },
+    { name:'Thu Hà', rating:5, text:'Lần đầu nghỉ ở The Forest nhưng thực sự ấn tượng. Quy trình đặt phòng online rất dễ dàng, check-in nhanh gọn. Tuyệt vời!', stay:'Phòng Suite · 2 đêm' },
+    { name:'Gia Huy', rating:4, text:'Tiện nghi đầy đủ, nhà hàng ngon. Hồ bơi rộng và sạch. Chỉ tiếc là giờ check-out hơi sớm. Nhưng nhìn chung rất hài lòng.', stay:'Phòng Family · 4 đêm' }
+  ];
+  const g = document.getElementById('testimonials-grid');
+  g.innerHTML = reviews.map(r => `
+    <div class="card testimonial-card">
+      <div class="testimonial-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+      <p class="testimonial-text">"${r.text}"</p>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar">${r.name[0]}</div>
+        <div>
+          <div class="testimonial-name">${r.name}</div>
+          <div class="testimonial-meta">${r.stay}</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+/* ── Search widget ── */
+document.getElementById('w-checkin').value  = todayStr();
+document.getElementById('w-checkout').value = tomorrowStr();
+
+document.getElementById('w-checkin').addEventListener('change', function() {
+  const next = addDays(this.value, 1);
+  const out  = document.getElementById('w-checkout');
+  if (out.value <= this.value) out.value = next;
+  out.min = next;
+});
+document.getElementById('w-checkout').min = tomorrowStr();
+
+document.getElementById('search-btn').addEventListener('click', () => {
+  const ci = document.getElementById('w-checkin').value;
+  const co = document.getElementById('w-checkout').value;
+  const g  = document.getElementById('w-guests').value;
+  const t  = document.getElementById('w-type').value;
+  if (!ci || !co) { showToast('Vui lòng chọn ngày nhận và trả phòng.', 'warning'); return; }
+  if (new Date(co) <= new Date(ci)) { showToast('Ngày trả phòng phải sau ngày nhận phòng.', 'warning'); return; }
+  location.href = `rooms.html?checkin=${ci}&checkout=${co}&guests=${g}&type=${t}`;
+});
+
+/* ── Init ── */
+renderRooms();
+renderServicesImg();
+renderAmenityIcons();
+renderTestimonials();
+</script>
+<script src="../js/footer.js"></script>
+</body>
+</html>
+
+
+
+
+
