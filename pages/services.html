@@ -710,6 +710,13 @@ function cancelOrder(id) {
 
 renderServicesGrid();
 loadMyOrders();
+
+/* Reactive: refresh "my orders" section when service order data changes */
+document.addEventListener('ksan:update', (e) => {
+  if (e.detail && (e.detail.key === 'service_orders' || e.detail.key === 'bookings')) {
+    loadMyOrders();
+  }
+});
 </script>
 <script src="../js/footer.js"></script>
 </body>

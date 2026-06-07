@@ -825,6 +825,15 @@ renderLoyaltyCounts();
 if (_urlTab === 'feedback') {
   switchTab('feedback');
 }
+
+/* Reactive: re-render the active tab when any KSAN data changes */
+document.addEventListener('ksan:update', () => {
+  if (!AdminAuth.current()) return;
+  renderStats();
+  if (currentTab === 'customers') renderCustomers();
+  else if (currentTab === 'feedback') renderFeedbacks();
+  else if (currentTab === 'loyalty') renderLoyaltyCounts();
+});
 </script>
 </body>
 </html>

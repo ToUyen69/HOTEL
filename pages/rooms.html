@@ -308,6 +308,13 @@ function showRoomDetail(roomId) {
 }
 
 renderRooms();
+
+/* Reactive: re-render room availability when booking data changes */
+document.addEventListener('ksan:update', (e) => {
+  if (e.detail && (e.detail.key === 'bookings' || e.detail.key === 'current_user')) {
+    renderRooms();
+  }
+});
 </script>
 <script src="../js/footer.js"></script>
 </body>

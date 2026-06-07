@@ -71,7 +71,10 @@ const KSAN = {
 
   /* ── Storage helpers ─────────────────────────────── */
   _get(key)       { try { return JSON.parse(localStorage.getItem('ksan_'+key)) } catch { return null } },
-  _set(key, val)  { localStorage.setItem('ksan_'+key, JSON.stringify(val)) },
+  _set(key, val)  {
+    localStorage.setItem('ksan_'+key, JSON.stringify(val));
+    try { document.dispatchEvent(new CustomEvent('ksan:update', { detail: { key } })); } catch(e) {}
+  },
 
   /* ── Customer API ────────────────────────────────── */
   getCustomers()              { return this._get('customers') || [] },

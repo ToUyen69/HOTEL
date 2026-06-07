@@ -614,6 +614,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('user-booking-area').style.display = 'none';
   }
 });
+
+/* Reactive: re-render whenever any KSAN data changes */
+document.addEventListener('ksan:update', () => {
+  const user = KSAN.getCurrentUser();
+  if (user) loadBookings();
+});
 </script>
 <script src="../js/footer.js"></script>
 </body>

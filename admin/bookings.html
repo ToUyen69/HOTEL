@@ -1629,6 +1629,11 @@ document.getElementById('f-search').addEventListener('keydown', e => { if(e.key=
 /* ── Init ── */
 applyFilter();
 renderStats();
+
+/* Reactive: re-render table and stats when any KSAN data changes */
+document.addEventListener('ksan:update', () => {
+  if (AdminAuth.current()) { renderStats(); applyFilter(); }
+});
 </script>
 </body>
 </html>

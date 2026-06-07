@@ -740,6 +740,11 @@ function markRoomClean(roomNumber) {
 
 renderStats();
 renderRooms();
+
+/* Reactive: re-render rooms and stats when any KSAN data changes */
+document.addEventListener('ksan:update', () => {
+  if (AdminAuth.current()) { renderStats(); renderRooms(); }
+});
 </script>
 </body>
 </html>

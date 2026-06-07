@@ -455,6 +455,17 @@ function initPasswordChange() {
 }
 
 loadAccount();
+
+/* Reactive: re-render loyalty card, history, and tier progress when data changes */
+document.addEventListener('ksan:update', () => {
+  const u = KSAN.getCurrentUser();
+  if (!u) return;
+  currentUser = u;
+  renderLoyaltyCard();
+  renderTierProgress();
+  renderRedeemOptions();
+  renderHistory();
+});
 </script>
 <script src="../js/footer.js"></script>
 </body>

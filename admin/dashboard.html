@@ -479,6 +479,11 @@ document.getElementById('range-from').value = rangeFrom;
 document.getElementById('range-to').value   = rangeTo;
 renderAll();
 setInterval(renderAll, 60000);
+
+/* Reactive: re-render dashboard when any KSAN data changes */
+document.addEventListener('ksan:update', () => {
+  if (AdminAuth.current()) renderAll();
+});
 </script>
 </body>
 </html>

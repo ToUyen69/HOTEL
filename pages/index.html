@@ -350,6 +350,13 @@ renderRooms();
 renderServicesImg();
 renderAmenityIcons();
 renderTestimonials();
+
+/* Reactive: re-render auth header when login state changes */
+document.addEventListener('ksan:update', (e) => {
+  if (e.detail && e.detail.key === 'current_user') {
+    if (typeof renderAuthHeader === 'function') renderAuthHeader();
+  }
+});
 </script>
 <script src="../js/footer.js"></script>
 </body>
